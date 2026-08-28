@@ -1,7 +1,5 @@
 from html.parser import HTMLParser
 from pathlib import Path
-import base64
-import hashlib
 import json
 import re
 import struct
@@ -198,9 +196,6 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(data["name"], "Decent Technology Group")
         self.assertEqual(data["url"], "https://decent.tech")
         self.assertEqual(data["email"], "hello@decent.tech")
-        digest = hashlib.sha256(json_ld["data"].encode("utf-8")).digest()
-        csp_hash = "sha256-" + base64.b64encode(digest).decode("ascii")
-        self.assertIn(csp_hash, self.nginx)
 
     def test_robots_and_sitemap_are_published(self):
         robots = (ROOT / "site" / "robots.txt").read_text()
@@ -212,13 +207,21 @@ class SiteTests(unittest.TestCase):
     def test_nginx_sends_security_headers(self):
         self.assertIn('X-Content-Type-Options "nosniff"', self.nginx)
         self.assertIn('Referrer-Policy "strict-origin-when-cross-origin"', self.nginx)
-        self.assertIn("Strict-Transport-Security", self.nginx)
-        self.assertIn("max-age=31536000", self.nginx)
         self.assertIn("Content-Security-Policy", self.nginx)
         self.assertIn("default-src 'self'", self.nginx)
         self.assertIn("style-src 'self'", self.nginx)
         self.assertIn("img-src 'self'", self.nginx)
+        self.assertIn("script-src 'none'", self.nginx)
         self.assertNotIn("unsafe-inline", self.nginx)
+
+    def test_nginx_leaves_transport_security_to_the_ingress(self):
+        """TLS terminates at the Traefik ingress, not in this container.
+
+        The container listens on plain HTTP on port 8080, so a
+        Strict-Transport-Security header set here would be both ineffective and
+        misleading. The ingress owns that header.
+        """
+        self.assertNotIn("Strict-Transport-Security", self.nginx)
 
     def test_container_is_unprivileged_and_has_healthcheck(self):
         dockerfile = (ROOT / "Dockerfile").read_text()
