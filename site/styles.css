@@ -70,25 +70,34 @@ html {
 /* Every page is the inside of its dot. The field colour sits on <html> as a
    class, so the page paints in that colour before any script or scene loads.
    That first paint is what the cross-document view transition lands on.
-   The five field classes and the five --dot-* tokens hold the same values. */
+   The five field classes and the five --dot-* tokens hold the same values.
+   The full stop colour sits here too, on the root, because the wordmark and
+   the list are siblings of <main>, not children of it: a value set on
+   .page--* never reaches them. The same values repeat on .page--* below for
+   the content inside main. */
 .field--gold {
   --field: var(--dot-gold);
+  --wordmark-dot: var(--brand-vermilion);
 }
 
 .field--vermilion {
   --field: var(--dot-vermilion);
+  --wordmark-dot: var(--brand-cream);
 }
 
 .field--terracotta {
   --field: var(--dot-terracotta);
+  --wordmark-dot: var(--brand-cream);
 }
 
 .field--steel {
   --field: var(--dot-steel);
+  --wordmark-dot: var(--brand-cream);
 }
 
 .field--cream {
   --field: var(--dot-cream);
+  --wordmark-dot: var(--brand-vermilion);
 }
 
 .field--gold,
