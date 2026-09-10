@@ -9,6 +9,10 @@ export type SitePage = {
   title: string;
   path: string;
   token: 'gold' | 'vermilion' | 'terracotta' | 'steel' | 'cream';
+  /** The wordmark line while this dot is active. Ben wrote it on 2026-09-10. */
+  phrase: string;
+  /** The short word on the disc texture in site/menu/<slug>.svg. */
+  label: string;
 };
 
 /** Prefixes a site-absolute path (`/about/`) with the Vite base. */
@@ -18,9 +22,44 @@ export function withBase(sitePath: string): string {
 }
 
 export const SITE_PAGES: readonly SitePage[] = [
-  { slug: 'about', title: 'About', path: withBase('/about/'), token: 'gold' },
-  { slug: 'portfolio', title: 'Portfolio', path: withBase('/portfolio/'), token: 'vermilion' },
-  { slug: 'blog', title: 'Blog', path: withBase('/blog/'), token: 'terracotta' },
-  { slug: 'ben', title: 'About Ben', path: withBase('/ben/'), token: 'steel' },
-  { slug: 'contact', title: 'Get in touch', path: withBase('/contact/'), token: 'cream' },
+  {
+    slug: 'about',
+    title: 'About',
+    path: withBase('/about/'),
+    token: 'gold',
+    phrase: "Hey, we're decent.",
+    label: 'hey.',
+  },
+  {
+    slug: 'portfolio',
+    title: 'Portfolio',
+    path: withBase('/portfolio/'),
+    token: 'vermilion',
+    phrase: 'decent. work',
+    label: 'work.',
+  },
+  {
+    slug: 'blog',
+    title: 'Blog',
+    path: withBase('/blog/'),
+    token: 'terracotta',
+    phrase: 'decent. read',
+    label: 'read.',
+  },
+  {
+    slug: 'ben',
+    title: 'About Ben',
+    path: withBase('/ben/'),
+    token: 'steel',
+    phrase: 'decent. people',
+    label: 'people.',
+  },
+  {
+    slug: 'contact',
+    title: 'Get in touch',
+    path: withBase('/contact/'),
+    token: 'cream',
+    phrase: 'decent. contact',
+    label: 'contact.',
+  },
 ];

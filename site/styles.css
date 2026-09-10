@@ -323,9 +323,10 @@ footer {
 }
 
 /* Home page: immersive. The sphere stage fills the viewport edge to edge on
-   the navy plate. The wordmark sits over it top left, the five-link row
-   over it at the bottom. No header band, no page padding, no footer. The
-   stage tokens are the same in both colour schemes. */
+   the navy plate. The wordmark sits over it top left and reads the phrase of
+   the active dot; the list of pages sits over it on the right. No header
+   band, no page padding, no footer. The stage tokens are the same in both
+   colour schemes. */
 .home {
   background: var(--stage);
   color: var(--stage-ink);
@@ -355,13 +356,19 @@ footer {
   pointer-events: none;
 }
 
+/* The home wordmark is the only text on the sphere. It is large, in the
+   serif stack, and it reads the phrase of the active dot. The company line
+   is left out here; the hidden h1 carries the company name. */
 .home .wordmark {
+  display: block;
   pointer-events: auto;
   color: var(--stage-ink);
+  font-size: clamp(2.4rem, 6vw, 5.5rem);
+  line-height: 1.05;
 }
 
 .home .wordmark-company {
-  color: var(--stage-ink);
+  display: none;
 }
 
 .menu {
@@ -376,40 +383,45 @@ footer {
   overflow: hidden;
   /* The wheel turns the sphere, so the stage must not scroll or bounce. */
   overscroll-behavior: none;
-  /* The active-page pill from the bundle sits above the link row. */
-  --menu-overlay-bottom: 5rem;
 }
 
+/* The list of pages on the right, vertically centred. It is the keyboard
+   path and the no-WebGL path, so it is visible at every width. */
 .menu-list {
   position: absolute;
-  left: 0;
+  top: 50%;
   right: 0;
-  bottom: 0;
   z-index: 2;
   margin: 0;
-  padding: 1.2rem clamp(1rem, 3vw, 2rem) calc(0.8rem + env(safe-area-inset-bottom));
-  /* A navy scrim so the links stay legible when discs pass behind them. */
-  background: linear-gradient(to top, rgba(24, 37, 52, 0.92), rgba(24, 37, 52, 0));
+  padding: 0.9rem clamp(1rem, 3vw, 2rem);
+  transform: translateY(-50%);
+  /* A navy scrim on the list's own box, so the entries stay legible when
+     discs pass behind them. */
+  background: rgba(24, 37, 52, 0.72);
+  border-radius: 0.6rem 0 0 0.6rem;
 }
 
 .menu-list ul {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.2rem 1.4rem;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
   margin: 0;
   padding: 0;
   list-style: none;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 0.95rem;
-  font-weight: 650;
+  font-weight: 500;
 }
 
 .menu-list a {
   display: inline-flex;
+  flex-direction: row-reverse;
   align-items: center;
   gap: 0.6rem;
   min-height: 2.5rem;
   color: var(--stage-ink);
+  text-align: right;
   text-decoration: none;
 }
 
@@ -417,12 +429,21 @@ footer {
   text-decoration: underline;
 }
 
+/* The active entry carries the weight and shows its dot colour. */
+.menu-list a[aria-current="page"] {
+  font-weight: 750;
+}
+
 .menu-list__dot {
   flex: none;
-  width: 0.85rem;
-  height: 0.85rem;
-  border: 1px solid rgba(242, 241, 232, 0.28);
+  width: 0.55rem;
+  height: 0.55rem;
   border-radius: 50%;
+  opacity: 0;
+}
+
+.menu-list a[aria-current="page"] .menu-list__dot {
+  opacity: 1;
 }
 
 .menu-list__dot[data-dot="gold"] {
@@ -616,9 +637,22 @@ footer p {
     margin-left: -0.55rem;
   }
 
-  /* The link row wraps onto two lines; the pill moves up above it. */
-  .menu-stage {
-    --menu-overlay-bottom: 7.25rem;
+  /* On a phone the list sits at the bottom right, where the wordmark and
+     the discs leave room. It keeps its own scrim. */
+  .menu-list {
+    top: auto;
+    bottom: calc(0.6rem + env(safe-area-inset-bottom));
+    transform: none;
+    padding: 0.6rem 1rem;
+    border-radius: 0.6rem 0 0 0.6rem;
+  }
+
+  .menu-list ul {
+    font-size: 0.9rem;
+  }
+
+  .menu-list a {
+    min-height: 2.2rem;
   }
 
   .hero {

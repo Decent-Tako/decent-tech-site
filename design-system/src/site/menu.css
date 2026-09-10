@@ -1,7 +1,8 @@
 /*
- * Stage and overlay styles for the site Infinite Menu. Site custom properties
- * only: --stage, --stage-ink, and the five --dot-* tokens come from
- * site/styles.css. Bundled into dist-site/assets/site.css.
+ * Stage styles for the site Infinite Menu, plus the wordmark phrase crossfade
+ * the bundle drives. Site custom properties only: --stage, --stage-ink, and
+ * the five --dot-* tokens come from site/styles.css. Bundled into
+ * dist-site/assets/site.css.
  */
 
 .menu-sphere {
@@ -78,63 +79,58 @@
   background: var(--dot-cream);
 }
 
-.menu-overlay {
+/* The wordmark phrase. The bundle renders the phrase of the active dot into
+   the .wordmark-phrase slot the home page already holds. The new phrase is
+   in the flow and keeps the box; the outgoing one lies over it and fades
+   out, so the two cross in 250 ms. */
+.wordmark-phrase {
+  position: relative;
+  display: inline-block;
+}
+
+.wordmark-phrase__in {
+  display: inline-block;
+}
+
+.wordmark-phrase__in[data-fading="true"] {
+  animation: wordmark-phrase-in 250ms ease-out both;
+}
+
+.wordmark-phrase__out {
   position: absolute;
-  left: 50%;
-  bottom: var(--menu-overlay-bottom, clamp(1.25rem, 5vh, 3rem));
-  z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  max-width: calc(100% - 2rem);
-  padding: 0.75rem 1.25rem;
-  border: 1px solid rgba(242, 241, 232, 0.28);
-  border-radius: 999px;
-  background: var(--stage);
-  color: var(--stage-ink);
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  text-decoration: none;
-  transform: translateX(-50%);
+  top: 0;
+  left: 0;
   white-space: nowrap;
+  pointer-events: none;
+  animation: wordmark-phrase-out 250ms ease-out both;
 }
 
-.menu-overlay:hover .menu-overlay__title {
-  text-decoration: underline;
-  text-underline-offset: 0.22em;
+@keyframes wordmark-phrase-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.menu-overlay:focus-visible {
-  outline: 3px solid var(--stage-ink);
-  outline-offset: 4px;
+@keyframes wordmark-phrase-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
-.menu-overlay__swatch {
-  flex: none;
-  width: 1rem;
-  height: 1rem;
-  border-radius: 50%;
-  background: var(--stage-ink);
-}
+/* Under reduced motion the phrase swaps at once. */
+@media (prefers-reduced-motion: reduce) {
+  .wordmark-phrase__in[data-fading="true"],
+  .wordmark-phrase__out {
+    animation: none;
+  }
 
-.menu-overlay__swatch[data-dot="gold"] {
-  background: var(--dot-gold);
-}
-
-.menu-overlay__swatch[data-dot="vermilion"] {
-  background: var(--dot-vermilion);
-}
-
-.menu-overlay__swatch[data-dot="terracotta"] {
-  background: var(--dot-terracotta);
-}
-
-.menu-overlay__swatch[data-dot="steel"] {
-  background: var(--dot-steel);
-}
-
-.menu-overlay__swatch[data-dot="cream"] {
-  background: var(--dot-cream);
+  .wordmark-phrase__out {
+    display: none;
+  }
 }

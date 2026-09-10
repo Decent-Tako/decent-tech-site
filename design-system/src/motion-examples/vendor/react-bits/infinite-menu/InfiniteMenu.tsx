@@ -40,6 +40,14 @@
  *    pixels and 350 ms. `InfiniteMenu` got the prop `onItemClick(item,
  *    vertexIndex, screenPoint)`, where `screenPoint` is the centre of the
  *    nearest vertex in canvas pixels.
+ * 14. `InfiniteGridMenu` got `turnToItem(itemIndex)`. It picks, among the
+ *    vertices that carry that item, the one nearest the current front, and
+ *    makes it the snap target. The existing snap then eases the sphere
+ *    there, so the sphere turns instead of jumping. The page calls it when
+ *    the pointer or the keyboard moves along its own link list.
+ * 15. `InfiniteGridMenu` got `setScale(scale)`, because the page computes the
+ *    scale from the viewport and applies it again on every resize. Upstream
+ *    takes `scale` in the constructor only.
  * Everything else is unchanged.
  */
 import { type CSSProperties, type FC, useRef, useState, useEffect, type MutableRefObject } from 'react';
@@ -901,6 +909,43 @@ export class InfiniteGridMenu {
       vec3.create(),
       this.getVertexWorldPosition(this.findNearestVertexIndex())
     );
+  }
+
+  // Local change 14. Turn the sphere to the given item. Many vertices carry
+  // the same item, so the target is the one of them that is nearest the
+  // front now. Only the snap target moves; the snap in `update()` eases the
+  // sphere on to it, so the sphere never jumps.
+  public turnToItem(itemIndex: number): void {
+    const count = Math.max(1, this.items.length);
+    const wanted = ((itemIndex % count) + count) % count;
+    const front = this.control.snapDirection;
+    let best: vec3 | null = null;
+    let bestDot = -Infinity;
+    for (let i = 0; i < this.instancePositions.length; ++i) {
+      if (i % count !== wanted) continue;
+      const world = vec3.normalize(vec3.create(), this.getVertexWorldPosition(i));
+      const d = vec3.dot(world, front);
+      if (d > bestDot) {
+        bestDot = d;
+        best = world;
+      }
+    }
+    if (!best) return;
+    // An earlier drag leaves a pointer rotation that would fight the snap.
+    quat.identity(this.control.pointerRotation);
+    this.control.snapTargetDirection = best;
+  }
+
+  // Local change 15. Set the scale after construction. The camera distance
+  // and the frame height both follow it, so a new value takes effect on the
+  // next frame.
+  public setScale(scale: number): void {
+    if (!(scale > 0) || scale === this.scaleFactor) return;
+    this.scaleFactor = scale;
+    this.camera.position[2] = 3 * scale;
+    this.updateCameraMatrix();
+    this.updateProjectionMatrix();
+    if (this.paused) this.render();
   }
 
   // The angle between the active vertex and its nearest neighbour. One step
