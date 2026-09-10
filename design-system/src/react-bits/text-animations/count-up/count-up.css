@@ -1,0 +1,15 @@
+.rb-frame .count-up__value {
+  display: block;
+  margin: 1.5rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 4rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.rb-frame .count-up__label {
+  margin: 0 1.5rem 1.5rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--charcoal);
+}
