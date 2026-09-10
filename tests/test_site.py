@@ -53,6 +53,22 @@ FIELDS = {
 # The navy ink of the wordmark word and the running head on every field.
 FIELD_INK = "#182534"
 
+# The colour of the full stop on each field, and on the navy home stage. Ben's
+# rule has two parts: the stop differs from the word it sits in, and it reads
+# against the field behind it. Cream on gold is 1.3:1 and was almost
+# invisible, so the gold field takes vermilion; the cream field takes
+# vermilion for the same reason. site/README.md holds the measured ratios.
+# No 3:1 floor is asserted for the stop: on the terracotta field no brand
+# colour other than the word colour reaches it.
+WORDMARK_DOTS = {
+    "about": ("var(--brand-vermilion)", "#e34234"),
+    "portfolio": ("var(--brand-cream)", "#f2f1e8"),
+    "blog": ("var(--brand-cream)", "#f2f1e8"),
+    "ben": ("var(--brand-cream)", "#f2f1e8"),
+    "contact": ("var(--brand-vermilion)", "#e34234"),
+}
+HOME_WORDMARK_DOT = ("var(--brand-gold)", "#ffcb73")
+
 # The wordmark word and the running head are display type, so the WCAG
 # large-text threshold applies: 3:1, for text at least 24 pixels, or bold and
 # at least 19 pixels. The running head is set at 1.5rem bold, 24 pixels, and
@@ -124,6 +140,56 @@ def wordmark_markup(phrase):
     return f'{before}<span class="wordmark-dot">.</span>{after}'
 
 
+class MenuLinkParser(HTMLParser):
+    """The direct children of every link in the right-hand list.
+
+    `.menu-list a` is a flex box with `row-reverse`, so its direct children are
+    reversed on screen. There must be exactly two: the swatch, and the whole
+    phrase in one span. A bare text node beside them would be a third child, so
+    the reversal would take the words of the phrase one by one and the entry
+    would read backwards, "work . decent".
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.links = []
+        self._depth = 0
+        self._in_list = False
+
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
+        if tag == "nav" and "menu-list" in attributes.get("class", "").split():
+            self._in_list = True
+            return
+        if not self._in_list:
+            return
+        if tag == "a":
+            self.links.append([])
+            self._depth = 1
+            return
+        if self._depth:
+            if self._depth == 1:
+                self.links[-1].append(attributes.get("class", ""))
+            self._depth += 1
+
+    def handle_data(self, data):
+        # A bare text node directly under the link is a flex child of its own.
+        if self._depth == 1 and data.strip():
+            self.links[-1].append(f"#text {data.strip()!r}")
+
+    def handle_endtag(self, tag):
+        if tag == "nav":
+            self._in_list = False
+        if self._depth:
+            self._depth -= 1
+
+
+def menu_link_children(path):
+    parser = MenuLinkParser()
+    parser.feed(path.read_text())
+    return parser.links
+
+
 def css_rule(css, selector):
     """The body of the first rule with this exact selector, or None."""
     match = re.search(re.escape(selector) + r"\s*\{([^}]*)\}", css)
@@ -146,10 +212,12 @@ class SiteParser(HTMLParser):
         self.effects = []
         self.h1_count = 0
         self.menu_list_links = []
+        self.menu_list_texts = []
         self.current_page_links = []
         self._script_type = None
         self._script_chunks = []
         self._in_menu_list = False
+        self._in_menu_link = 0
 
     def handle_starttag(self, tag, attrs):
         attributes = dict(attrs)
@@ -166,8 +234,18 @@ class SiteParser(HTMLParser):
             self.links.append(attributes.get("href", ""))
             if self._in_menu_list:
                 self.menu_list_links.append(attributes.get("href", ""))
+                # The text of the entry, gathered in the order the nodes come
+                # in the markup. `row-reverse` on the link reverses the flex
+                # children, so a phrase split over several children would read
+                # backwards on screen while this DOM order still read forward.
+                # The phrase must therefore sit in one span; the test below
+                # counts the children as well.
+                self.menu_list_texts.append([])
+                self._in_menu_link = 1
             if attributes.get("aria-current") == "page":
                 self.current_page_links.append(attributes.get("href", ""))
+        elif self._in_menu_link:
+            self._in_menu_link += 1
         if tag == "nav" and "menu-list" in attributes.get("class", "").split():
             self._in_menu_list = True
         if tag == "link":
@@ -187,10 +265,14 @@ class SiteParser(HTMLParser):
             self._script_chunks.append(data)
         else:
             self.text.append(data)
+            if self._in_menu_link:
+                self.menu_list_texts[-1].append(data)
 
     def handle_endtag(self, tag):
         if tag == "nav":
             self._in_menu_list = False
+        if self._in_menu_link:
+            self._in_menu_link -= 1
         if tag == "script" and self._script_type is not None:
             self.scripts.append(
                 {
@@ -1017,6 +1099,71 @@ class SiteTests(unittest.TestCase):
         )
         self.assertRegex(self.css, r"\.page \.menu-list a \{[^}]*color: var\(--stage-ink\)")
         self.assertRegex(self.css, r"\.menu-list \{[^}]*background: rgba\(24, 37, 52, 0\.88\)")
+
+    def test_every_list_entry_reads_its_phrase_in_order(self):
+        # The CI screenshots showed "work . decent" and ". Hey, we're decent".
+        # `.menu-list a` is `row-reverse`, to put the swatch on the right, so
+        # every node of the phrase that is a direct child of the link is
+        # reversed with it. The whole phrase now sits in one span, so the link
+        # holds exactly two flex children and the phrase keeps its own order.
+        pages = [(SITE / "index.html", "the home page")] + [
+            (SITE / slug / "index.html", path) for slug, _, path, _ in PAGES
+        ]
+        wanted = [PHRASES[slug][0] for slug, _, _, _ in PAGES]
+        for page, where in pages:
+            parser = parse(page)
+            texts = ["".join(chunks) for chunks in parser.menu_list_texts]
+            self.assertEqual(texts, wanted, f"{where} list does not read its phrases")
+            children = menu_link_children(page)
+            self.assertEqual(len(children), len(PAGES), f"{where} list link count")
+            for entry, phrase in zip(children, wanted):
+                self.assertEqual(
+                    entry,
+                    ["menu-list__dot", "menu-list__phrase"],
+                    f"{where} entry {phrase!r} must hold the swatch and one phrase span",
+                )
+
+    def test_the_full_stop_is_set_per_field_and_differs_from_the_word(self):
+        # Ben's rule has two parts: the stop differs from the word it sits in,
+        # and it reads against the field behind it. Cream on gold is 1.3:1 and
+        # was almost invisible on the About page. No 3:1 floor is asserted for
+        # the stop: on the terracotta field no brand colour other than the word
+        # colour reaches it. The table and the measured ratios are in
+        # site/README.md.
+        root = re.search(r":root\s*\{([^}]+)\}", self.css)
+        tokens = css_variables(root.group(1))
+        for slug, _, path, _ in PAGES:
+            body = css_rule(self.css, f".page--{slug}")
+            self.assertIsNotNone(body, f"styles.css lacks .page--{slug}")
+            token, dot_hex = WORDMARK_DOTS[slug]
+            self.assertRegex(
+                body,
+                rf"--wordmark-dot:\s*{re.escape(token)}\s*;",
+                f"{path} full stop is not {token}",
+            )
+            name = token.removeprefix("var(--").removesuffix(")")
+            self.assertEqual(tokens[name].lower(), dot_hex.lower(), f"--{name}")
+            # The stop must differ from the navy word, or the rule is lost.
+            self.assertNotEqual(dot_hex.lower(), FIELD_INK.lower(), f"{path} stop is the word")
+            # It must also differ from its own field, or it is not there.
+            self.assertNotEqual(
+                dot_hex.lower(), FIELDS[slug][1].lower(), f"{path} stop is the field"
+            )
+        # The home stage is navy with a cream word, so the stop takes gold.
+        home = css_rule(self.css, ".home")
+        token, dot_hex = HOME_WORDMARK_DOT
+        self.assertRegex(home, rf"--wordmark-dot:\s*{re.escape(token)}\s*;")
+        self.assertEqual(tokens["brand-gold"].lower(), dot_hex.lower())
+        self.assertNotEqual(dot_hex.lower(), tokens["stage-ink"].lower())
+        self.assertNotEqual(dot_hex.lower(), tokens["stage"].lower())
+
+    def test_the_readme_records_the_full_stop_rule(self):
+        text = (SITE / "README.md").read_text()
+        for _, dot_hex in WORDMARK_DOTS.values():
+            self.assertIn(dot_hex, text, f"site/README.md does not name {dot_hex}")
+        for ratio in ("2.76:1", "3.64:1", "2.75:1", "3.14:1", "10.38:1"):
+            self.assertIn(ratio, text, f"site/README.md does not record {ratio}")
+        self.assertIn("menu-list__phrase", text)
 
     def test_plate_text_and_plate_pairs_keep_aa(self):
         # Four pages take the navy plate with cream type. Get in touch is read

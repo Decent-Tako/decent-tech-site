@@ -36,12 +36,39 @@ The right-hand list keeps the navy scrim and the cream type it has on the home
 page, because its small type needs the full 4.5:1 over whatever the scene
 draws behind it.
 
-The full stop of every wordmark is always a contrasting colour, Ben's rule. On
-the gold, vermilion, terracotta, and steel fields the stop is cream; on the
-cream Contact field and on the navy home stage it is gold. Every `decent.`
-wraps its stop in `<span class="wordmark-dot">`, in the home wordmark, in the
-page wordmarks, and in the phrases of the list. The colour comes from the
-`--wordmark-dot` token, never from an inline style.
+### The full stop
+
+The full stop of every wordmark is always a contrasting colour, Ben's rule.
+The rule has two parts: the stop must differ from the word it sits in, and it
+must also read against the field behind it. Cream on gold is 1.3:1 and was
+almost invisible on the About page, so the stop is set per field:
+
+| Field | Full stop | Ratio, stop on field |
+| --- | --- | --- |
+| gold `#ffcb73`, About | vermilion `#e34234` | 2.76:1 |
+| vermilion `#e34234`, Portfolio | cream `#f2f1e8` | 3.64:1 |
+| terracotta `#d97757`, Blog | cream `#f2f1e8` | 2.75:1 |
+| steel `#5b8fa3`, About Ben | cream `#f2f1e8` | 3.14:1 |
+| cream `#f2f1e8`, Get in touch | vermilion `#e34234` | 3.64:1 |
+| navy `#182534`, the home stage | gold `#ffcb73` | 10.38:1 |
+
+The stop is a decorative accent inside the navy word, not text that stands
+alone, so no 3:1 floor is set for it. On the terracotta field no brand colour
+other than the word colour reaches 3:1, and cream at 2.75:1 is the best of
+them. The gold field takes vermilion for the same reason: gold is the only
+brand colour with a higher ratio there, and gold is the field.
+
+Every `decent.` wraps its stop in `<span class="wordmark-dot">`, in the home
+wordmark, in the page wordmarks, and in the phrases of the list. The colour
+comes from the `--wordmark-dot` token, never from an inline style.
+
+### The right-hand list entries
+
+Each list link is a flex box with `row-reverse`, so the colour swatch sits to
+the right of the phrase. A link must therefore hold exactly two flex children:
+the swatch, and the whole phrase in one `<span class="menu-list__phrase">`.
+Without that span the reversal takes the words and the full stop as separate
+children and the entry reads backwards, "work . decent".
 
 ## Page to scene
 

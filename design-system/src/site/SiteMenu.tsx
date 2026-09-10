@@ -548,7 +548,13 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
                   data-dot={page.token}
                   aria-hidden="true"
                 />
-                <Phrase phrase={page.phrase} />
+                {/* The whole phrase in one span. The link is reversed so the
+                    swatch sits on the right, so the link must hold exactly
+                    two flex children; a bare phrase would give the reversal
+                    each of its nodes and the entry would read backwards. */}
+                <span className="menu-list__phrase">
+                  <Phrase phrase={page.phrase} />
+                </span>
               </a>
             </li>
           ))}
