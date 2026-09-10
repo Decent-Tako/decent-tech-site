@@ -1,0 +1,15 @@
+import { Meta, Canvas } from '@storybook/addon-docs/blocks';
+
+import * as WordmarkStories from './Wordmark.stories';
+
+<Meta of={WordmarkStories} />
+
+# Wordmark
+
+The arrangement is immutable. Brand Sans 700 renders `Uncomfortable` in uppercase. Brand Script 400 renders `Academy`. The lockup is two lines, with the script right-aligned. Spacing and optical stroke stay fixed.
+
+The mark is live text. It inherits `color`. It is not an image.
+
+Do not move, scale, skew, or rotate the lockup. Do not interpolate font weight.
+
+<Canvas of={WordmarkStories.Default} />

@@ -1,0 +1,133 @@
+.academy-image-reveal {
+  display: grid;
+  gap: 1rem;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-synthesis: none;
+}
+
+.academy-image-reveal__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.academy-image-reveal__intro,
+.academy-image-reveal__fixed {
+  margin: 0;
+  max-width: 52rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--charcoal);
+}
+
+.academy-image-reveal__intro a,
+.academy-image-reveal__fixed a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+.academy-image-reveal__replay {
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.academy-image-reveal__replay:hover,
+.academy-image-reveal__replay:focus-visible {
+  background: var(--accent-blue);
+  color: var(--paper);
+  border-color: var(--accent-blue);
+}
+
+.academy-image-reveal__replay:active {
+  background: var(--accent-yellow);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.academy-image-reveal__scroller {
+  position: relative;
+  height: 640px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.academy-image-reveal__scroller:focus-visible {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: -3px;
+}
+
+.academy-image-reveal__title {
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.academy-image-reveal__title h2 {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  text-transform: uppercase;
+}
+
+.academy-image-reveal__item {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.academy-image-reveal__caption {
+  margin: 0.75rem 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.academy-image-reveal__mask {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  will-change: clip-path;
+  background: var(--soft);
+}
+
+.academy-image-reveal__mask img[data-photo] {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+  mix-blend-mode: normal;
+  will-change: transform;
+}
+
+.academy-image-reveal__spacer {
+  height: 30vh;
+}
+
+.academy-image-reveal--reduce .academy-image-reveal__mask {
+  clip-path: none !important;
+}
+
+.academy-image-reveal--reduce .academy-image-reveal__mask img {
+  transform: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .academy-image-reveal:not(.academy-image-reveal--force) .academy-image-reveal__mask {
+    clip-path: none !important;
+  }
+}

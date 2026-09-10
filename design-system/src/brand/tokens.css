@@ -1,0 +1,275 @@
+/* Brand tokens. This file is the single source for the brand faces and colours.
+   The colours are the Academy palette until the Decent brand kit arrives.
+   To rebrand: replace the two font files under public/fonts, then edit the
+   colour custom properties below. Nothing else in the library names a face
+   or a colour. See ../../REBRAND.md. */
+
+@font-face {
+  font-family: 'Brand Sans';
+  src: url('/fonts/brand-sans-400.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Brand Sans';
+  src: url('/fonts/brand-sans-700.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Brand Script';
+  src: url('/fonts/brand-script-400.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --ink: #212121;
+  --paper: #FFFFFF;
+  --soft: #F2F2F2;
+  --line: #D9D9D9;
+  --quiet: #A6A6A6;
+  --charcoal: #4A4A4A;
+  --accent-blue: #0035B1;
+  --accent-yellow: #DEF54F;
+
+  --text-on-paper: #212121;
+  --text-muted-on-paper: #4A4A4A;
+  --text-on-ink: #FFFFFF;
+  --text-muted-on-ink: #c4cdc9;
+  --hairline: #D9D9D9;
+  --hairline-on-ink: #4A4A4A;
+  --disabled-mark: #A6A6A6;
+
+  --display-2: clamp(2.75rem, 6.5vw, 5.5rem);
+}
+
+/* Photographs stay in natural colour in every state. */
+img[data-photo],
+[data-photo] img {
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  width: max-content;
+  color: inherit;
+  font-family: 'Brand Sans', sans-serif;
+  text-decoration: none;
+}
+
+.wordmark__lead {
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.72;
+  text-transform: uppercase;
+}
+
+/* Optical tuning for the handwritten line. Not a native bold. */
+.wordmark__script {
+  align-self: flex-end;
+  margin-right: 0.03em;
+  font-family: 'Brand Script', cursive;
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  paint-order: stroke fill;
+  -webkit-text-stroke: 0.35px currentColor;
+}
+
+.wordmark--tiny .wordmark__lead {
+  font-size: 0.8rem;
+}
+.wordmark--tiny .wordmark__script {
+  margin-top: 2px;
+  font-size: 0.9rem;
+}
+.wordmark--small .wordmark__lead {
+  font-size: 1.05rem;
+}
+.wordmark--small .wordmark__script {
+  margin-top: 3px;
+  font-size: 1.15rem;
+}
+.wordmark--footer .wordmark__lead {
+  font-size: 1.3rem;
+}
+.wordmark--footer .wordmark__script {
+  margin-top: 3px;
+  font-size: 1.5rem;
+}
+
+.wordmark--hero .wordmark__lead {
+  font-size: var(--display-2);
+  line-height: 0.68;
+}
+
+.wordmark--hero .wordmark__script {
+  margin-top: 0.04em;
+  font-size: calc(var(--display-2) * 0.86);
+}
+
+.brand-doc {
+  max-width: 52rem;
+  padding-bottom: 4rem;
+  color: var(--ink);
+  font-family: 'Brand Sans', sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.brand-doc h2 {
+  margin: 2rem 0 0.75rem;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+.brand-doc p,
+.brand-doc ul {
+  margin: 0 0 1rem;
+}
+
+.brand-doc code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875em;
+}
+
+.brand-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1rem;
+  margin: 0 0 1.5rem;
+}
+
+.brand-swatch {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.brand-swatch__chip {
+  width: 4.5rem;
+  height: 4.5rem;
+  border: 1px solid var(--line);
+}
+
+.brand-swatch__chip[data-token='--paper'] {
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.brand-swatch__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.brand-swatch__meta strong {
+  font-size: 1rem;
+}
+
+.brand-swatch__meta p {
+  margin: 0;
+  color: var(--charcoal);
+  font-size: 0.875rem;
+}
+
+.brand-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1.5rem;
+  font-size: 0.875rem;
+}
+
+.brand-table th,
+.brand-table td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.brand-table th {
+  font-weight: 700;
+}
+
+.brand-pair {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.25rem;
+  padding: 0.25rem 0.5rem;
+  font-weight: 700;
+}
+
+.brand-font-sample {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+}
+
+.brand-font-sample p {
+  margin: 0;
+  line-height: 1.25;
+  overflow: visible;
+  font-synthesis: none;
+}
+
+.brand-font-face {
+  margin: 0 0 0.75rem;
+  color: var(--charcoal);
+  font-size: 0.875rem;
+}
+
+.brand-plate {
+  padding: 1.5rem;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.brand-plate--ink {
+  background: var(--ink);
+  color: var(--text-on-ink);
+}
+
+.brand-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Brand/Fallback story layout */
+.fallback-compare {
+  color: var(--ink);
+  background: var(--paper);
+  padding: var(--space-5, 32px);
+}
+
+.fallback-row {
+  border-top: 1px solid var(--quiet, #a6a6a6);
+  padding: 20px 0;
+}
+
+.fallback-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.fallback-meta span {
+  color: var(--muted, #4a4a4a);
+}
+
+.fallback-sample {
+  font-size: 40px;
+  line-height: 1.2;
+}

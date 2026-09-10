@@ -1,0 +1,19 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Styled systems/Overview" />
+
+# Styled component systems
+
+This tier shows finished design languages from maintained packages. Each example uses the system's own default appearance. This gallery does not re-theme the systems and does not promote a candidate to production.
+
+The headless tier under **UI primitives** stays the behavior and accessibility reference. Those packages ship almost no CSS, so they look like bare browser controls. That is expected. The **Themed** stories there are agent CSS, not an upstream language.
+
+| System | Package | Version | Licence | Primitive library | Official docs | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| shadcn/ui | `shadcn` CLI, style `base-nova` | 4.21.0 | MIT | `@base-ui/react` 1.8.0, `cmdk` 1.1.1 | https://ui.shadcn.com | https://github.com/shadcn-ui/ui |
+| Radix Themes | `@radix-ui/themes` | 3.3.0 | MIT | `radix-ui` primitives | https://www.radix-ui.com/themes/docs | https://github.com/radix-ui/themes |
+| Mantine | `@mantine/core` | 9.6.0 | MIT | Mantine own components | https://mantine.dev | https://github.com/mantinedev/mantine |
+
+Each system shows button, field, checkbox, dialog, and command or search.
+
+Radix Themes has no command palette. Its search example is Text Field with `type="search"`. Mantine search uses Autocomplete from `@mantine/core`. Spotlight is a separate package and is not installed.

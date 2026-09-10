@@ -1,0 +1,63 @@
+name: design-system
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'design-system/**'
+      - '.github/workflows/design-system.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'design-system/**'
+      - '.github/workflows/design-system.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: design-system
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: design-system/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Drop the Chrome apt source the runner image ships
+        # dl.google.com served a hash-mismatched index on three attempts on
+        # 2026-09-10, and playwright install --with-deps refreshes every apt
+        # source. Playwright downloads its own Chromium, so this source is
+        # never needed here.
+        run: sudo rm -f /etc/apt/sources.list.d/google-chrome*.list /etc/apt/sources.list.d/google-chrome*.sources
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Rubric check
+        run: npm run rubric
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run type
+
+      - name: Storybook tests
+        run: npm run storybook:test
+
+      - name: Storybook build
+        run: npm run storybook:build

@@ -1,0 +1,287 @@
+.scroll-ex {
+  display: grid;
+  gap: 1rem;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.scroll-ex__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.scroll-ex__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.scroll-ex__intro,
+.scroll-ex__fixed {
+  margin: 0;
+  max-width: 52rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--charcoal);
+}
+
+.scroll-ex__intro a,
+.scroll-ex__fixed a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+.scroll-ex__actions {
+  display: flex;
+  flex: none;
+  gap: 0.5rem;
+}
+
+.scroll-ex__button {
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.scroll-ex__button:hover,
+.scroll-ex__button:focus-visible {
+  background: var(--accent-blue);
+  color: var(--paper);
+  border-color: var(--accent-blue);
+}
+
+.scroll-ex__button:active,
+.scroll-ex__button[aria-pressed='true'] {
+  background: var(--accent-yellow);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.scroll-ex__stage {
+  position: relative;
+  overflow: auto;
+  height: 560px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.scroll-ex__stage:focus-visible {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+.scroll-ex__progress {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform-origin: 0 50%;
+  background: var(--accent-blue);
+}
+
+.scroll-ex__article {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 36rem;
+  padding: 2.5rem 1.5rem 6rem;
+}
+
+.scroll-ex__kicker {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--charcoal);
+}
+
+.scroll-ex__heading {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.scroll-ex__dek,
+.scroll-ex__article p {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.scroll-ex__section {
+  margin: 1.5rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.scroll-ex__photo {
+  margin: 0.5rem 0 0;
+}
+
+.scroll-ex__photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.scroll-ex__photo figcaption {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  color: var(--charcoal);
+}
+
+.scroll-cards {
+  margin: 4rem auto 6rem;
+  max-width: 31.25rem;
+  width: 100%;
+  padding: 0 1rem 6rem;
+}
+
+.scroll-card {
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding-top: 20px;
+  margin-bottom: -120px;
+}
+
+.scroll-card__splash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(306deg, var(--accent-blue), var(--ink));
+  clip-path: path(
+    'M 0 303.5 C 0 292.454 8.995 285.101 20 283.5 L 460 219.5 C 470.085 218.033 480 228.454 480 239.5 L 500 430 C 500 441.046 491.046 450 480 450 L 20 450 C 8.954 450 0 441.046 0 430 Z'
+  );
+}
+
+.scroll-card__face {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  width: 300px;
+  height: 430px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--paper);
+  box-shadow:
+    0 0 1px hsl(0deg 0% 0% / 0.075),
+    0 0 2px hsl(0deg 0% 0% / 0.075),
+    0 0 4px hsl(0deg 0% 0% / 0.075),
+    0 0 8px hsl(0deg 0% 0% / 0.075),
+    0 0 16px hsl(0deg 0% 0% / 0.075);
+  transform-origin: 10% 60%;
+  color: var(--ink);
+}
+
+.scroll-card__face img {
+  display: block;
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.scroll-card__copy {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem 1.25rem;
+}
+
+.scroll-card__copy h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.scroll-card__copy p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--charcoal);
+}
+
+.scroll-track {
+  padding: 0 0 2rem 7.5rem;
+}
+
+.scroll-track__item {
+  height: 100vh;
+  max-height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.scroll-track__box {
+  position: relative;
+  width: 200px;
+  height: 250px;
+  border: 2px dotted var(--accent-blue);
+  background: var(--paper);
+}
+
+.scroll-track__box img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.scroll-track__label {
+  position: absolute;
+  left: 0.5rem;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  margin: 0;
+  padding: 0.4rem 0.5rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.scroll-track__progress {
+  position: sticky;
+  top: 0;
+  width: 80px;
+  height: 80px;
+  margin: 0;
+  padding: 0;
+}
+
+.scroll-track__ring {
+  transform: translateX(-100px) rotate(-90deg);
+  stroke: var(--accent-blue);
+  stroke-dashoffset: 0;
+  stroke-width: 5;
+  fill: none;
+}
+
+.scroll-track__ring-bg {
+  opacity: 0.2;
+}

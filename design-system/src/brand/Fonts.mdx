@@ -1,0 +1,13 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+import { FontSpecimens } from './FontSpecimens';
+
+<Meta title="Brand/Fonts" />
+
+# Fonts
+
+Brand Sans is the interface typeface. Brand Script appears only in the wordmark. Both are aliases declared once in `src/brand/tokens.css` and bound to files under `public/fonts/`. To change a face, replace the file and keep the alias; see `REBRAND.md`.
+
+Every story asserts at load that the face it renders is the real file and not a system fallback.
+
+<FontSpecimens />

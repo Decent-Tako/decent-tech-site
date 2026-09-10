@@ -1,0 +1,23 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Motion examples/Runtime additions" />
+
+# Runtime additions
+
+`motion` 13.2.0 stays the default. An extra package appears here only when Motion cannot produce the effect. Issue 194 still rejects GSAP, React Spring, and `@formkit/auto-animate` where the effect is the same as Motion.
+
+Every row names the component that needs the package and the reason. A component that adds a runtime without a row here fails the rubric in issue 268.
+
+| Package | Version | Licence | Unpacked size | Component that needs it | Why |
+| --- | --- | --- | --- | --- | --- |
+| `cobe` | 0.6.5 | MIT | 12 KB | Globe | WebGL globe. Motion does not draw a 3D globe. Story: Motion examples/Globe. https://github.com/shuding/cobe |
+| `react-use-measure` | 2.1.7 | MIT | 29 KB | Sliding number | SlidingNumber measures each digit height so the reel can translate in pixels. Motion springs the digit. It does not measure the glyph box. https://github.com/pmndrs/react-use-measure |
+| Academy `plusAdapter` | local | MIT | 4 KB | Cursor floating target, Magnetic filings, Bobble hover | `motion-plus` 1.5.1 is MIT but exclusive to Motion+ members. npm cannot install it without membership. Motion does not export `Cursor` or `usePointerPosition`. The adapter covers the used surface with motion values. |
+| `react-use-measure` | 2.1.7 | MIT | 29 KB | Sliding number, Transition panel card | SlidingNumber measures each digit height so the reel can translate in pixels. The Transition panel card measures copy height so the panel can spring to it. Motion springs the value. It does not measure the box. https://github.com/pmndrs/react-use-measure |
+| `react-use-measure` | 2.1.7 | MIT | 29 KB | Sliding number, Infinite slider | SlidingNumber measures each digit height so the reel can translate in pixels. InfiniteSlider measures the duplicated track so duration is distance / speed. Motion springs the digit and animates the offset. It does not measure the box. https://github.com/pmndrs/react-use-measure |
+| `lucide-react` | 1.43.0 | ISC | tree-shaken icons | Carousel | ChevronLeft and ChevronRight on CarouselNavigation. Motion does not ship those icons. https://lucide.dev |
+| `react-use-measure` | 2.1.7 | MIT | 29 KB | Sliding number, Toolbar expandable | SlidingNumber measures each digit height so the reel can translate in pixels. Toolbar expandable measures panel height so the spring has a pixel target. Motion does not measure layout boxes. https://github.com/pmndrs/react-use-measure |
+| Academy `plusAdapter` | local | MIT | 4 KB | Cursor floating target, Magnetic filings | `motion-plus` 1.5.1 is MIT but exclusive to Motion+ members. npm cannot install it without membership. Motion does not export `Cursor` or `usePointerPosition`. The adapter covers the used surface with motion values. |
+| `flubber` | 0.4.2 | MIT | 88 KB | Path morphing | Motion morphs similar `d` strings. It cannot mix unlike shapes. The example uses `interpolate` as a `useTransform` mixer. https://github.com/veltman/flubber |
+| Academy `usePointerPosition` | local | MIT | 1 KB | Color picker | `motion-plus` 1.5.1 is MIT but exclusive to Motion+ members. Motion does not export `usePointerPosition`. The adapter is one shared `motionValue` pair on `pointermove`. |
+| Academy `plusCarousel` | local | MIT | 6 KB | Carousel iOS exposure slider | `motion-plus` `Carousel`, `useCarousel`, `useTicker`, and `useTickerItem` are the ticker that maps notch offset to exposure. npm cannot install `motion-plus` without membership. Motion does not export that ticker. The adapter covers the used surface: free-scroll `x`, `renderedOffset`, `targetOffset.jump`, per-item `offset`, `maxInset`, `isMeasured`. Loop wrapping is not implemented because the example sets `loop={false}`. |

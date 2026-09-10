@@ -1,0 +1,134 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Provenance/Upstream sources" />
+
+# Upstream provenance
+
+This page records packages and resources from earlier Academy experiments. It does not implement components.
+
+Checked on 2026-09-09 against surviving local manifests, named research reports, Git history on this checkout, closed GitHub issues, and current npm plus official documentation.
+
+## How to read the matrix
+
+| Label | Meaning |
+| --- | --- |
+| **used** | A surviving experiment installed the package, or source imported it. |
+| **evaluated** | A named research report or closed issue compared it. No surviving install or import. |
+| **newly discovered** | Current official metadata disagrees with the recorded research claim. |
+| **unknown** | Named evidence and Git history do not establish a package or licence. |
+
+Do not treat visual similarity as use. Git history on this checkout has no `design-system/package.json` older than issue 214.
+
+## Evidence inspected
+
+| Source | Role |
+| --- | --- |
+| `/private/tmp/academy-motion-library/package.json` and `package-lock.json` | Motion-gallery experiment manifest |
+| `/private/tmp/academy-storybook-candidate/package.json` and `package-lock.json` | Storybook candidate manifest |
+| `/private/tmp/academy-motion-library-audit.md` | Issue 194 motion-library audit |
+| `/private/tmp/academy-motion-library-prior-art.md` | Issue 173 / 172 motion catalog research |
+| `/private/tmp/academy-data-visual-prior-art.md` | Issue 176 chart and map research |
+| `/private/tmp/academy-wordmark-motion-research.md` | Issue 196 wordmark motion research |
+| Git log for `design-system/` | Only commit is issue 214 blank shell |
+| Closed issues 166, 172, 176, 194, 196, 207 | Experiment intent and deletions |
+
+## Used, with implementation evidence
+
+These packages appear in a surviving manifest **and** in experiment source imports or copied UI files.
+
+| Package | Recorded version | Experiment | Recorded API / file | Licence (npm latest) | React peers (npm latest) | Official docs | Source | Current npm latest |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `motion` | 13.2.0 | Both experiments, now Pages | `motion/react`: `motion`, `AnimatePresence`, `LayoutGroup`, `MotionConfig`, `useScroll`, `useTransform`, `useReducedMotion` | MIT | `^18 \|\| ^19` | https://motion.dev/docs/react | https://github.com/motiondivision/motion | 13.2.0 (matches) |
+| `@base-ui/react` | 1.7.0 | Motion library | `Button` from `@base-ui/react/button` in `components/ui/button.tsx` | MIT | `^17 \|\| ^18 \|\| ^19` | https://base-ui.com | https://github.com/mui/base-ui | 1.8.0 |
+| `class-variance-authority` | 0.7.1 | Motion library | `cva` in `button.tsx` and `dock.tsx` | Apache-2.0 | none | https://github.com/joe-bell/cva | https://github.com/joe-bell/cva | 0.7.1 (matches) |
+| `clsx` | 2.1.1 | Motion library | `lib/utils.ts` via `cn()` | MIT | none | https://github.com/lukeed/clsx | https://github.com/lukeed/clsx | 2.1.1 (matches) |
+| `tailwind-merge` | 3.6.0 | Motion library | `twMerge` in `lib/utils.ts` | MIT | none | https://github.com/dcastil/tailwind-merge | https://github.com/dcastil/tailwind-merge | 3.6.0 (matches) |
+| `rough-notation` | 0.5.1 (lockfile exact) | Motion library | `annotate` in `components/ui/highlighter.tsx` | MIT | none | https://github.com/pshihn/rough-notation | https://github.com/pshihn/rough-notation | 0.5.1. Last npm publish 2020-10-30 |
+| `next-themes` | 0.4.6 (lockfile exact) | Motion library | `useTheme` in `components/ui/magic-card.tsx` | MIT | `^16.8` through `^19` | https://github.com/pacocoursey/next-themes | https://github.com/pacocoursey/next-themes | 0.4.6 (matches) |
+| `lucide-react` | 1.31.0 | Motion library | icon imports in `app/page.tsx` | ISC | `^16.5.1` through `^19` | https://lucide.dev | https://github.com/lucide-icons/lucide | 1.43.0 |
+| `@visx/axis` | 4.0.0 | Storybook candidate | `AxisBottom`, `AxisLeft` | MIT | `^18 \|\| ^19` | https://visx.airbnb.tech | https://github.com/airbnb/visx | 4.0.0 (matches) |
+| `@visx/group` | 4.0.0 | Storybook candidate | `Group` | MIT | `^18 \|\| ^19` | https://visx.airbnb.tech | https://github.com/airbnb/visx | 4.0.0 |
+| `@visx/pattern` | 4.0.0 | Storybook candidate | `PatternLines` | MIT | `^18 \|\| ^19` | https://visx.airbnb.tech | https://github.com/airbnb/visx | 4.0.0 |
+| `@visx/scale` | 4.0.0 | Storybook candidate | `scaleBand`, `scaleLinear` | MIT | `^18 \|\| ^19` | https://visx.airbnb.tech | https://github.com/airbnb/visx | 4.0.0 |
+| `@visx/shape` | 4.0.0 | Storybook candidate | `Bar`, `AreaClosed`, `LinePath` | MIT | `^18 \|\| ^19` | https://visx.airbnb.tech | https://github.com/airbnb/visx | 4.0.0 |
+| `@visx/glyph` | 4.0.0 | Storybook candidate | `GlyphDot` in `ActivityLine.jsx` | MIT | `^18 \|\| ^19` | https://visx.airbnb.tech | https://github.com/airbnb/visx | 4.0.0 |
+| `@visx/annotation` | 4.0.0 | Storybook candidate | `Annotation`, `Connector`, `CircleSubject`, `Label` | MIT | `^18 \|\| ^19` | https://visx.airbnb.tech | https://github.com/airbnb/visx | 4.0.0 |
+| Magic UI (copy-paste) | not an npm runtime | Motion library | Copied files: `text-animate.tsx`, `highlighter.tsx`, `dock.tsx`, `magic-card.tsx`, `ripple-button.tsx`, `number-ticker.tsx` | MIT (catalog) | n/a | https://magicui.design/docs | https://github.com/magicuidesign/magicui | Catalog, not a versioned runtime |
+
+## Used, installed only
+
+These packages are in a surviving `package.json` or lockfile. Source under `app/`, `components/`, `lib/`, and `src/` has **no import**. Do not treat them as implemented primitives.
+
+| Package | Recorded version | Experiment | Manifest evidence | Licence | React peers | Official docs | Source | Current npm latest |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `@shadcn/react` | 0.3.0 | Motion library | `package.json` | MIT | `>=19` | https://ui.shadcn.com | https://github.com/shadcn-ui/ui | 0.3.1 |
+| `shadcn` CLI | 4.18.0 | Motion library | `package.json`; `components.json` schema https://ui.shadcn.com/schema.json | MIT | none | https://ui.shadcn.com/docs | https://github.com/shadcn-ui/ui | 4.21.0 |
+| `cmdk` | 1.1.1 | Motion library | `package.json` | MIT | `^18 \|\| ^19` | https://github.com/pacocoursey/cmdk | https://github.com/pacocoursey/cmdk | 1.1.1 (matches) |
+| `date-fns` | 4.1.0 | Motion library | `package.json` | MIT | none | https://github.com/date-fns/date-fns | https://github.com/date-fns/date-fns | 4.4.0 |
+| `embla-carousel-react` | 8.5.2 | Motion library | `package.json` | MIT | `^16.8` through `^19` | https://www.embla-carousel.com | https://github.com/davidjerleke/embla-carousel | 8.6.0 |
+| `input-otp` | 1.4.2 | Motion library | `package.json` | MIT | `^16.8` through `^19` | https://input-otp.rodz.dev | https://github.com/guilhermerodz/input-otp | 1.5.0 |
+| `react-day-picker` | 9.8.1 | Motion library | `package.json` | MIT | `>=16.8` | https://daypicker.dev | https://github.com/gpbl/react-day-picker | 10.0.1. Docs still publish a v9 line |
+| `react-resizable-panels` | 4.5.8 | Motion library | `package.json` | MIT | `^18 \|\| ^19` | https://react-resizable-panels.vercel.app | https://github.com/bvaughn/react-resizable-panels | 4.12.4 |
+| `recharts` | 3.8.0 | Motion library | `package.json`. Issue 176 evaluated 3.10.1 and rejected it for the chart specimen | MIT | `^16.8` through `^19` | https://recharts.org | https://github.com/recharts/recharts | 3.10.1 |
+| `tw-animate-css` | 1.4.0 | Motion library | `package.json` | MIT | none | https://github.com/Wombosvideo/tw-animate-css | https://github.com/Wombosvideo/tw-animate-css | 1.4.0 (matches) |
+| `vinext` | 1.0.0-beta.5 | Motion library | `vite.config.ts` host, not an Academy UI primitive | MIT | React `^19.2.6`, Vite `^8` | https://vinext.dev | https://github.com/cloudflare/vinext | 1.0.0-beta.9 |
+| `@visx/legend` | 4.0.0 | Storybook candidate | `package.json`. No `src/` import | MIT | `^18 \|\| ^19` | https://visx.airbnb.tech | https://github.com/airbnb/visx | 4.0.0 |
+| `@visx/geo` | 4.0.0 | Storybook candidate | **Lockfile root dependency.** Missing from `package.json`. No `src/` import. Issue 176 recommended `Mercator` | MIT | `^18 \|\| ^19` | https://visx.airbnb.tech | https://github.com/airbnb/visx | 4.0.0 |
+
+React recorded versions: motion library `19.2.6`, Storybook candidate `19.2.8`. npm latest `19.2.8`. MIT. https://react.dev https://github.com/facebook/react
+
+## Evaluated, not installed in surviving manifests
+
+| Package / catalog | Recorded claim | Decision in evidence | Licence now | React peers now | Official docs | Source | Current npm latest |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Aceternity UI | Copy-paste catalog in motion prior-art | Selective samples. No surviving copied file in `components/ui/` | Custom commercial-use terms | n/a | https://ui.aceternity.com/licence | report URL | not a runtime package |
+| Motion Primitives | Optional text primitives | Evaluated in the motion-library research. Issue 271 copies sliding-number, morphing-dialog, and image-comparison. Issue 299 copies text-shimmer, text-shimmer-wave, spinning-text, and animated-number | MIT | n/a | https://motion-primitives.com | https://github.com/ibelick/motion-primitives | catalog |
+| React Bits / Vue Bits | Optional inventive text | Evaluated. MIT + Commons Clause | MIT + Commons Clause | n/a | https://reactbits.dev | https://github.com/DavidHDev/react-bits | catalog |
+| Animate UI | Rejected: stale, not plain MIT | Evaluated, rejected | report: MIT + Commons Clause | n/a | https://animate-ui.com | https://github.com/imskyleen/animate-ui | catalog |
+| `@formkit/auto-animate` | Rejected as gallery kit; duplicates Motion | Evaluated | MIT | none | https://auto-animate.formkit.com | https://github.com/formkit/auto-animate | 0.10.0 |
+| `@nivo/bar` | Too themed for the specimen | Evaluated | MIT | `^16.14` through `^19` | https://nivo.rocks | https://github.com/plouc/nivo | 0.99.0 |
+| `@unovis/react` | Leaflet map path too heavy | Evaluated | Apache-2.0 | `>=16.8` through `^19` | https://unovis.dev | https://github.com/f5/unovis | 1.6.7 |
+| `@tanstack/react-charts` | Alpha, unstable pin | Evaluated as 0.16.0 | MIT | `^19` | https://github.com/TanStack/charts | https://github.com/TanStack/charts | 0.16.2 |
+| `@svg-maps/australia` | ShareAlike. Do not source-copy | Evaluated, rejected | CC-BY-SA-4.0 | none | https://github.com/VictorCazanave/svg-maps | same | 2.0.0 |
+| Leaflet | Heavyweight geospatial. Skip | Evaluated | BSD-2-Clause | none | https://leafletjs.com | https://github.com/Leaflet/Leaflet | 1.9.4 |
+| `@radix-ui/react-progress` | Maintained, not needed | Issue 194 | MIT | `^16.8` through `^19` | https://www.radix-ui.com/primitives/docs/components/progress | https://github.com/radix-ui/primitives | 1.1.16 |
+| `@radix-ui/react-accordion` | Maintained, not needed | Issue 194 | MIT | `^16.8` through `^19` | https://www.radix-ui.com/primitives/docs/components/accordion | https://github.com/radix-ui/primitives | 1.2.20 |
+| `react-aria-components` | Disclosure/ProgressBar alternative | Issue 194 | Apache-2.0 | `^16.8` through `^19` | https://react-spectrum.adobe.com/react-aria/Disclosure.html | https://github.com/adobe/react-spectrum | 1.21.1 |
+| `@number-flow/react` | Only if animated numerals become a need | Issue 194 | MIT | `^18 \|\| ^19` | https://number-flow.barvian.me | https://github.com/barvian/number-flow | 0.6.2 |
+| `react-countup` | Last repository push 2024-06-01 in the audit | Issue 194 | MIT | `>=16.3` | https://react-countup.now.sh | https://github.com/glennreyes/react-countup | 6.5.3 |
+| `react-circular-progressbar` | Circular. Does not match linear meter | Issue 194 | MIT | `>=0.14` | https://github.com/kevinsqi/react-circular-progressbar | same | 2.2.0 |
+| `react-ripples` | Not maintained enough | Issue 194 | MIT | none | https://github.com/rwu823/react-ripples | same | 2.2.1. Last npm 2019-08-21 |
+| `gsap` | Compared with Motion and React Spring | Closed issue 166 | Standard no-charge licence (not MIT) | none | https://gsap.com | https://github.com/greensock/GSAP | 3.15.0 |
+| `@react-spring/web` | Compared in issue 166. visx xychart peer, deliberately not added | Issues 166 and 176 | MIT | `^16.8` through `^19` | https://www.react-spring.dev | https://github.com/pmndrs/react-spring | 10.1.2 |
+| Cult UI / Kokonut UI | Secondary only | Motion prior-art | MIT / MIT | n/a | GitHub links in the report | https://github.com/nolly-studio/cult-ui | catalog |
+
+## Newly discovered on 2026-09-09
+
+| Claim in local evidence | Current official fact | Effect |
+| --- | --- | --- |
+| `react-simple-maps` 3.0.0, last commit 2023-07-01, skip as stale | npm latest is **5.0.3**, published 2026-09-07, React `^16.8` through `^19`, MIT | The 2023 stale skip is no longer current. Still **not used**. Re-evaluate before any later gallery ticket |
+| `react-day-picker` recorded 9.8.1 | Latest is **10.0.1**. Docs still expose v9 | Installed experiment is v9. Current line is v10 |
+| visx docs last-modified 2026-06-22 | https://visx.airbnb.tech returns 200. npm packages remain 4.0.0 | Recorded visx 4.0.0 still current |
+
+## Used local typefaces
+
+These faces are not npm packages. The files live in `design-system/public/fonts/` and bind the two aliases in `src/brand/tokens.css`.
+
+| Face | Evidence | Licence |
+| --- | --- | --- |
+| Brand Sans 400 and 700 | `brand-sans-400.woff2`, `brand-sans-700.woff2`, and `brand-sans-OFL.txt` (Uncomfortable Sans, an OFL derivative of Saira) | SIL Open Font License 1.1. |
+| Brand Script Regular 400 | `brand-script-400.woff2` and `brand-script-OFL.txt` (Nothing You Could Do) | SIL Open Font License 1.1. Copyright (c) 2010, Kimberly Geswein |
+
+## Unknown
+
+| Item | Why it stays unknown |
+| --- | --- |
+| Discarded repository `design-system/` package set from issues 167 and 207 | Git log for `design-system/` on this checkout starts at issue 214. No earlier `package.json` exists here |
+| Brand Sans | Local files in `design-system/public/fonts/`. Not an npm package. No licence file was supplied with the locked brand proof |
+| A maintained pointer-spotlight package | Issue 194 states npm search found none. That absence is recorded, not a package name |
+| `@visx/xychart` | Issue 176 forbids it because it peers `@react-spring/web`. It is not in either surviving manifest |
+
+## Current repository Storybook
+
+This checkout's `design-system/package.json` installs Storybook 10.6.0, React 19.2.8, and `motion` 13.2.0. Pages uses Motion as the only motion runtime. UI primitive, styled-system, and icon-resource galleries install their own upstream packages. This catalogue does not promote a candidate to production.
+This checkout's `design-system/package.json` installs Storybook 10.6.0, React 19.2.8, and `motion` 13.2.0. Pages uses Motion as the default motion runtime. Motion examples also installs Magic UI registry copies, plus `cobe` 0.6.5, `canvas-confetti` 1.9.4, `rough-notation` 0.5.1, `svg-dotted-map` 2.0.1, and `next-themes` 0.4.6 for effects Motion cannot produce. UI primitive and styled-system galleries install their own upstream packages. This catalogue does not promote a candidate to production.

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-nova",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "src/styled/shadcn.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/styled/shadcn",
+    "utils": "@/styled/shadcn/utils",
+    "ui": "@/styled/shadcn/ui",
+    "lib": "@/styled/shadcn",
+    "hooks": "@/styled/shadcn/hooks"
+  },
+  "iconLibrary": "lucide",
+  "registries": {
+    "@magicui": "https://magicui.design/r/{name}.json",
+    "@motion-primitives": "https://motion-primitives.com/c/{name}.json",
+    "@kokonutui": "https://kokonutui.com/r/{name}.json",
+    "@uilayouts": "https://www.ui-layouts.com/r/{name}.json"
+  }
+}

@@ -1,0 +1,60 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Charts and data/Overview" />
+
+# Charts and data visualisation
+
+This section compares **Recharts** and **visx** on one fictional Academy 2026 cohort snapshot. Both packages chart the same week-ask, week-completion, and state-participant rows.
+
+The gallery imports package components. It does not ship a custom charting engine. It does not include a map.
+
+Checked on 2026-09-09 against the surviving manifests, `/private/tmp/academy-data-visual-prior-art.md`, Provenance, current npm metadata, and official documentation.
+
+## Dataset
+
+The rows are a compact Academy example: six Learn weeks plus "How Learn works", weekly ask counts, completion percent, and eight Australian state and territory participant counts. The values are fictional. They are not live supporter data.
+
+## Packages
+
+| Package | Installed | Licence | React peers | Accessibility | Prior Academy use | Official docs | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `recharts` | 3.10.1 | MIT | `^16.8` through `^19` | `accessibilityLayer` is **true** by default in 3.x. Arrow keys move the tooltip. Screen readers still need a data table. | Installed in the motion-library manifest. Issue 176 rejected it as too heavy for that specimen. | https://recharts.org | https://github.com/recharts/recharts |
+| `@visx/shape` plus scale, axis, group, grid, pattern, glyph, annotation, legend, tooltip, responsive | 4.0.0 | MIT | `^18 \|\| ^19` | visx primitives are DIY. This gallery wraps each graphic in `figure`, gives the SVG a title, and repeats the values in an HTML table. Pattern fills keep colour from being the only cue. | Used in the Storybook candidate: `AxisBottom`, `AxisLeft`, `Bar`, `AreaClosed`, `LinePath`, `GlyphDot`, `Annotation`. | https://visx.airbnb.tech | https://github.com/airbnb/visx |
+
+## Chart types
+
+| Type | Recharts API | visx API |
+| --- | --- | --- |
+| Line | `LineChart`, `Line` | `LinePath`, `GlyphDot` |
+| Bar | `BarChart`, `Bar` | `Bar` |
+| Area | `AreaChart`, `Area` | `AreaClosed` |
+| Progress | stacked `Bar` on a vertical `BarChart` | `Bar` as a linear meter |
+| Small multiples | one small `BarChart` per state | one small `Bar` per state |
+| Annotation | `ReferenceDot` plus `Label` | `Annotation`, `Connector`, `CircleSubject`, `Label` |
+| Legend | `Legend` | `LegendOrdinal` |
+| Tooltip | `Tooltip` | `useTooltip`, `TooltipWithBounds`, `localPoint` |
+| Responsive | `responsive` on the chart | `ParentSize` from `@visx/responsive` |
+
+Default stories keep package colours. Themed stories use Academy ink `#212121`, line `#D9D9D9`, hover blue `#0035B1`, and press yellow `#DEF54F`.
+
+## Accessibility findings
+
+- Recharts 3.10.1 turns on `accessibilityLayer` by default. Keyboard users move between points with arrow keys. VoiceOver needs Quick Nav off. That is an upstream limitation.
+- visx 4.0.0 has no chart keyboard layer unless you use `@visx/xychart`. This gallery does not install that package.
+- Both stories include an HTML table so the values stay available to a screen reader.
+- Contrast: themed marks use ink, yellow, or blue on paper. Pattern lines on bars keep WCAG 1.4.1.
+- Empty stories pass an empty array. Captions say "No cohort data."
+- Reduced motion: Recharts honors `isAnimationActive={false}`. visx primitives do not animate.
+
+## Omitted candidates
+
+| Candidate | Reason |
+| --- | --- |
+| `@visx/xychart` | Peers `@react-spring/web`. Issue 176 keeps Motion as the only animation engine. |
+| `@visx/geo` | This ticket forbids a map. |
+| `@nivo/bar` | Issue 176: dashboard defaults fight the Academy identity. |
+| `@unovis/react` | Issue 176: Leaflet map path is too heavy. |
+| `@tanstack/react-charts` | Issue 176: alpha pin is not stable. |
+| Leaflet and `react-simple-maps` | Maps are out of scope. |
+
+This catalogue does not promote a candidate to production.
