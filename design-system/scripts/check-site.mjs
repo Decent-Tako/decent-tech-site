@@ -342,13 +342,12 @@ async function checkContinuityPaths(browser, viewport) {
     const page = await context.newPage();
     if (!viewTransitions) {
       // The bundle reads `startViewTransition` on the document when it opens
-      // a page, so removing it before any script runs takes the feature away
-      // from the site and from the browser's own navigation.
+      // a page, so taking it away before any script runs puts the site on the
+      // path it takes in a browser without the feature. `delete` removes the
+      // property from the prototype, so the site sees neither the key nor a
+      // callable value.
       await page.addInitScript(() => {
-        Object.defineProperty(document, 'startViewTransition', {
-          value: undefined,
-          configurable: true,
-        });
+        delete Document.prototype.startViewTransition;
       });
     }
     await page.goto(SITE_URL, { waitUntil: 'load' });

@@ -88,7 +88,11 @@ type LastClick = 'open' | 'turn' | 'miss' | 'drag';
 function supportsViewTransition(): boolean {
   return (
     typeof document !== 'undefined' &&
-    'startViewTransition' in document &&
+    // The value, not the key. A test that takes the feature away by setting
+    // it to undefined leaves the key in place, and so would a browser that
+    // ships the property without the behaviour.
+    typeof (document as Document & { startViewTransition?: unknown })
+      .startViewTransition === 'function' &&
     CSS.supports('view-transition-name: x')
   );
 }

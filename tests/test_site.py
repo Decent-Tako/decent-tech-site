@@ -925,7 +925,11 @@ class SiteTests(unittest.TestCase):
         # The site runs the circle or the shared element, never both. The
         # bundle picks by feature detection.
         menu = (DESIGN_SYSTEM / "src" / "site" / "SiteMenu.tsx").read_text()
-        self.assertIn("'startViewTransition' in document", menu)
+        # The value, not the key. `'startViewTransition' in document` stays
+        # true when the property is present but set to undefined, so the site
+        # would take the shared-element path in a browser that cannot run it.
+        self.assertIn(".startViewTransition === 'function'", menu)
+        self.assertNotIn("'startViewTransition' in document", menu)
         self.assertIn("CSS.supports('view-transition-name: x')", menu)
         self.assertIn("if (reduceRef.current || supportsViewTransition()) {", menu)
 
