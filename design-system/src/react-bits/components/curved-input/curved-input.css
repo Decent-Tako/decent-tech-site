@@ -1,0 +1,22 @@
+.rb-frame [data-testid='curved-input-stage'] {
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+}
+
+.rb-frame .curved-input,
+.rb-frame .curved-input__svg text {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .curved-input__caption {
+  margin: 0;
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 0.9375rem;
+}
+
+.rb-frame [data-reduced='true'] .curved-input__ring {
+  transition: none;
+}
