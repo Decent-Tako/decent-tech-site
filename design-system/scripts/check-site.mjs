@@ -142,8 +142,10 @@ async function checkPage(browser, viewport, pagePath) {
 
   // A text effect splits its text into letter spans. The letters of one word
   // must stay on one line: every letter shares its wrapper's line top, and
-  // wrapping happens only at the spaces between wrappers.
-  const brokenWords = await page.evaluate(() => {
+  // wrapping happens only at the spaces between wrappers. Split Text raises
+  // its letters one by one on entry, so the measure waits for the tween to
+  // settle before it counts a word as broken.
+  const countSplitWords = () => {
     const groups = new Map();
     document.querySelectorAll('[data-effect] .char, [data-effect] .split-char').forEach((letter) => {
       const wrapper = letter.parentElement;
@@ -156,12 +158,17 @@ async function checkPage(browser, viewport, pagePath) {
       if (Math.max(...tops) - Math.min(...tops) > 1) broken += 1;
     }
     return { words: groups.size, broken };
-  });
-  if (brokenWords.words > 0) {
-    if (brokenWords.broken > 0) {
-      fail(`${label}: ${brokenWords.broken} of ${brokenWords.words} split words break across lines`);
+  };
+  let settled = await page.evaluate(countSplitWords);
+  for (let attempt = 0; attempt < 40 && settled.words > 0 && settled.broken > 0; attempt += 1) {
+    await page.waitForTimeout(250);
+    settled = await page.evaluate(countSplitWords);
+  }
+  if (settled.words > 0) {
+    if (settled.broken > 0) {
+      fail(`${label}: ${settled.broken} of ${settled.words} split words break across lines`);
     } else {
-      console.log(`check-site: ${label}: ${brokenWords.words} split words each stay on one line`);
+      console.log(`check-site: ${label}: ${settled.words} split words each stay on one line`);
     }
   }
 
