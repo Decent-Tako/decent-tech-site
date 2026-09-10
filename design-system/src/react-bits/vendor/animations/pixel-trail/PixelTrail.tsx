@@ -226,6 +226,7 @@ export default function PixelTrail({
     const observer = new ResizeObserver(resize);
     observer.observe(host);
     host.addEventListener('pointermove', onPointerMove);
+    renderer.domElement.addEventListener('pointermove', onPointerMove);
     resize();
 
     if (propsRef.current.seedCenter) {
@@ -256,6 +257,7 @@ export default function PixelTrail({
       cancelAnimationFrame(raf);
       observer.disconnect();
       host.removeEventListener('pointermove', onPointerMove);
+      renderer.domElement.removeEventListener('pointermove', onPointerMove);
       if (renderer.domElement.parentNode === host) {
         host.removeChild(renderer.domElement);
       }

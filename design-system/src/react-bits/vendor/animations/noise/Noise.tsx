@@ -67,6 +67,7 @@ const Noise: React.FC<NoiseProps> = ({
       canvas.height = canvasSize;
       canvas.style.width = '100%';
       canvas.style.height = '100%';
+      drawGrain();
     };
 
     const drawGrain = () => {
@@ -99,7 +100,6 @@ const Noise: React.FC<NoiseProps> = ({
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
     resize();
-    drawGrain();
     loop();
 
     return () => {

@@ -80,9 +80,11 @@ async function playSketch(stage: HTMLElement) {
   }
   const canvasEl = stage.querySelector('canvas');
   await expect(canvasEl).not.toBeNull();
-  movePointer(stage, 80, 80);
-  movePointer(stage, 140, 110);
-  movePointer(stage, 200, 150);
+  const host = stage.querySelector('.pixel-trail-host') ?? canvasEl;
+  await expect(host).not.toBeNull();
+  for (let i = 0; i < 10; i += 1) {
+    movePointer(host as HTMLElement, 40 + i * 18, 50 + (i % 4) * 16);
+  }
   await assertCanvasPainted(canvasEl as HTMLCanvasElement, INK, { grid: 16, timeoutMs: 6000 });
 }
 

@@ -109,9 +109,10 @@ async function playBrand(canvas: Canvas) {
   await expect(canvas.getByRole('heading', { name: 'Orbit Images' })).toBeVisible();
 }
 
-function itemTransform(stage: HTMLElement) {
+function itemOffset(stage: HTMLElement) {
   const item = stage.querySelector('.orbit-item');
-  return item ? getComputedStyle(item).transform : '';
+  if (!item) return '';
+  return getComputedStyle(item).offsetDistance || item.getAttribute('style') || '';
 }
 
 async function playOrbit(canvas: Canvas) {
@@ -119,9 +120,9 @@ async function playOrbit(canvas: Canvas) {
   await waitFor(() => {
     expect(stage.querySelectorAll('.orbit-image').length).toBe(5);
   }, SLOW);
-  const first = itemTransform(stage);
+  const first = itemOffset(stage);
   await waitFor(() => {
-    expect(itemTransform(stage)).not.toBe(first);
+    expect(itemOffset(stage)).not.toBe(first);
   }, SLOW);
   return stage;
 }
@@ -166,9 +167,9 @@ export const ReducedMotion: Story = {
     await waitFor(() => {
       expect(stage.querySelectorAll('.orbit-image').length).toBe(5);
     }, SLOW);
-    const first = itemTransform(stage);
+    const first = itemOffset(stage);
     await new Promise((resolve) => setTimeout(resolve, 200));
-    await expect(itemTransform(stage)).toBe(first);
+    await expect(itemOffset(stage)).toBe(first);
     await playPause(canvas, stage);
   },
 };

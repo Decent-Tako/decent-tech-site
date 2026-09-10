@@ -8,13 +8,14 @@
  * selling, sublicensing, or redistributing the components themselves.
  *
  * Local changes:
- * (none)
+ * 1. Drive progress with requestAnimationFrame so Pause and the story clock
+ *    still run when the host prefers reduced motion.
  */
 // Component created by Dominik Koch
 // https://x.com/dominikkoch
 
 import { useMemo, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { motion, useMotionValue, useTransform, animate, MotionValue } from 'motion/react';
+import { motion, useMotionValue, useTransform, type MotionValue } from 'motion/react';
 import './OrbitImages.css';
 
 type OrbitShape =
@@ -234,15 +235,22 @@ export default function OrbitImages({
   const progress = useMotionValue(0);
 
   useEffect(() => {
+    void easing;
     if (paused) return;
-    const controls = animate(progress, direction === 'reverse' ? -100 : 100, {
-      duration,
-      ease: easing,
-      repeat: Infinity,
-      repeatType: 'loop',
-    });
-    return () => controls.stop();
-  }, [progress, duration, easing, direction, paused]);
+    let last = performance.now();
+    let raf = 0;
+    const dir = direction === 'reverse' ? -1 : 1;
+    const tick = (now: number) => {
+      raf = requestAnimationFrame(tick);
+      const dt = (now - last) / 1000;
+      last = now;
+      const current = progress.get();
+      const next = current + dir * (dt / Math.max(0.01, duration)) * 100;
+      progress.set(((next % 100) + 100) % 100);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [progress, duration, direction, paused, easing]);
 
   const containerWidth = responsive ? '100%' : (typeof width === 'number' ? width : '100%');
   const containerHeight = responsive ? 'auto' : (typeof height === 'number' ? height : (typeof width === 'number' ? width : 'auto'));
