@@ -319,11 +319,21 @@ async function checkMissClick(page, viewportName, box) {
 // `turn`. The disc is the one furthest from the centre of the stage, so it is
 // certainly not the centred one.
 async function checkTurnClick(page, viewportName, box) {
-  const discs = await hitPoints(page);
+  const [discs, centredRaw] = await Promise.all([
+    hitPoints(page),
+    page.locator('#menu-stage').getAttribute('data-centred-vertex'),
+  ]);
+  const centred = Number(centredRaw);
+  // Several vertices carry the same page, so a disc that is not the centred
+  // vertex can still be the centred *page*, and turning to it would leave the
+  // wordmark alone. The item of a vertex is its index modulo the five pages,
+  // so the target must differ there, not just in the vertex.
+  const centredItem = ((centred % PAGE_PATHS.length) + PAGE_PATHS.length) % PAGE_PATHS.length;
   const centre = { x: box.width / 2, y: box.height / 2 };
   let target = null;
   let furthest = -Infinity;
   for (const disc of discs) {
+    if (disc.vertex % PAGE_PATHS.length === centredItem) continue;
     // Big enough to click without landing on a neighbour, and wholly on the
     // stage, so the click cannot fall outside the viewport.
     if (disc.r < 12) continue;
@@ -336,7 +346,10 @@ async function checkTurnClick(page, viewportName, box) {
     }
   }
   if (!target) {
-    fail(`${viewportName}: no off-centre disc big enough to click among ${discs.length} discs`);
+    fail(
+      `${viewportName}: no off-centre disc of another page big enough to click ` +
+        `among ${discs.length} discs`,
+    );
     return;
   }
   const beforePhrase = (await wordmarkPhrase(page)).trim();
