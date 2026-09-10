@@ -1,0 +1,8 @@
+.rb-frame .blur-text__copy {
+  margin: 1.25rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+}
