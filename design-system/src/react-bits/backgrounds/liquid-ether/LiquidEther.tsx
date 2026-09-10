@@ -124,8 +124,9 @@ export function LiquidEther({
           resolution={resolution}
           isBounce={isBounce}
           colors={colors}
-          autoDemo={autoDemo && !reduce}
+          autoDemo={autoDemo}
           autoSpeed={motionSpeed}
+          autoResumeDelay={reduce ? 0 : autoResumeDelay}
           autoIntensity={autoIntensity}
           takeoverDuration={takeoverDuration}
           autoResumeDelay={autoResumeDelay}

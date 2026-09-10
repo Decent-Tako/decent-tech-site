@@ -11,6 +11,8 @@
  * 1. preserveDrawingBuffer: true so play can sample the canvas after pause.
  * 2. paused, onReady, and onError props so the story can hold the sim and prove paint.
  * 3. Bind pointer listeners to the container, not window.
+ * 4. Warm 12 frames with a seeded pointer path so a still reduced-motion
+ *    frame has paint before Pause holds the sim.
  */
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
@@ -1094,12 +1096,18 @@ const color_frag = `
         this.output.update();
       }
       private notifiedReady = false;
+      private readyFrames = 0;
       loop() {
         if (!this.running) return;
-        if (!pausedRef.current || !this.notifiedReady) {
+        if (!pausedRef.current || this.readyFrames < 12) {
+          if (this.readyFrames < 12) {
+            const t = this.readyFrames / 12;
+            Mouse.setNormalized(Math.sin(t * 6.283185) * 0.6, Math.cos(t * 6.283185) * 0.6);
+          }
           this.render();
+          this.readyFrames += 1;
         }
-        if (!this.notifiedReady) {
+        if (!this.notifiedReady && this.readyFrames >= 12) {
           this.notifiedReady = true;
           readyRef.current.onReady?.();
         }
