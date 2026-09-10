@@ -1,0 +1,50 @@
+.rb-frame [data-testid='card-swap-stage'] {
+  overflow: visible;
+  min-height: 32rem;
+  background: var(--soft);
+}
+
+.rb-frame .card-swap-container .card {
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.rb-frame .card-swap__photo {
+  display: block;
+  width: 100%;
+  height: 8rem;
+  object-fit: cover;
+}
+
+.rb-frame .card-swap__kicker,
+.rb-frame .card-swap__title,
+.rb-frame .card-swap__copy {
+  margin: 0;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.rb-frame .card-swap__kicker {
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-blue);
+}
+
+.rb-frame .card-swap__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.rb-frame .card-swap__copy {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
