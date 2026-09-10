@@ -1,0 +1,55 @@
+.rb-frame [data-testid='profile-card-stage'] {
+  min-height: 36rem;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+}
+
+.profile-card-stage {
+  --sunpillar-1: var(--accent-yellow);
+  --sunpillar-2: var(--paper);
+  --sunpillar-3: var(--accent-blue);
+  --sunpillar-4: var(--accent-yellow);
+  --sunpillar-5: var(--accent-blue);
+  --sunpillar-6: var(--paper);
+  width: min(100%, 22rem);
+}
+
+.rb-frame [data-paused='true'] .pc-card,
+.rb-frame [data-paused='true'] .pc-shine {
+  animation-play-state: paused;
+}
+
+.rb-frame .pc-card {
+  height: 32rem;
+  max-height: 32rem;
+}
+
+.rb-frame .pc-card,
+.rb-frame .pc-details,
+.rb-frame .pc-details h3,
+.rb-frame .pc-details p,
+.rb-frame .pc-handle,
+.rb-frame .pc-status,
+.rb-frame .pc-contact-btn {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .pc-details h3,
+.rb-frame .pc-handle,
+.rb-frame .pc-contact-btn {
+  color: var(--paper);
+}
+
+.rb-frame .pc-details p,
+.rb-frame .pc-status {
+  color: var(--quiet);
+}
+
+.rb-frame .pc-contact-btn {
+  pointer-events: auto;
+  min-height: 2.25rem;
+  border: 1px solid var(--paper);
+  background: transparent;
+  cursor: pointer;
+}
