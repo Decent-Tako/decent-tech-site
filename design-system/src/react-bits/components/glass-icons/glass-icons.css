@@ -1,0 +1,34 @@
+.rb-frame [data-testid='glass-icons-stage'] {
+  overflow: visible;
+  min-height: 22rem;
+}
+
+.glass-icons-stage {
+  width: min(100%, 28rem);
+  margin: 0 auto;
+}
+
+.glass-icons-stage--paused .icon-btn__back,
+.glass-icons-stage--paused .icon-btn__front,
+.glass-icons-stage--paused .icon-btn__label {
+  transition: none !important;
+}
+
+.glass-icons-stage--reduced .icon-btn__back {
+  transform: none;
+}
+
+.glass-icons-stage--reduced .icon-btn__front {
+  transform: none;
+}
+
+.glass-icons-stage--reduced .icon-btn__label {
+  opacity: 1;
+  transform: translateY(20%);
+}
+
+.rb-frame .icon-btn__label {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+  color: var(--paper);
+}
