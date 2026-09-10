@@ -1,0 +1,37 @@
+.logo-loop-stage {
+  min-height: 10rem;
+  padding: 1.5rem 0;
+}
+
+.logo-loop-stage .logoloop {
+  width: 100%;
+  overflow: hidden;
+}
+
+.rb-frame .logoloop__node {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rb-frame .logoloop__kicker {
+  margin: 0;
+  color: var(--accent-blue);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rb-frame .logo-loop-copy {
+  margin: 0 1rem 1rem;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-align: center;
+}

@@ -1,0 +1,16 @@
+.laser-flow-stage {
+  min-height: 24rem;
+}
+
+.laser-flow-stage .laser-flow-container {
+  pointer-events: auto;
+  width: 100%;
+  height: 22rem;
+}
+
+.rb-frame .laser-flow-copy {
+  margin: 0 1rem 1rem;
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-align: center;
+}

@@ -1,0 +1,15 @@
+.magic-rings-stage {
+  min-height: 24rem;
+}
+
+.magic-rings-stage .magic-rings-container {
+  width: 100%;
+  height: 22rem;
+}
+
+.rb-frame .magic-rings-copy {
+  margin: 0 1rem 1rem;
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-align: center;
+}
