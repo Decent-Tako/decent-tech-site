@@ -1,0 +1,19 @@
+/*
+ * Vendored from React Bits.
+ * Source: https://github.com/DavidHDev/react-bits/blob/625f25025fed1c28e2de7d3ac5f12ee83542844d/src/ts-default/Backgrounds/LiquidEther/LiquidEther.css
+ * Page: https://reactbits.dev/backgrounds/liquid-ether
+ * Commit: 625f25025fed1c28e2de7d3ac5f12ee83542844d
+ * Date: 2026-09-10
+ * Licence: MIT + Commons Clause (see ../../LICENSE.md). The Commons Clause forbids
+ * selling, sublicensing, or redistributing the components themselves.
+ *
+ * Local changes:
+ * (none)
+ */
+.liquid-ether-container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
