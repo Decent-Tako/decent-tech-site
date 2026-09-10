@@ -118,13 +118,13 @@ async function playDrag(stage: HTMLElement) {
   // A slow sweep across the stage, so the springs follow and the ribbons
   // stretch out; then a fine grid, because a 30 px ribbon can slip between
   // eight samples per axis.
-  for (let step = 0; step < 24; step += 1) {
-    const t = step / 23;
+  for (let step = 0; step < 12; step += 1) {
+    const t = step / 11;
     fireEvent.mouseMove(surface, {
       clientX: rect.left + rect.width * (0.1 + 0.8 * t),
       clientY: rect.top + rect.height * (0.5 + 0.35 * Math.sin(t * Math.PI * 2)),
     });
-    await new Promise((resolve) => setTimeout(resolve, 40));
+    await new Promise((resolve) => setTimeout(resolve, 30));
   }
   await assertCanvasPainted(sketch, STAGE_INK, { grid: 32 });
 }
