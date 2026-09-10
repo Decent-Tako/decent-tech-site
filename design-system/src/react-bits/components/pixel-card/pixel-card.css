@@ -1,0 +1,54 @@
+.rb-frame [data-testid='pixel-card-stage'] {
+  min-height: 28rem;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+}
+
+.pixel-card-stage {
+  display: grid;
+  place-items: center;
+}
+
+.rb-frame .pixel-card {
+  --pixel-card-border: var(--line);
+  --pixel-card-background: var(--soft);
+  --pixel-card-active-color: var(--accent-blue);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.pixel-card__copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.4rem;
+  width: min(100%, 14rem);
+  padding: 1rem;
+  pointer-events: none;
+}
+
+.rb-frame .pixel-card__kicker,
+.rb-frame .pixel-card__title,
+.rb-frame .pixel-card__body {
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .pixel-card__kicker {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+}
+
+.rb-frame .pixel-card__title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.rb-frame .pixel-card__body {
+  font-size: 0.9rem;
+  line-height: 1.45;
+}

@@ -1,0 +1,51 @@
+.rb-frame [data-testid='spotlight-card-stage'] {
+  min-height: 18rem;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+}
+
+.rb-frame .card-spotlight {
+  width: min(100%, 28rem);
+  border-color: var(--charcoal);
+  background-color: var(--ink);
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame [data-reduced='true'] .card-spotlight::before {
+  opacity: 0;
+}
+
+.spotlight-card__kicker,
+.spotlight-card__title,
+.spotlight-card__copy {
+  margin: 0;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--paper);
+}
+
+.spotlight-card__copy {
+  display: grid;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.rb-frame .spotlight-card__kicker {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-yellow);
+}
+
+.rb-frame .spotlight-card__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.rb-frame .spotlight-card__body {
+  margin: 0;
+  line-height: 1.5;
+  color: var(--paper);
+}
