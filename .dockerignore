@@ -2,3 +2,7 @@
 .github
 tests
 README.md
+design-system/node_modules
+design-system/storybook-static
+design-system/dist-site
+design-system/site-shots

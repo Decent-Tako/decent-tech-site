@@ -1,0 +1,90 @@
+/*
+ * Stage and overlay styles for the site Infinite Menu. Site custom properties
+ * only: --stage, --stage-ink, and the five --dot-* tokens come from
+ * site/styles.css. Bundled into dist-site/assets/menu.css.
+ */
+
+.menu-sphere {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.menu-sphere .rb-infinite-menu {
+  --infinite-menu-accent: var(--stage-ink);
+  --infinite-menu-icon: var(--stage);
+}
+
+/* The upstream overlay logs internal links instead of navigating. The site
+ * renders its own link from onActiveItemChange, so the upstream parts hide. */
+.menu-sphere .rb-infinite-menu .face-title,
+.menu-sphere .rb-infinite-menu .face-description,
+.menu-sphere .rb-infinite-menu .action-button {
+  display: none;
+}
+
+.menu-sphere .infinite-grid-menu-canvas {
+  display: block;
+  touch-action: none;
+}
+
+.menu-overlay {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1.25rem, 5vh, 3rem);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: calc(100% - 2rem);
+  padding: 0.75rem 1.25rem;
+  border: 1px solid rgba(242, 241, 232, 0.28);
+  border-radius: 999px;
+  background: var(--stage);
+  color: var(--stage-ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.menu-overlay:hover .menu-overlay__title {
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+}
+
+.menu-overlay:focus-visible {
+  outline: 3px solid var(--stage-ink);
+  outline-offset: 4px;
+}
+
+.menu-overlay__swatch {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--stage-ink);
+}
+
+.menu-overlay__swatch[data-dot="gold"] {
+  background: var(--dot-gold);
+}
+
+.menu-overlay__swatch[data-dot="vermilion"] {
+  background: var(--dot-vermilion);
+}
+
+.menu-overlay__swatch[data-dot="terracotta"] {
+  background: var(--dot-terracotta);
+}
+
+.menu-overlay__swatch[data-dot="steel"] {
+  background: var(--dot-steel);
+}
+
+.menu-overlay__swatch[data-dot="cream"] {
+  background: var(--dot-cream);
+}

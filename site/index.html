@@ -10,6 +10,8 @@
     <link rel="canonical" href="https://decent.tech/">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/assets/menu.css">
+    <script type="module" src="/assets/menu.js"></script>
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Decent Technology Group">
     <meta property="og:title" content="Decent Technology Group">
@@ -33,51 +35,21 @@
         <span aria-hidden="true">decent.</span>
         <span class="wordmark-company">Technology Group</span>
       </a>
-      <nav aria-label="Primary navigation">
-        <a href="#services">Services</a>
-        <a href="#contact">Contact</a>
-      </nav>
     </header>
 
     <main id="main-content">
-      <section class="hero" aria-labelledby="hero-title">
-        <p class="eyebrow">Decent Technology Group</p>
-        <h1 id="hero-title">Technology that earns its place.</h1>
-        <p class="hero-copy">
-          We help organizations choose technology with care, then deliver the systems that follow.
-        </p>
-        <a class="button" href="mailto:hello@decent.tech">Start a conversation</a>
-      </section>
-
-      <section class="services" id="services" aria-labelledby="services-title">
-        <div class="section-heading">
-          <p class="eyebrow">What we do</p>
-          <h2 id="services-title">From first decision to live systems.</h2>
-        </div>
-        <div class="service-grid">
-          <article>
-            <p class="service-number" aria-hidden="true">01</p>
-            <h3>Technology strategy</h3>
-            <p>Practical direction for products, platforms, and technical decisions.</p>
-          </article>
-          <article>
-            <p class="service-number" aria-hidden="true">02</p>
-            <h3>Software delivery</h3>
-            <p>Accessible web applications, integrations, and internal tools.</p>
-          </article>
-          <article>
-            <p class="service-number" aria-hidden="true">03</p>
-            <h3>Infrastructure and operations</h3>
-            <p>Cloud platforms, delivery pipelines, and operational support.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="contact" id="contact" aria-labelledby="contact-title">
-        <p class="eyebrow">Get in touch</p>
-        <h2 id="contact-title">Have a useful problem to solve?</h2>
-        <p>Tell us what you are working on. We reply by email.</p>
-        <a class="email-link" href="mailto:hello@decent.tech">hello@decent.tech</a>
+      <section class="menu" aria-labelledby="menu-title">
+        <h1 id="menu-title" class="visually-hidden">Decent Technology Group</h1>
+        <div id="menu-stage" class="menu-stage" data-webgl="pending"></div>
+        <nav class="menu-list" aria-label="Site pages">
+          <ul>
+            <li><a href="/about/"><span class="menu-list__dot" data-dot="gold" aria-hidden="true"></span>About</a></li>
+            <li><a href="/portfolio/"><span class="menu-list__dot" data-dot="vermilion" aria-hidden="true"></span>Portfolio</a></li>
+            <li><a href="/blog/"><span class="menu-list__dot" data-dot="terracotta" aria-hidden="true"></span>Blog</a></li>
+            <li><a href="/ben/"><span class="menu-list__dot" data-dot="steel" aria-hidden="true"></span>About Ben</a></li>
+            <li><a href="/contact/"><span class="menu-list__dot" data-dot="cream" aria-hidden="true"></span>Get in touch</a></li>
+          </ul>
+        </nav>
       </section>
     </main>
 
