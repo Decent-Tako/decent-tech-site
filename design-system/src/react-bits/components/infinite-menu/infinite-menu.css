@@ -1,0 +1,34 @@
+.rb-frame [data-testid='infinite-menu-stage'] {
+  height: 420px;
+  min-height: 420px;
+}
+
+.infinite-menu-stage .rb-infinite-menu {
+  position: absolute;
+  inset: 0;
+  --infinite-menu-accent: var(--accent-yellow);
+  --infinite-menu-icon: var(--ink);
+}
+
+.rb-frame .infinite-menu-stage .face-title,
+.rb-frame .infinite-menu-stage .face-description {
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .infinite-menu-stage .action-button:hover,
+.rb-frame .infinite-menu-stage .action-button:focus-visible {
+  --infinite-menu-accent: var(--accent-blue);
+  --infinite-menu-icon: var(--paper);
+}
+
+.rb-frame .infinite-menu__status {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  margin: 0;
+  color: var(--paper);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  pointer-events: none;
+}
