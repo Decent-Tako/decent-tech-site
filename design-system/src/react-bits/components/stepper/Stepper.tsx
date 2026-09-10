@@ -76,6 +76,7 @@ export function Stepper({
         nextButtonText={nextButtonText}
         disableStepIndicators={disableStepIndicators}
         paused={paused}
+        instant={reduce}
         onStepChange={(next) => {
           setStep(next);
           setDone(false);

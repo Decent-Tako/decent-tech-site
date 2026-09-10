@@ -8,14 +8,15 @@
  * selling, sublicensing, or redistributing the components themselves.
  *
  * Local changes:
- * 1. paused prop wraps the tree in MotionConfig reducedMotion=always so Pause
- *    shows the current step with no spring.
+ * 1. paused is accepted so the wrapper can freeze the story. instant skips
+ *    AnimatePresence so reduced motion does not leave a fading step in the
+ *    tree for the contrast check.
  * 2. Step indicators are buttons for keyboard and name. Footer buttons set
  *    type=button.
  * 3. Indicator and connector colours use brand tokens. Upstream fill was
  *    #5227FF. Inactive fill was #222 with #a3a3a3 text.
  */
-import { AnimatePresence, motion, MotionConfig, type Variants } from 'motion/react';
+import { AnimatePresence, motion, type Variants } from 'motion/react';
 import React, { Children, type HTMLAttributes, type JSX, type ReactNode, useLayoutEffect, useRef, useState } from 'react';
 
 import './Stepper.css';
@@ -36,6 +37,7 @@ interface StepperProps extends HTMLAttributes<HTMLDivElement> {
   disableStepIndicators?: boolean;
   renderStepIndicator?: (props: RenderStepIndicatorProps) => ReactNode;
   paused?: boolean;
+  instant?: boolean;
 }
 
 interface RenderStepIndicatorProps {
@@ -59,7 +61,8 @@ export default function Stepper({
   nextButtonText = 'Continue',
   disableStepIndicators = false,
   renderStepIndicator,
-  paused = false,
+  paused: _paused = false,
+  instant = false,
   ...rest
 }: StepperProps) {
   const [currentStep, setCurrentStep] = useState<number>(initialStep);
@@ -97,7 +100,7 @@ export default function Stepper({
     updateStep(totalSteps + 1);
   };
 
-  const tree = (
+  return (
     <div className="outer-container" {...rest}>
       <div
         className={`step-circle-container ${stepCircleContainerClassName}`}
@@ -139,6 +142,7 @@ export default function Stepper({
           isCompleted={isCompleted}
           currentStep={currentStep}
           direction={direction}
+          instant={instant}
           className={`step-content-default ${contentClassName}`}
         >
           {stepsArray[currentStep - 1]}
@@ -171,8 +175,6 @@ export default function Stepper({
       </div>
     </div>
   );
-
-  return paused ? <MotionConfig reducedMotion="always">{tree}</MotionConfig> : tree;
 }
 
 interface StepContentWrapperProps {
@@ -181,10 +183,22 @@ interface StepContentWrapperProps {
   direction: number;
   children: ReactNode;
   className?: string;
+  instant?: boolean;
 }
 
-function StepContentWrapper({ isCompleted, currentStep, direction, children, className }: StepContentWrapperProps) {
+function StepContentWrapper({
+  isCompleted,
+  currentStep,
+  direction,
+  children,
+  className,
+  instant = false,
+}: StepContentWrapperProps) {
   const [parentHeight, setParentHeight] = useState<number>(0);
+
+  if (instant) {
+    return <div className={className}>{isCompleted ? null : children}</div>;
+  }
 
   return (
     <motion.div

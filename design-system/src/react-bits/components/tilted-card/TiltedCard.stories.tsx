@@ -83,6 +83,7 @@ async function playHover(canvas: Canvas) {
   const stage = canvas.getByTestId('tilted-card-stage');
   const figure = stage.querySelector('.tilted-card-figure');
   if (!(figure instanceof HTMLElement)) throw new Error('The Tilted Card figure is missing.');
+  await userEvent.hover(figure);
   movePointer(figure, 80, 80);
   await waitFor(() => {
     expect(stage).toHaveAttribute('data-hover', 'true');

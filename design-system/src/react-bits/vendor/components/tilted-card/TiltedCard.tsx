@@ -15,10 +15,12 @@
  * 3. Pointer listeners sit next to the mouse listeners so the story play
  *    helper reaches the card.
  * 4. onHoverChange reports hover to the wrapper for data-hover.
+ * 5. The caption is aria-hidden and visibility-hidden until hover. A fading
+ *    caption fails the contrast check. The photograph already has alt text.
  */
 import type { CSSProperties, ReactNode } from 'react';
 import type { SpringOptions } from 'motion/react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'motion/react';
 import './TiltedCard.css';
 
@@ -70,7 +72,6 @@ export default function TiltedCard({
   const rotateX = useSpring(useMotionValue(0), springValues);
   const rotateY = useSpring(useMotionValue(0), springValues);
   const scale = useSpring(1, springValues);
-  const opacity = useSpring(0);
   const rotateFigcaption = useSpring(0, {
     stiffness: 350,
     damping: 30,
@@ -78,9 +79,31 @@ export default function TiltedCard({
   });
 
   const [lastY, setLastY] = useState<number>(0);
+  const [hovered, setHovered] = useState(false);
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const onEnter = () => {
+      if (pausedRef.current) return;
+      handleEnter();
+    };
+    const onLeave = () => handleLeave();
+    const onMove = (event: PointerEvent) => handleMove(event.clientX, event.clientY);
+    node.addEventListener('pointerenter', onEnter);
+    node.addEventListener('pointerleave', onLeave);
+    node.addEventListener('pointermove', onMove);
+    return () => {
+      node.removeEventListener('pointerenter', onEnter);
+      node.removeEventListener('pointerleave', onLeave);
+      node.removeEventListener('pointermove', onMove);
+    };
+  });
 
   function handleMove(clientX: number, clientY: number) {
-    if (paused || !ref.current) return;
+    if (pausedRef.current || !ref.current) return;
 
     const rect = ref.current.getBoundingClientRect();
     const offsetX = clientX - rect.left - rect.width / 2;
@@ -101,14 +124,14 @@ export default function TiltedCard({
   }
 
   function handleEnter() {
-    if (paused) return;
+    if (pausedRef.current) return;
     scale.set(scaleOnHover);
-    opacity.set(1);
+    setHovered(true);
     onHoverChange?.(true);
   }
 
   function handleLeave() {
-    opacity.set(0);
+    setHovered(false);
     scale.set(1);
     rotateX.set(0);
     rotateY.set(0);
@@ -163,10 +186,12 @@ export default function TiltedCard({
       {showTooltip && (
         <motion.figcaption
           className="tilted-card-caption"
+          aria-hidden="true"
           style={{
             x,
             y,
-            opacity,
+            opacity: hovered ? 1 : 0,
+            visibility: hovered ? 'visible' : 'hidden',
             rotate: rotateFigcaption
           }}
         >

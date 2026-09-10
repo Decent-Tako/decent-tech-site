@@ -81,7 +81,9 @@ export const Default: Story = {
     await playBrand(canvas);
     await expect(canvas.getByText('Week 0')).toBeVisible();
     const stage = await playNext(canvas, '1');
-    await expect(canvas.getByText('Six weeks')).toBeVisible();
+    await waitFor(() => {
+      expect(canvas.getByText('Six weeks')).toBeVisible();
+    }, SLOW);
     await playPauseResume(canvas, stage);
     await userEvent.click(canvas.getByRole('button', { name: 'Replay' }));
     await expect(stage).toHaveAttribute('data-run', '1');

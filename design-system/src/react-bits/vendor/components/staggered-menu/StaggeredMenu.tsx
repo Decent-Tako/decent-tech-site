@@ -15,6 +15,7 @@
  * 3. logoAlt prop so the photograph has real alt text.
  * 4. useId() for the panel id so two copies can mount at once.
  * 5. Social links stay on this page. No target=_blank.
+ * 6. The closed panel is inert so its links are not focusable under aria-hidden.
  */
 import React, { useCallback, useId, useLayoutEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
@@ -467,7 +468,7 @@ export const StaggeredMenu: React.FC<StaggeredMenuProps> = ({
         </button>
       </header>
 
-      <aside id={panelId} ref={panelRef} className="staggered-menu-panel" aria-hidden={!open}>
+      <aside id={panelId} ref={panelRef} className="staggered-menu-panel" aria-hidden={!open} inert={!open || undefined}>
         <div className="sm-panel-inner">
           <ul className="sm-panel-list" role="list" data-numbering={displayItemNumbering || undefined}>
             {items && items.length ? (
