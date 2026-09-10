@@ -1,0 +1,23 @@
+.rb-frame .rotating-text__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 2rem 1.25rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.rb-frame .rotating-text__lead {
+  color: var(--accent-blue);
+}
+
+.rb-frame .rotating-text {
+  overflow: hidden;
+  padding: 0.15rem 0.5rem;
+  background: var(--accent-yellow);
+  color: var(--ink);
+}
