@@ -1,0 +1,25 @@
+.rb-frame [data-testid='reflective-card-stage'] {
+  min-height: 34rem;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+}
+
+.rb-frame .reflective-card-container,
+.rb-frame .reflective-content,
+.rb-frame .user-name,
+.rb-frame .user-role,
+.rb-frame .security-badge,
+.rb-frame .label,
+.rb-frame .value {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--paper);
+}
+
+.rb-frame .reflective-card-container {
+  background: var(--ink);
+}
+
+.rb-frame [data-paused='true'] .reflective-sheen {
+  animation-play-state: paused;
+}
