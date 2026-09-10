@@ -129,7 +129,7 @@ export const ReducedMotion: Story = {
     await playBrand(canvas);
     const stage = canvas.getByTestId('logo-loop-stage');
     await expect(stage).toHaveAttribute('data-reduced', 'true');
-    await expect(canvas.getByText('Start')).toBeVisible();
+    await expect(canvas.getByTestId('logo-loop-host')).toBeVisible();
     await playPause(canvas, stage);
   },
 };

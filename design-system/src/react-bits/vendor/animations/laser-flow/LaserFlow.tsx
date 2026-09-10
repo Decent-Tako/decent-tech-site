@@ -12,6 +12,7 @@
  * 2. paused stops the frame loop and keeps the last frame.
  * 3. onReady fires after the first draw. onUnavailable fires when WebGL is missing.
  * 4. data-testid on the canvas.
+ * 5. A paused first frame sets uFade to 1 so reduced motion still paints.
  */
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
@@ -571,14 +572,23 @@ export const LaserFlow: React.FC<Props> = ({
       lastFpsCheckRef.current = now;
     };
 
+    const paintStill = () => {
+      uniforms.uFade.value = 1;
+      hasFadedRef.current = true;
+      fade = 1;
+      const rgb = hexToRGB(color || '#FFFFFF');
+      uniforms.uColor.value.set(rgb.r, rgb.g, rgb.b);
+      renderer.render(scene, camera);
+      if (!readyRef.current) {
+        readyRef.current = true;
+        onReadyRef.current?.();
+      }
+    };
+
     const animate = () => {
       raf = requestAnimationFrame(animate);
       if (heldRef.current || pausedRef.current || !inViewRef.current) {
-        if (!readyRef.current && renderer) {
-          renderer.render(scene, camera);
-          readyRef.current = true;
-          onReadyRef.current?.();
-        }
+        if (!readyRef.current && renderer) paintStill();
         return;
       }
 

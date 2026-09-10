@@ -13,6 +13,7 @@
  * 3. onReady fires after the first draw. onUnavailable fires when WebGL is missing.
  * 4. Bind pointermove to the mount, not mousemove.
  * 5. data-testid on the canvas.
+ * 6. A paused first frame writes uniforms at time 1 so reduced motion still paints.
  */
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
@@ -280,30 +281,8 @@ export default function MagicRings({
     let isPageVisible = !document.hidden;
     let elapsed = 0;
     let lastT = 0;
-    const animate = (t: number) => {
-      frameId = requestAnimationFrame(animate);
-      const p = propsRef.current!;
-      if (pausedRef.current) {
-        lastT = t;
-        if (!readyRef.current) {
-          renderer.render(scene, camera);
-          readyRef.current = true;
-          onReadyRef.current?.();
-        }
-        return;
-      }
-
-      const dt = lastT === 0 ? 0 : Math.min(t - lastT, 100);
-      lastT = t;
-      elapsed += dt * 0.001 * p.speed;
-
-      smoothMouseRef.current[0] += (mouseRef.current[0] - smoothMouseRef.current[0]) * 0.08;
-      smoothMouseRef.current[1] += (mouseRef.current[1] - smoothMouseRef.current[1]) * 0.08;
-      hoverAmountRef.current += ((isHoveredRef.current ? 1 : 0) - hoverAmountRef.current) * 0.08;
-      burstRef.current *= 0.95;
-      if (burstRef.current < 0.001) burstRef.current = 0;
-
-      uniforms.uTime.value = elapsed;
+    const writeUniforms = (p: NonNullable<typeof propsRef.current>, time: number) => {
+      uniforms.uTime.value = time;
       uniforms.uAttenuation.value = p.attenuation;
       uniforms.uColor.value.set(p.color);
       uniforms.uColorTwo.value.set(p.colorTwo);
@@ -325,7 +304,33 @@ export default function MagicRings({
       uniforms.uParallax.value = p.parallax;
       uniforms.uBurst.value = p.clickBurst ? burstRef.current : 0;
       uniforms.uCoverageAlpha.value = p.alphaMode === 'coverage' ? 1 : 0;
+    };
 
+    const animate = (t: number) => {
+      frameId = requestAnimationFrame(animate);
+      const p = propsRef.current!;
+      if (pausedRef.current) {
+        lastT = t;
+        if (!readyRef.current) {
+          writeUniforms(p, 1);
+          renderer.render(scene, camera);
+          readyRef.current = true;
+          onReadyRef.current?.();
+        }
+        return;
+      }
+
+      const dt = lastT === 0 ? 0 : Math.min(t - lastT, 100);
+      lastT = t;
+      elapsed += dt * 0.001 * p.speed;
+
+      smoothMouseRef.current[0] += (mouseRef.current[0] - smoothMouseRef.current[0]) * 0.08;
+      smoothMouseRef.current[1] += (mouseRef.current[1] - smoothMouseRef.current[1]) * 0.08;
+      hoverAmountRef.current += ((isHoveredRef.current ? 1 : 0) - hoverAmountRef.current) * 0.08;
+      burstRef.current *= 0.95;
+      if (burstRef.current < 0.001) burstRef.current = 0;
+
+      writeUniforms(p, elapsed);
       renderer.render(scene, camera);
       if (!readyRef.current) {
         readyRef.current = true;

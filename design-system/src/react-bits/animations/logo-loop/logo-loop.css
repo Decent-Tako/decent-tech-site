@@ -5,6 +5,7 @@
 
 .logo-loop-stage .logoloop {
   width: 100%;
+  overflow: hidden;
 }
 
 .rb-frame .logoloop__node {
