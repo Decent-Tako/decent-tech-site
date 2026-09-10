@@ -7,6 +7,16 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SITE = ROOT / "site"
+
+# The five pages behind the five dots, in dot order: slug, title, path, token.
+PAGES = (
+    ("about", "About", "/about/", "gold"),
+    ("portfolio", "Portfolio", "/portfolio/", "vermilion"),
+    ("blog", "Blog", "/blog/", "terracotta"),
+    ("ben", "About Ben", "/ben/", "steel"),
+    ("contact", "Get in touch", "/contact/", "cream"),
+)
 
 
 def relative_luminance(hex_color):
@@ -41,16 +51,28 @@ class SiteParser(HTMLParser):
         self.meta_name_values = {}
         self.meta_properties = {}
         self.scripts = []
+        self.h1_count = 0
+        self.menu_list_links = []
+        self.current_page_links = []
         self._script_type = None
         self._script_chunks = []
+        self._in_menu_list = False
 
     def handle_starttag(self, tag, attrs):
         attributes = dict(attrs)
         self.tags.append(tag)
         if tag == "html":
             self.html_lang = attributes.get("lang")
+        if tag == "h1":
+            self.h1_count += 1
         if tag == "a":
             self.links.append(attributes.get("href", ""))
+            if self._in_menu_list:
+                self.menu_list_links.append(attributes.get("href", ""))
+            if attributes.get("aria-current") == "page":
+                self.current_page_links.append(attributes.get("href", ""))
+        if tag == "nav" and "menu-list" in attributes.get("class", "").split():
+            self._in_menu_list = True
         if tag == "link":
             self.link_tags.append(attributes)
         if tag == "meta" and attributes.get("name"):
@@ -59,7 +81,8 @@ class SiteParser(HTMLParser):
         if tag == "meta" and attributes.get("property"):
             self.meta_properties[attributes["property"]] = attributes.get("content", "")
         if tag == "script":
-            self._script_type = attributes.get("type")
+            self._script_type = attributes.get("type") or ""
+            self._script_src = attributes.get("src")
             self._script_chunks = []
 
     def handle_data(self, data):
@@ -69,33 +92,80 @@ class SiteParser(HTMLParser):
             self.text.append(data)
 
     def handle_endtag(self, tag):
+        if tag == "nav":
+            self._in_menu_list = False
         if tag == "script" and self._script_type is not None:
             self.scripts.append(
-                {"type": self._script_type, "data": "".join(self._script_chunks)}
+                {
+                    "type": self._script_type,
+                    "src": self._script_src,
+                    "data": "".join(self._script_chunks),
+                }
             )
             self._script_type = None
             self._script_chunks = []
 
 
+def parse(path):
+    parser = SiteParser()
+    parser.feed(path.read_text())
+    return parser
+
+
 class SiteTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.html = (ROOT / "site" / "index.html").read_text()
-        cls.css = (ROOT / "site" / "styles.css").read_text()
+        cls.html = (SITE / "index.html").read_text()
+        cls.css = (SITE / "styles.css").read_text()
         cls.nginx = (ROOT / "nginx.conf").read_text()
-        cls.parser = SiteParser()
-        cls.parser.feed(cls.html)
+        cls.parser = parse(SITE / "index.html")
         cls.page_text = " ".join(cls.parser.text)
 
-    def test_company_identity_and_services_are_present(self):
+    def test_company_identity_is_present_on_the_home_page(self):
         self.assertIn("Decent Technology Group", self.page_text)
         self.assertIn("decent.", self.page_text)
-        for service in ("Technology strategy", "Software delivery", "Infrastructure and operations"):
-            self.assertIn(service, self.page_text)
 
-    def test_inquiry_path_uses_company_email(self):
-        self.assertIn("mailto:hello@decent.tech", self.parser.links)
-        self.assertIn("hello@decent.tech", self.page_text)
+    def test_home_page_loads_the_menu_bundle(self):
+        module_scripts = [
+            script for script in self.parser.scripts if script["src"] == "/assets/menu.js"
+        ]
+        self.assertEqual(len(module_scripts), 1)
+        self.assertEqual(module_scripts[0]["type"], "module")
+        stylesheets = [
+            item.get("href") for item in self.parser.link_tags if item.get("rel") == "stylesheet"
+        ]
+        self.assertIn("/assets/menu.css", stylesheets)
+        self.assertIn("/styles.css", stylesheets)
+
+    def test_home_page_holds_the_menu_stage_and_the_link_list(self):
+        self.assertIn('id="menu-stage"', self.html)
+        self.assertIn('data-webgl="pending"', self.html)
+        self.assertIn('id="menu-title"', self.html)
+        self.assertEqual(self.parser.menu_list_links, [path for _, _, path, _ in PAGES])
+        for _, _, _, token in PAGES:
+            self.assertIn(f'data-dot="{token}"', self.html)
+
+    def test_home_page_has_no_hero_services_or_contact_plate(self):
+        for selector in ('class="hero"', 'class="services"', 'class="contact"'):
+            self.assertNotIn(selector, self.html)
+
+    def test_no_inline_script_or_style_anywhere_in_site(self):
+        for page in SITE.rglob("*.html"):
+            html = page.read_text()
+            parser = parse(page)
+            for script in parser.scripts:
+                if script["src"] is None:
+                    self.assertEqual(
+                        script["type"],
+                        "application/ld+json",
+                        f"{page.relative_to(ROOT)} has an inline script",
+                    )
+            self.assertNotRegex(html, r"\sstyle=", f"{page.relative_to(ROOT)} has a style attribute")
+            self.assertNotIn("<style", html, f"{page.relative_to(ROOT)} has a style element")
+        for svg in SITE.rglob("*.svg"):
+            self.assertNotRegex(
+                svg.read_text(), r"\sstyle=", f"{svg.relative_to(ROOT)} has a style attribute"
+            )
 
     def test_page_uses_semantic_landmarks(self):
         for tag in ("header", "nav", "main", "section", "footer"):
@@ -113,6 +183,7 @@ class SiteTests(unittest.TestCase):
         self.assertIn("prefers-reduced-motion", self.css)
         self.assertIn("prefers-color-scheme: dark", self.css)
         self.assertIn("color-scheme: light dark", self.css)
+        self.assertIn(".visually-hidden", self.css)
 
     def test_phone_layout_uses_a_narrow_breakpoint(self):
         self.assertRegex(self.css, r"@media \(max-width: 40rem\)")
@@ -154,9 +225,73 @@ class SiteTests(unittest.TestCase):
                 f"{label} accent on inverted surfaces fails AA",
             )
 
+    def test_stage_tokens_are_the_same_in_both_schemes(self):
+        root = re.search(r":root\s*\{([^}]+)\}", self.css)
+        dark = re.search(
+            r"@media \(prefers-color-scheme: dark\)\s*\{\s*:root\s*\{([^}]+)\}",
+            self.css,
+        )
+        light_tokens = css_variables(root.group(1))
+        dark_tokens = css_variables(dark.group(1))
+        for name in ("stage", "stage-ink", *(f"dot-{token}" for _, _, _, token in PAGES)):
+            self.assertIn(name, light_tokens, f"light theme is missing --{name}")
+            self.assertEqual(light_tokens[name], dark_tokens.get(name), f"--{name} differs in dark")
+        self.assertEqual(light_tokens["stage"], "#182534")
+        self.assertGreaterEqual(
+            contrast_ratio(light_tokens["stage-ink"], light_tokens["stage"]),
+            4.5,
+            "stage text fails AA on the stage plate",
+        )
+
+    def test_menu_textures_match_the_dot_tokens(self):
+        root = re.search(r":root\s*\{([^}]+)\}", self.css)
+        tokens = css_variables(root.group(1))
+        for slug, _, _, token in PAGES:
+            svg = SITE / "menu" / f"{slug}.svg"
+            self.assertTrue(svg.is_file(), f"{svg.relative_to(ROOT)} is missing")
+            text = svg.read_text()
+            self.assertIn('width="256"', text)
+            self.assertIn('height="256"', text)
+            fills = re.findall(r'fill="(#[0-9a-fA-F]{6})"', text)
+            self.assertEqual(len(fills), 1, f"{slug}.svg must hold one filled rect")
+            self.assertEqual(fills[0].lower(), tokens[f"dot-{token}"].lower(), f"{slug}.svg fill differs from --dot-{token}")
+
+    def test_each_page_exists_with_one_heading_and_a_way_home(self):
+        home_links = ("/", "https://decent.tech/")
+        for slug, title, path, _ in PAGES:
+            page = SITE / slug / "index.html"
+            self.assertTrue(page.is_file(), f"{path} is missing")
+            parser = parse(page)
+            html = page.read_text()
+            self.assertEqual(parser.html_lang, "en", f"{path} lang")
+            self.assertEqual(parser.h1_count, 1, f"{path} must have one h1")
+            self.assertIn('class="skip-link"', html, f"{path} skip link")
+            self.assertIn('href="#main-content"', html, f"{path} skip link target")
+            self.assertIn('id="main-content"', html, f"{path} main id")
+            self.assertTrue(
+                any(link in home_links for link in parser.links), f"{path} does not link home"
+            )
+            self.assertEqual(parser.current_page_links, [path], f"{path} aria-current")
+            self.assertIn(f"{title} · Decent Technology Group", html)
+            self.assertIn(f'<link rel="canonical" href="https://decent.tech{path}">', html)
+            for _, _, other_path, _ in PAGES:
+                self.assertIn(other_path, parser.links, f"{path} nav lacks {other_path}")
+
+    def test_about_page_carries_the_services_copy(self):
+        parser = parse(SITE / "about" / "index.html")
+        text = " ".join(parser.text)
+        self.assertIn("Technology that earns its place.", text)
+        for service in ("Technology strategy", "Software delivery", "Infrastructure and operations"):
+            self.assertIn(service, text)
+
+    def test_contact_page_uses_company_email(self):
+        parser = parse(SITE / "contact" / "index.html")
+        self.assertIn("mailto:hello@decent.tech", parser.links)
+        self.assertIn("hello@decent.tech", " ".join(parser.text))
+
     def test_favicon_and_open_graph_image_exist(self):
-        favicon = ROOT / "site" / "favicon.svg"
-        og_image = ROOT / "site" / "og.png"
+        favicon = SITE / "favicon.svg"
+        og_image = SITE / "og.png"
         self.assertTrue(favicon.is_file())
         self.assertIn("<svg", favicon.read_text())
         self.assertTrue(og_image.is_file())
@@ -198,11 +333,13 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(data["email"], "hello@decent.tech")
 
     def test_robots_and_sitemap_are_published(self):
-        robots = (ROOT / "site" / "robots.txt").read_text()
-        sitemap = (ROOT / "site" / "sitemap.xml").read_text()
+        robots = (SITE / "robots.txt").read_text()
+        sitemap = (SITE / "sitemap.xml").read_text()
         self.assertIn("User-agent: *", robots)
         self.assertIn("Sitemap: https://decent.tech/sitemap.xml", robots)
-        self.assertIn("https://decent.tech/", sitemap)
+        self.assertIn("<loc>https://decent.tech/</loc>", sitemap)
+        for _, _, path, _ in PAGES:
+            self.assertIn(f"<loc>https://decent.tech{path}</loc>", sitemap)
 
     def test_nginx_sends_security_headers(self):
         self.assertIn('X-Content-Type-Options "nosniff"', self.nginx)
@@ -231,6 +368,12 @@ class SiteTests(unittest.TestCase):
         self.assertIn("USER 101", dockerfile)
         self.assertIn("EXPOSE 8080", dockerfile)
         self.assertIn("HEALTHCHECK", dockerfile)
+
+    def test_container_builds_and_copies_the_site_bundle(self):
+        dockerfile = (ROOT / "Dockerfile").read_text()
+        self.assertIn("npm run build:site", dockerfile)
+        self.assertIn("dist-site/assets", dockerfile)
+        self.assertIn("/usr/share/nginx/html/assets/", dockerfile)
 
 
 if __name__ == "__main__":

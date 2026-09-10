@@ -8,6 +8,18 @@
   --accent-on-ink: #e17850;
   --line: rgba(23, 32, 29, 0.16);
   --inverse-muted: #c4cdc9;
+  --header-height: 6.4rem;
+  /* The five page dots, from the brand palette Ben supplied on 2026-09-10.
+     One source: site/menu/<slug>.svg repeats each value and
+     tests/test_site.py keeps them equal. Same values in both colour schemes. */
+  --dot-gold: #ffcb73;
+  --dot-vermilion: #e34234;
+  --dot-terracotta: #d97757;
+  --dot-steel: #5b8fa3;
+  --dot-cream: #f2f1e8;
+  /* The brand navy plate behind the sphere and the only text colour on it. */
+  --stage: #182534;
+  --stage-ink: #f2f1e8;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
 }
@@ -22,6 +34,13 @@
     --accent-on-ink: #a8381e;
     --line: rgba(239, 232, 220, 0.16);
     --inverse-muted: #5c6662;
+    --dot-gold: #ffcb73;
+    --dot-vermilion: #e34234;
+    --dot-terracotta: #d97757;
+    --dot-steel: #5b8fa3;
+    --dot-cream: #f2f1e8;
+    --stage: #182534;
+    --stage-ink: #f2f1e8;
   }
 }
 
@@ -104,14 +123,15 @@ footer {
   text-transform: uppercase;
 }
 
-nav {
+.site-header nav {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.35rem;
   font-size: 0.95rem;
   font-weight: 650;
 }
 
-nav a {
+.site-header nav a {
   display: inline-flex;
   align-items: center;
   min-height: 2.75rem;
@@ -119,8 +139,95 @@ nav a {
   text-decoration: none;
 }
 
-nav a:hover {
+.site-header nav a:hover,
+.site-header nav a[aria-current="page"] {
   text-decoration: underline;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Home page: the sphere on a fixed dark plate, then the link list. */
+.menu {
+  padding-block: 0 clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.menu-stage {
+  position: relative;
+  min-height: calc(100svh - var(--header-height));
+  background: var(--stage);
+  color: var(--stage-ink);
+  overflow: hidden;
+}
+
+.menu-stage[data-webgl="unavailable"] {
+  min-height: 0;
+  height: 0;
+}
+
+.menu-list {
+  margin-top: 1.5rem;
+}
+
+.menu-list ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.menu-list a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.75rem;
+  text-decoration: none;
+}
+
+.menu-list a:hover {
+  text-decoration: underline;
+}
+
+.menu-list__dot {
+  flex: none;
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+
+.menu-list__dot[data-dot="gold"] {
+  background: var(--dot-gold);
+}
+
+.menu-list__dot[data-dot="vermilion"] {
+  background: var(--dot-vermilion);
+}
+
+.menu-list__dot[data-dot="terracotta"] {
+  background: var(--dot-terracotta);
+}
+
+.menu-list__dot[data-dot="steel"] {
+  background: var(--dot-steel);
+}
+
+.menu-list__dot[data-dot="cream"] {
+  background: var(--dot-cream);
 }
 
 .hero {
@@ -269,6 +376,10 @@ footer p {
 }
 
 @media (max-width: 40rem) {
+  :root {
+    --header-height: 6.2rem;
+  }
+
   .site-header {
     flex-wrap: wrap;
     align-items: flex-start;
@@ -286,7 +397,7 @@ footer p {
     margin-top: 0.2rem;
   }
 
-  nav {
+  .site-header nav {
     margin-left: -0.55rem;
   }
 
