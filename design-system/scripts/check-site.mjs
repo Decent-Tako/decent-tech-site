@@ -713,22 +713,37 @@ async function checkContactForm(page, label, viewport) {
   // holds the moment the pointer is inside it plus the hold margin, so a few
   // rounds are enough.
   let onTheForm = false;
-  for (let round = 0; round < 6 && !onTheForm; round += 1) {
-    const box = await wrapper.boundingBox();
-    if (!box) {
-      fail(`${label}: the form has no bounding box for the hover`);
-      return;
-    }
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.waitForTimeout(100);
-    const now = await wrapper.boundingBox();
-    onTheForm =
-      now !== null &&
-      Math.abs(now.x - box.x) < 4 &&
-      Math.abs(now.y - box.y) < 4;
+  for (let round = 0; round < 12 && !onTheForm; round += 1) {
+    // Aim at the middle of the form where it rests, not where it is drawn.
+    // The form chases the pointer, so aiming at the drawn middle makes it run
+    // ahead; the resting middle is the one place it settles on.
+    const aim = await wrapper.evaluate((node) => {
+      const box = node.getBoundingClientRect();
+      const shown = new DOMMatrixReadOnly(getComputedStyle(node).transform);
+      return {
+        x: box.left + box.width / 2 - shown.e,
+        y: box.top + box.height / 2 - shown.f,
+      };
+    });
+    await page.mouse.move(aim.x, aim.y);
+    await page.waitForTimeout(120);
+    // The form holds once the pointer is inside it plus the hold margin.
+    onTheForm = await wrapper.evaluate(
+      (node, point) => {
+        const box = node.getBoundingClientRect();
+        const margin = 24;
+        return (
+          point.x >= box.left - margin &&
+          point.x <= box.right + margin &&
+          point.y >= box.top - margin &&
+          point.y <= box.bottom + margin
+        );
+      },
+      aim,
+    );
   }
   if (!onTheForm) {
-    fail(`${label}: the pointer did not catch the form within six rounds`);
+    fail(`${label}: the pointer did not catch the form within twelve rounds`);
     return;
   }
   await page.waitForTimeout(200);

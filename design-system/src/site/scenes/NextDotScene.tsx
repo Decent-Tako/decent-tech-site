@@ -35,11 +35,17 @@ function runNextDot(host: HTMLElement, link: HTMLElement): () => void {
   /** True once the reader has scrolled the disc's own height past the bottom. */
   function scrolledPast(): boolean {
     const box = link.getBoundingClientRect();
-    // How far the bottom of the disc has travelled above the bottom of the
-    // viewport. The page carries a disc's height of room below the disc, so
-    // this can reach the disc's own height, which is the threshold.
+    // The reader must have scrolled. A page shorter than the viewport shows
+    // the disc and all the room below it at load, with nothing to scroll, and
+    // that must never open the next page on its own.
+    const scrollable =
+      document.documentElement.scrollHeight - window.innerHeight;
+    if (scrollable <= 1 || window.scrollY <= 1) return false;
+    // The reader is at the bottom, and the disc's own height of room sits
+    // between the disc and that bottom. Both together are the threshold.
+    const remaining = scrollable - window.scrollY;
     const past = window.innerHeight - box.bottom;
-    return past >= box.height;
+    return remaining <= 1 && past >= box.height;
   }
 
   function step() {

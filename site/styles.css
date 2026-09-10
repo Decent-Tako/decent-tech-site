@@ -1041,7 +1041,10 @@ h3 {
   justify-content: center;
   width: min(100%, 44rem);
   margin: clamp(4rem, 12vw, 8rem) auto 0;
-  padding-bottom: calc(clamp(7rem, 18vw, 11rem) + 6rem);
+  /* The room below the disc is the disc's own height and a margin. The
+     viewport share keeps a short page taller than the screen, so there is
+     always something for the reader to scroll. */
+  padding-bottom: calc(clamp(7rem, 18vw, 11rem) + 30vh);
 }
 
 .next-dot__link {
