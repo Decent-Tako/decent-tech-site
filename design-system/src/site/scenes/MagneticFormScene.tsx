@@ -131,6 +131,13 @@ function runMagnet(host: HTMLElement, wrapper: HTMLElement, follow: number): () 
         const settle = () => {
           wrapper.removeEventListener('transitionend', settle);
           wrapper.style.transition = '';
+          // Clear the inline transform in the same frame as the flag. While
+          // the ease runs, the computed transform is a matrix of the frame
+          // the compositor shows. The flag must never go up before that
+          // matrix is gone, or the site check reads the ease and not the
+          // resting place.
+          wrapper.style.transform = '';
+          host.dataset.offset = '0,0';
           // The form is at rest and holds there for the rest of the visit.
           // The site check waits for this before it reads the transform.
           host.dataset.atRest = 'true';

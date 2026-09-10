@@ -13,6 +13,10 @@
  *    render while `paused` is true, after the first frame has drawn. Setting
  *    `paused` repaints one frame so the still image stays after a resize.
  * 3. `onReady` prop. Called once, after the first rendered frame.
+ * 4. `speed` prop. The shader clock runs at this part of real time, so the
+ *    site can slow the threads while the page is idle. The clock accumulates
+ *    the scaled step instead of scaling the timestamp, so a change of speed
+ *    never jumps the pattern.
  * Everything else is unchanged.
  */
 import React, { useEffect, useRef } from 'react';
@@ -23,6 +27,7 @@ import './Threads.css';
 interface ThreadsProps {
   color?: [number, number, number];
   amplitude?: number;
+  speed?: number;
   distance?: number;
   enableMouseInteraction?: boolean;
   paused?: boolean;
@@ -149,6 +154,7 @@ void main() {
 const Threads: React.FC<ThreadsProps> = ({
   color = [1, 1, 1],
   amplitude = 1,
+  speed = 1,
   distance = 0,
   enableMouseInteraction = false,
   paused = false,
@@ -170,8 +176,8 @@ const Threads: React.FC<ThreadsProps> = ({
 
   // Keep the latest props in a ref so updating them mutates the live shader
   // uniforms instead of tearing down and rebuilding the whole WebGL context.
-  const propsRef = useRef({ color, amplitude, distance, enableMouseInteraction });
-  propsRef.current = { color, amplitude, distance, enableMouseInteraction };
+  const propsRef = useRef({ color, amplitude, distance, enableMouseInteraction, speed });
+  propsRef.current = { color, amplitude, distance, enableMouseInteraction, speed };
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -251,12 +257,16 @@ const Threads: React.FC<ThreadsProps> = ({
     intersectionObserver.observe(container);
 
     let hasDrawn = false;
+    // The shader clock. It gathers the scaled step of each frame, so a change
+    // of speed changes the rate and never the phase.
+    let clock = 0;
+    let lastFrame = 0;
     function update(t: number) {
       animationFrameId.current = requestAnimationFrame(update);
       if (!isVisible || document.hidden) return;
       if (hasDrawn && pausedRef.current) return;
 
-      const { color, amplitude, distance, enableMouseInteraction } = propsRef.current;
+      const { color, amplitude, distance, enableMouseInteraction, speed } = propsRef.current;
 
       program.uniforms.uColor.value.set(...color);
       program.uniforms.uAmplitude.value = amplitude;
@@ -272,7 +282,10 @@ const Threads: React.FC<ThreadsProps> = ({
         program.uniforms.uMouse.value[0] = 0.5;
         program.uniforms.uMouse.value[1] = 0.5;
       }
-      program.uniforms.iTime.value = t * 0.001;
+      const step = lastFrame === 0 ? 0 : (t - lastFrame) * 0.001;
+      lastFrame = t;
+      clock += step * speed;
+      program.uniforms.iTime.value = clock;
       renderer.render({ scene: mesh });
       if (!hasDrawn) {
         hasDrawn = true;

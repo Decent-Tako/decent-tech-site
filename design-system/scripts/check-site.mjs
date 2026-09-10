@@ -36,6 +36,18 @@
 // form and is kept, and the three fields filled leave Send enabled with a
 // mailto: action. The Contact screenshot comes after that first pull.
 //
+// On About it presses one of the three section discs: the section's plate must
+// become visible and the page must not navigate, and Escape must close it
+// again. It leaves one section open, so the About screenshot shows it.
+//
+// It then opens Blog in a context of its own, scrolls to the bottom and
+// asserts that nothing opened, then pushes with three wheel events. About Ben,
+// the next page in the cycle, must open with its field element present.
+//
+// Last it opens the home page once more and waits 21 seconds with no input of
+// any kind. The stage must then carry data-idle, and one pointer move must
+// clear it.
+//
 // Usage: node scripts/check-site.mjs [url]   (default http://127.0.0.1:8080/)
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -77,6 +89,9 @@ const THIRD_PHRASE = 'decent. read';
 const HOVER_PHRASE = 'decent. contact';
 const ALL_PATHS = ['/', ...PAGE_PATHS];
 const STAGE_TIMEOUT_MS = 10_000;
+// The page goes idle after 20 seconds with no input. The check waits a second
+// longer than that, so a slow runner does not read the flag too early.
+const IDLE_TIMEOUT_MS = 21_000;
 const SHOTS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'site-shots');
 const VIEWPORTS = [
   { name: 'desktop-1280x800', width: 1280, height: 800 },
@@ -623,6 +638,22 @@ function formTransform(page) {
   });
 }
 
+// The resting place has two spellings. A wrapper with no transform computes
+// as "none", and a wrapper that carries the identity computes as
+// "matrix(1, 0, 0, 1, 0, 0)". They are the same place, so the check reads
+// both as "none" and compares the normalised strings.
+function restingPlace(transform) {
+  if (transform === 'none') return 'none';
+  const numbers = transform.match(/^matrix\(([^)]+)\)$/);
+  if (!numbers) return transform;
+  const parts = numbers[1].split(',').map((part) => Number(part.trim()));
+  const identity = [1, 0, 0, 1, 0, 0];
+  const isIdentity =
+    parts.length === identity.length &&
+    parts.every((part, index) => Math.abs(part - identity[index]) < 0.01);
+  return isIdentity ? 'none' : transform;
+}
+
 // Wait until the transform is other than `before`. Returns true on a change.
 function waitForTransformChange(page, before, timeout = 1000) {
   return page
@@ -672,11 +703,60 @@ async function checkContactForm(page, label, viewport) {
   console.log(`check-site: ${label}: the pointer pulls the form (transform ${await formTransform(page)})`);
 
   // 2. A pointer on the form stops the chase at once.
-  await wrapper.hover();
-  await page.waitForTimeout(200);
-  const held = await formTransform(page);
+  //
+  // The pointer goes to one fixed point and waits there, because the form
+  // comes to the pointer by design. `hover()` cannot be used: it waits for the
+  // element to hold still first, and this form holds still only once the
+  // pointer has arrived.
+  //
+  // The point is the middle of the form where it rests, offset by a little
+  // more than the hold margin. The travel is capped at 40 per cent of the
+  // viewport, so a point far from the resting place, such as the middle of the
+  // screen, may be one the form can never reach.
+  const aim = await page.evaluate((margin) => {
+    const node = document.querySelector('.contact-form');
+    if (!node) return null;
+    const box = node.getBoundingClientRect();
+    const shown = new DOMMatrixReadOnly(getComputedStyle(node).transform);
+    return {
+      x: Math.round(box.left + box.width / 2 - shown.e),
+      y: Math.round(box.top + box.height / 2 - shown.f - box.height / 2 - margin),
+    };
+  }, 32);
+  if (!aim) {
+    fail(`${label}: the form is missing for the hold check`);
+    return;
+  }
+  await page.mouse.move(aim.x, aim.y);
+  const onTheForm = await page
+    .waitForFunction(
+      (point) => {
+        const node = document.querySelector('.contact-form');
+        if (!node) return false;
+        const box = node.getBoundingClientRect();
+        const margin = 24;
+        return (
+          point.x >= box.left - margin &&
+          point.x <= box.right + margin &&
+          point.y >= box.top - margin &&
+          point.y <= box.bottom + margin
+        );
+      },
+      aim,
+      { timeout: 3000 },
+    )
+    .then(() => true)
+    .catch(() => false);
+  if (!onTheForm) {
+    fail(`${label}: the form did not reach the pointer within 3 s`);
+    return;
+  }
+  // The chase closes a part of the distance each frame, so it needs a few
+  // frames to come to a stop after it has arrived.
   await page.waitForTimeout(400);
-  if ((await formTransform(page)) !== held) {
+  const held = restingPlace(await formTransform(page));
+  await page.waitForTimeout(500);
+  if (restingPlace(await formTransform(page)) !== held) {
     fail(`${label}: the form kept moving while the pointer was on it`);
   } else {
     console.log(`check-site: ${label}: the form holds still under the pointer`);
@@ -698,10 +778,10 @@ async function checkContactForm(page, label, viewport) {
     .catch(() => fail(`${label}: the form did not return to its resting place within 2 s`));
   // One more frame, so the read is of the frame the compositor now shows.
   await page.waitForTimeout(100);
-  const frozen = await formTransform(page);
+  const frozen = restingPlace(await formTransform(page));
   await page.mouse.move(8, 8);
   await page.waitForTimeout(600);
-  const after = await formTransform(page);
+  const after = restingPlace(await formTransform(page));
   if (after !== frozen) {
     fail(`${label}: the form moved after the reader had typed: "${frozen}" then "${after}"`);
   } else {
@@ -726,6 +806,155 @@ async function checkContactForm(page, label, viewport) {
   // Leave the form as the reader found it, so the screenshot shows the page
   // and not a half-filled card.
   await page.locator('.contact-form form').evaluate((form) => form.reset());
+}
+
+// About folds its three services into discs. A press opens one section: its
+// plate becomes visible and the page does not navigate. Escape closes it.
+//
+// This runs before the About screenshot, and it leaves the first section open,
+// so the shot shows the page with one section open.
+async function checkSectionDots(page, label) {
+  const discs = page.locator('.section-dot__disc');
+  const count = await discs.count();
+  if (count !== 3) {
+    fail(`${label}: found ${count} section discs, expected 3`);
+    return;
+  }
+  console.log(`check-site: ${label}: the About services folded into ${count} discs`);
+
+  const before = page.url();
+  const first = discs.first();
+  const panel = page.locator('.section-dot__panel').first();
+  if (await panel.isVisible()) {
+    fail(`${label}: a section plate was visible before any disc was pressed`);
+  }
+
+  await first.click();
+  try {
+    await panel.waitFor({ state: 'visible', timeout: 2000 });
+    console.log(`check-site: ${label}: a press on a section disc opened its plate`);
+  } catch {
+    fail(`${label}: a press on a section disc did not open its plate within 2 s`);
+    return;
+  }
+  if (page.url() !== before) {
+    fail(`${label}: the section press navigated to ${page.url()}, expected no route change`);
+    return;
+  }
+  console.log(`check-site: ${label}: the section press did not navigate`);
+
+  // The open plate spans the services plate. Before, the panel sat in the
+  // article of its section and the copy read in a strip about one column wide,
+  // beside the discs. The plate must now take nearly the whole width.
+  const plateBox = await page.locator('.services').boundingBox();
+  const panelBox = await panel.boundingBox();
+  if (!plateBox || !panelBox) {
+    fail(`${label}: could not measure the open section plate`);
+    return;
+  }
+  const share = panelBox.width / plateBox.width;
+  if (share < 0.6) {
+    fail(
+      `${label}: the open section plate is ${Math.round(panelBox.width)} px, ` +
+        `${Math.round(share * 100)} % of the ${Math.round(plateBox.width)} px services plate, expected at least 60 %`,
+    );
+    return;
+  }
+  console.log(
+    `check-site: ${label}: the open section plate spans ${Math.round(share * 100)} % of the services plate`,
+  );
+
+  await page.keyboard.press('Escape');
+  try {
+    await panel.waitFor({ state: 'hidden', timeout: 2000 });
+    console.log(`check-site: ${label}: Escape closed the section`);
+  } catch {
+    fail(`${label}: Escape did not close the section within 2 s`);
+    return;
+  }
+
+  // Leave one section open, so the About screenshot shows it.
+  await first.click();
+  await panel.waitFor({ state: 'visible', timeout: 2000 });
+}
+
+// The whole site is one loop. A scroll to the bottom of a page, the disc's own
+// height past the next dot, opens the next page in the cycle.
+async function checkNextDot(page, label, expectedPath, fromPath) {
+  const link = page.locator('.next-dot__link');
+  if ((await link.count()) !== 1) {
+    fail(`${label}: found ${await link.count()} next-dot links, expected 1`);
+    return;
+  }
+  const href = await link.getAttribute('href');
+  if (!href?.endsWith(expectedPath)) {
+    fail(`${label}: the next dot points at "${href}", expected ${expectedPath}`);
+    return;
+  }
+
+  // Reaching the bottom shows the disc and opens nothing. Scrolling with
+  // `scrollTo` fires scroll events only, so it is never the deliberate push.
+  await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight);
+  });
+  await page.waitForTimeout(200);
+  if (!page.url().endsWith(fromPath)) {
+    fail(`${label}: reaching the bottom opened ${page.url()} on its own`);
+    return;
+  }
+  console.log(`check-site: ${label}: reaching the bottom opened nothing`);
+
+  // Now the deliberate push: three wheels at the bottom inside a second. The
+  // scene gathers them and opens the next page once they pass the disc's
+  // height.
+  const size = page.viewportSize();
+  await page.mouse.move(Math.round(size.width / 2), Math.round(size.height / 2));
+  for (let round = 0; round < 3; round += 1) {
+    // `page.mouse.wheel` needs a mouse. The phone viewport has none, so there
+    // the push is three dispatched wheel events instead.
+    // One wheel of the push can already open the next page. The rounds that
+    // follow then land on a document that is going away, and the evaluate
+    // throws "Execution context was destroyed". The push is done at that
+    // point, so the loop stops instead.
+    if (!page.url().endsWith(fromPath)) break;
+    if (size.width < 720) {
+      await page
+        .evaluate(() => {
+          window.dispatchEvent(
+            new WheelEvent('wheel', { deltaY: 300, deltaMode: 0, bubbles: true, cancelable: true }),
+          );
+        })
+        .catch(() => {});
+    } else {
+      await page.mouse.wheel(0, 300).catch(() => {});
+    }
+    await page.waitForTimeout(150);
+  }
+  try {
+    await page.waitForURL((url) => url.pathname.endsWith(expectedPath), {
+      timeout: 5000,
+      waitUntil: 'load',
+    });
+    console.log(`check-site: ${label}: the push at the bottom opened ${expectedPath}`);
+  } catch {
+    fail(
+      `${label}: the push at the bottom did not open ${expectedPath}`
+        + ` within 5 s; the page is at ${page.url()}`,
+    );
+    // A navigation may still be in flight. Let it land before the caller
+    // closes the context, so a late load cannot report against the next page.
+    // The wait carries a budget: with no navigation at all it must not hold
+    // the whole run until the job is cancelled.
+    await page.waitForLoadState('load', { timeout: 5000 }).catch(() => {});
+    return;
+  }
+  // The page it opened is the inside of its dot, so its field must be there.
+  try {
+    await page.waitForSelector('.scene', { state: 'attached', timeout: 5000 });
+    console.log(`check-site: ${label}: ${expectedPath} opened with its field present`);
+  } catch {
+    fail(`${label}: ${expectedPath} opened with no field element`);
+  }
 }
 
 async function checkPage(browser, viewport, pagePath) {
@@ -843,6 +1072,12 @@ async function checkPage(browser, viewport, pagePath) {
     }
   }
 
+  // About folds its services into discs. The check opens one and closes it,
+  // then leaves one open, so the About screenshot shows a section open.
+  if (pagePath === '/about/') {
+    await checkSectionDots(page, label);
+  }
+
   // The scenes are paused on their current frame (see above), so the
   // screenshot does not wait behind the software renderer.
   await page.waitForTimeout(300);
@@ -907,6 +1142,88 @@ async function checkDiscPage(browser, viewport) {
   await context.close();
 }
 
+// A page of its own for the scroll to the next dot: the scroll ends on
+// another page, so it cannot share the context that takes a screenshot. Blog
+// is the page the issue names; the next dot in the cycle is About Ben.
+async function checkNextDotPage(browser, viewport) {
+  const label = `${viewport.name} /blog/ next dot`;
+  const context = await browser.newContext({
+    viewport: { width: viewport.width, height: viewport.height },
+  });
+  const page = await context.newPage();
+  const consoleErrors = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  page.on('pageerror', (error) => consoleErrors.push(`pageerror: ${error.message}`));
+
+  const url = new URL('/blog/', SITE_URL).toString();
+  const response = await page.goto(url, { waitUntil: 'load' });
+  if (!response || !response.ok()) {
+    fail(`${label}: ${url} answered ${response?.status() ?? 'no response'}`);
+  }
+  // The scene must be mounted before the scroll, because the scene is what
+  // reads the threshold.
+  await page.waitForSelector('[data-effect="next-dot"][data-next-dot="ready"]', {
+    state: 'attached',
+    timeout: STAGE_TIMEOUT_MS,
+  }).catch(() => fail(`${label}: the next-dot scene did not report ready`));
+  await checkNextDot(page, label, '/ben/', '/blog/');
+
+  if (consoleErrors.length) {
+    fail(`${label}: ${consoleErrors.length} console error(s):\n  ${consoleErrors.join('\n  ')}`);
+  }
+  await context.close();
+}
+
+// Idle life. The home page with no input at all must raise data-idle after
+// 20 seconds, and the first pointer move must clear it.
+async function checkIdle(browser, viewport) {
+  const label = `${viewport.name} / idle`;
+  const context = await browser.newContext({
+    viewport: { width: viewport.width, height: viewport.height },
+  });
+  const page = await context.newPage();
+  const consoleErrors = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  page.on('pageerror', (error) => consoleErrors.push(`pageerror: ${error.message}`));
+
+  const response = await page.goto(SITE_URL, { waitUntil: 'load' });
+  if (!response || !response.ok()) {
+    fail(`${label}: ${SITE_URL} answered ${response?.status() ?? 'no response'}`);
+  }
+  await settle(page, '#menu-stage', `${label} #menu-stage`);
+
+  // 21 seconds with no input at all: no click, no move, no key.
+  try {
+    await page.waitForSelector('#menu-stage[data-idle="true"]', {
+      state: 'attached',
+      timeout: IDLE_TIMEOUT_MS,
+    });
+    console.log(`check-site: ${label}: the stage is idle after 20 s with no input`);
+  } catch {
+    fail(`${label}: the stage did not set data-idle within ${IDLE_TIMEOUT_MS} ms`);
+    await context.close();
+    return;
+  }
+
+  // The first input brings the motion back.
+  await page.mouse.move(viewport.width / 2, viewport.height / 2);
+  try {
+    await page.waitForSelector('#menu-stage[data-idle]', { state: 'detached', timeout: 2000 });
+    console.log(`check-site: ${label}: a pointer move cleared the idle flag`);
+  } catch {
+    fail(`${label}: the idle flag did not clear within 2 s of a pointer move`);
+  }
+
+  if (consoleErrors.length) {
+    fail(`${label}: ${consoleErrors.length} console error(s):\n  ${consoleErrors.join('\n  ')}`);
+  }
+  await context.close();
+}
+
 async function main() {
   await mkdir(SHOTS_DIR, { recursive: true });
   const browser = await chromium.launch({
@@ -926,6 +1243,11 @@ async function main() {
       // One home click with cross-document view transitions on, and one with
       // them off. Both must land on the page with its field element present.
       await checkContinuityPaths(browser, viewport);
+      // The scroll to the next dot ends on another page, so it takes a
+      // context of its own, as the presses above do.
+      await checkNextDotPage(browser, viewport);
+      // Idle life: 21 seconds with no input at all, then one pointer move.
+      await checkIdle(browser, viewport);
     }
   } finally {
     await browser.close();

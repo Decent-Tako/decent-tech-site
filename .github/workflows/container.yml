@@ -22,6 +22,9 @@ jobs:
   container:
     needs: test
     runs-on: ubuntu-latest
+    # The site check drives a browser. A check that hangs must end the job,
+    # not hold the runner until the workflow is cancelled.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-qemu-action@v3
