@@ -65,7 +65,7 @@ export function Waves({
         />
       }
       extraRuntime={<ReactBitsRuntimeLine source={REACT_BITS_SOURCE} />}
-      fixedNote="paused, onReady, className, and style are not controls. lineColor default is brand ink #212121 (upstream black). backgroundColor is brand paper #FFFFFF (upstream transparent). Pointer listeners bind to the container, not window. The caption is the Street card from src/pages/content.ts. This sketch is a 2d canvas, so there is no WebGL fallback."
+      fixedNote="paused, onReady, className, and style are not controls. lineColor default is brand ink #212121 (upstream black). backgroundColor is brand paper #FFFFFF (upstream transparent). Pointer listeners bind to the container, not window. The caption is the Street card from src/pages/content.ts. This sketch is a 2d canvas, so there is no WebGL fallback. The cursor-dot CSS uses var(--x) and var(--y); upstream var(-0.5rem) failed the Storybook minify."
       pauseLabel={paused ? 'Resume' : 'Pause'}
       onPause={() => setPaused((value) => !value)}
       replay

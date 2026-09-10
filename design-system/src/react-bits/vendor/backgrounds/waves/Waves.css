@@ -8,9 +8,12 @@
  * selling, sublicensing, or redistributing the components themselves.
  *
  * Local changes:
- * (none)
+ * 1. Cursor-dot transform uses var(--x) and var(--y). Upstream wrote
+ *    var(-0.5rem) and var(50%), which lightningcss rejects on minify.
  */
 .waves {
+  --x: 0px;
+  --y: 0px;
   position: absolute;
   top: 0;
   left: 0;
@@ -30,7 +33,7 @@
   height: 0.5rem;
   background: #160000;
   border-radius: 50%;
-  transform: translate3d(calc(var(-0.5rem) - 50%), calc(var(50%) - 50%), 0);
+  transform: translate3d(calc(var(--x) - 50%), calc(var(--y) - 50%), 0);
   will-change: transform;
 }
 
