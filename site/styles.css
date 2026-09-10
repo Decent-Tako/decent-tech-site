@@ -385,7 +385,9 @@ footer {
   bottom: 0;
   z-index: 2;
   margin: 0;
-  padding: 0.6rem clamp(1rem, 3vw, 2rem) calc(0.8rem + env(safe-area-inset-bottom));
+  padding: 1.2rem clamp(1rem, 3vw, 2rem) calc(0.8rem + env(safe-area-inset-bottom));
+  /* A navy scrim so the links stay legible when discs pass behind them. */
+  background: linear-gradient(to top, rgba(24, 37, 52, 0.92), rgba(24, 37, 52, 0));
 }
 
 .menu-list ul {
@@ -614,7 +616,7 @@ footer p {
 
   /* The link row wraps onto two lines; the pill moves up above it. */
   .menu-stage {
-    --menu-overlay-bottom: 8rem;
+    --menu-overlay-bottom: 7.25rem;
   }
 
   .hero {
