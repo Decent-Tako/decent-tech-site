@@ -1,0 +1,27 @@
+.ghost-cursor-copy {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  max-width: 32rem;
+}
+
+.rb-frame__stage--ink .ghost-cursor-copy p {
+  margin: 0;
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame__stage--ink .ghost-cursor-kicker {
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-yellow);
+}
+
+.rb-frame__stage--ink .ghost-cursor-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}

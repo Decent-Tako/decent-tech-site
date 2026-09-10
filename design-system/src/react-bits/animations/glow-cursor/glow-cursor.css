@@ -1,0 +1,29 @@
+.glow-cursor-host {
+  min-height: 22rem;
+}
+
+.glow-cursor-copy {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  max-width: 32rem;
+}
+
+.rb-frame__stage--ink .glow-cursor-copy p {
+  margin: 0;
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame__stage--ink .glow-cursor-kicker {
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-yellow);
+}
+
+.rb-frame__stage--ink .glow-cursor-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}

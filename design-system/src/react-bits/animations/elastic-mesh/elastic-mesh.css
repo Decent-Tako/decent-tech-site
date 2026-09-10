@@ -1,0 +1,11 @@
+.elastic-mesh-host {
+  width: min(100%, 36rem);
+  height: 22rem;
+  margin: 1.25rem auto 0;
+}
+
+.rb-frame .elastic-mesh-caption {
+  margin: 0.75rem 1rem 1rem;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
