@@ -1,0 +1,37 @@
+.rb-frame [data-testid='folder-stage'] {
+  overflow: visible;
+  min-height: 18rem;
+  display: grid;
+  place-items: center;
+}
+
+.folder-stage--paused,
+.folder-stage--paused * {
+  transition: none !important;
+}
+
+.folder-stage--paused {
+  pointer-events: none;
+}
+
+.folder-stage--reduced .folder,
+.folder-stage--reduced .folder * {
+  transition: none !important;
+}
+
+.rb-frame .folder:focus-visible {
+  outline-color: var(--ink);
+}
+
+.rb-frame .folder__label {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 0.15rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+  text-align: center;
+}
