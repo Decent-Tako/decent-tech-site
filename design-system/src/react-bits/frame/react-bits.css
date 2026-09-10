@@ -1,0 +1,109 @@
+/* Brand tokens only. --ink, --paper, --soft, --line, --quiet, --charcoal,
+   --accent-blue, --accent-yellow come from src/brand/tokens.css. */
+
+.rb-frame,
+.rb-frame button,
+.rb-frame p,
+.rb-frame h2 {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.rb-frame {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: var(--paper);
+}
+
+.rb-frame__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.rb-frame__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.rb-frame__actions {
+  display: flex;
+  flex: none;
+  gap: 0.5rem;
+}
+
+.rb-frame__button {
+  min-height: 2.25rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rb-frame__button:hover,
+.rb-frame__button:focus-visible {
+  background: var(--accent-blue);
+  color: var(--paper);
+  border-color: var(--accent-blue);
+}
+
+.rb-frame__button:active {
+  background: var(--accent-yellow);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.rb-frame__meta,
+.rb-frame__fixed {
+  margin: 0;
+  max-width: 52rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--charcoal);
+}
+
+.rb-frame__meta a,
+.rb-frame__fixed a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+.rb-frame__stage {
+  position: relative;
+  overflow: hidden;
+  min-height: 22rem;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.rb-frame__stage--tall {
+  min-height: 28rem;
+}
+
+/* Dark stage for backgrounds and WebGL sketches. Text inside is paper. */
+.rb-frame__stage--ink {
+  background: var(--ink);
+}
+
+.rb-frame__stage--ink p,
+.rb-frame__stage--ink h3 {
+  color: var(--paper);
+}
+
+.rb-frame__fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+}

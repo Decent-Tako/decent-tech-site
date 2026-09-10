@@ -13,6 +13,7 @@ export default defineConfig([
     'storybook-static',
     'src/styled/shadcn/ui/**',
     'src/motion-examples/vendor/**',
+    'src/react-bits/vendor/**',
   ]),
   {
     files: ['**/*.{ts,tsx}'],

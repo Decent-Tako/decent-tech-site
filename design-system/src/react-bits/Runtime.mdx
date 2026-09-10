@@ -1,0 +1,11 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+import { RuntimeTable } from './RuntimeTable';
+
+<Meta title="React Bits/Runtime" />
+
+# React Bits runtime
+
+Packages that vendored React Bits components need, beyond `react` and `motion`. Ben's decision of 2026-09-10: install what the upstream component needs, with an exact version pin, and record one row per package in the component's `source.ts`. The "Motion only" rule of **Motion examples / Runtime additions** does not apply here. This table is built from every `source.ts` under `src/react-bits/` and needs no edit when a component lands.
+
+<RuntimeTable />

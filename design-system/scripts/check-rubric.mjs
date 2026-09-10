@@ -18,20 +18,20 @@ const REPORT_ONLY = process.argv.includes('--report');
 
 // Sections that must meet the rubric. Add a directory here when it becomes
 // a component catalogue rather than a page composition.
-const ENFORCED = ['motion-examples'];
+const ENFORCED = ['motion-examples', 'react-bits'];
 
 // Stories that frame or index other stories rather than demonstrate a
 // component. They carry no controls of their own by design. Add a path
 // here deliberately; an empty set means every story is a component.
 const INDEX_STORIES = new Set([]);
 
-function walk(dir) {
+function walk(dir, suffix = '.stories.tsx') {
   const out = [];
   for (const entry of readdirSync(dir)) {
     if (entry === 'node_modules' || entry === 'vendor') continue;
     const full = join(dir, entry);
-    if (statSync(full).isDirectory()) out.push(...walk(full));
-    else if (entry.endsWith('.stories.tsx')) out.push(full);
+    if (statSync(full).isDirectory()) out.push(...walk(full, suffix));
+    else if (entry.endsWith(suffix)) out.push(full);
   }
   return out;
 }
@@ -88,6 +88,21 @@ for (const file of walk(SRC)) {
       file,
       'a11y-not-enforced',
       "add parameters: { a11y: { test: 'error' } } to this file's meta",
+    );
+  }
+}
+
+// React Bits. The Overview and Runtime pages are built from every
+// `source.ts` under src/react-bits/ through import.meta.glob. A source.ts
+// without REACT_BITS_SOURCE breaks the glob at build time; fail it here first.
+const reactBits = join(SRC, 'react-bits');
+for (const file of walk(reactBits, 'source.ts')) {
+  const source = readFileSync(file, 'utf8');
+  if (!/export const REACT_BITS_SOURCE\b/.test(source)) {
+    fail(
+      file,
+      'no-react-bits-source',
+      'export REACT_BITS_SOURCE: ReactBitsSource so the Overview and Runtime pages can list the component',
     );
   }
 }
