@@ -1,0 +1,11 @@
+.rb-frame .variable-proximity {
+  display: block;
+  margin: 1.25rem auto;
+  padding: 1.5rem 1rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 3rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--ink);
+  text-align: center;
+}
