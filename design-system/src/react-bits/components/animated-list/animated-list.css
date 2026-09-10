@@ -1,0 +1,44 @@
+.rb-frame .scroll-list-container {
+  width: min(100%, 28rem);
+  margin: 1rem auto;
+}
+
+.rb-frame .scroll-list-container .scroll-list {
+  background: var(--soft);
+}
+
+.rb-frame .scroll-list-container .scroll-list::-webkit-scrollbar-track {
+  background: var(--soft);
+}
+
+.rb-frame .scroll-list-container .scroll-list::-webkit-scrollbar-thumb {
+  background: var(--quiet);
+}
+
+.rb-frame .scroll-list-container .item {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.rb-frame .scroll-list-container .item.selected {
+  background: var(--accent-blue);
+  border-color: var(--accent-blue);
+}
+
+.rb-frame .scroll-list-container .item-text {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.rb-frame .scroll-list-container .item.selected .item-text {
+  color: var(--paper);
+}
+
+.rb-frame .scroll-list-container .top-gradient {
+  background: linear-gradient(to bottom, var(--paper), transparent);
+}
+
+.rb-frame .scroll-list-container .bottom-gradient {
+  background: linear-gradient(to top, var(--paper), transparent);
+}

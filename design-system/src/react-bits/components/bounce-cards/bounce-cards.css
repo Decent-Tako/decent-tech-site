@@ -1,0 +1,14 @@
+.rb-frame [data-testid='bounce-cards-stage'] {
+  overflow: visible;
+  min-height: 28rem;
+  display: grid;
+  place-items: center;
+}
+
+.rb-frame .bounceCardsContainer {
+  margin: 2rem auto;
+}
+
+.rb-frame .bounceCardsContainer .card {
+  border-color: var(--paper);
+}

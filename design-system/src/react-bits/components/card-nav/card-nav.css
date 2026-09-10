@@ -1,0 +1,23 @@
+.rb-frame [data-testid='card-nav-stage'] {
+  min-height: 28rem;
+  background: var(--soft);
+}
+
+.rb-frame .card-nav-container {
+  position: relative;
+  top: 1rem;
+  left: auto;
+  transform: none;
+  width: min(100%, 48rem);
+  margin: 0 auto;
+}
+
+.rb-frame .nav-card-label,
+.rb-frame .nav-card-link,
+.rb-frame .card-nav-cta-button {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .logo-container .wordmark {
+  font-size: 1rem;
+}
