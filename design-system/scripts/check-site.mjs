@@ -19,6 +19,12 @@
 // "open" and opens its page. The discs come from data-hit-points, the list of
 // front-facing discs the stage publishes once a second.
 //
+// On the Get in touch page it drives the magnetic contact form, before the
+// reduced-motion switch: a pointer in a far corner pulls the form, a pointer
+// on the form stops the chase, a word typed with the keyboard freezes the
+// form and is kept, and the three fields filled leave Send enabled with a
+// mailto: action. The Contact screenshot comes after that first pull.
+//
 // Usage: node scripts/check-site.mjs [url]   (default http://127.0.0.1:8080/)
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -446,6 +452,110 @@ async function checkDiscClicks(page, viewportName) {
   await checkOpenClick(page, viewportName, box);
 }
 
+// The transform the magnet writes on the form wrapper, as a string. An empty
+// transform is the resting place.
+function formTransform(page) {
+  return page.evaluate(() => {
+    const wrapper = document.querySelector('.contact-form');
+    return wrapper ? getComputedStyle(wrapper).transform : 'missing';
+  });
+}
+
+// Wait until the transform is other than `before`. Returns true on a change.
+function waitForTransformChange(page, before, timeout = 1000) {
+  return page
+    .waitForFunction(
+      (had) => {
+        const wrapper = document.querySelector('.contact-form');
+        if (!wrapper) return false;
+        return getComputedStyle(wrapper).transform !== had;
+      },
+      before,
+      { timeout },
+    )
+    .then(() => true)
+    .catch(() => false);
+}
+
+// The contact form chases the pointer, holds still the moment the reader
+// means to use it, and keeps what the reader typed. Below 720 pixels the form
+// never moves, so the narrow viewport asserts that it holds from the start.
+async function checkContactForm(page, label, viewport) {
+  const wrapper = page.locator('.contact-form');
+  if ((await wrapper.count()) !== 1) {
+    fail(`${label}: found ${await wrapper.count()} .contact-form wrappers, expected 1`);
+    return;
+  }
+  // The Send button and the mailto action, with no motion involved.
+  const action = await page.locator('.contact-form form').getAttribute('action');
+  if (!action?.startsWith('mailto:')) {
+    fail(`${label}: the form action is "${action}", expected a mailto: address`);
+  }
+
+  const narrow = viewport.width < 720;
+  const atRest = await formTransform(page);
+
+  // 1. A pointer in a far corner pulls the form. It must move within 1 s.
+  await page.mouse.move(viewport.width - 8, viewport.height - 8);
+  const pulled = await waitForTransformChange(page, atRest);
+  if (narrow) {
+    if (pulled) fail(`${label}: the form moved on a viewport narrower than 720 pixels`);
+    else console.log(`check-site: ${label}: the form holds still below 720 pixels`);
+    return;
+  }
+  if (!pulled) {
+    fail(`${label}: the pointer in the far corner did not move the form within 1 s`);
+    return;
+  }
+  console.log(`check-site: ${label}: the pointer pulls the form (transform ${await formTransform(page)})`);
+
+  // 2. A pointer on the form stops the chase at once.
+  await wrapper.hover();
+  await page.waitForTimeout(200);
+  const held = await formTransform(page);
+  await page.waitForTimeout(400);
+  if ((await formTransform(page)) !== held) {
+    fail(`${label}: the form kept moving while the pointer was on it`);
+  } else {
+    console.log(`check-site: ${label}: the form holds still under the pointer`);
+  }
+
+  // 3. The keyboard focuses the name field and types. The form must then
+  // stay still, and the typed value must survive the motion.
+  const name = page.locator('#contact-name');
+  await name.focus();
+  await page.keyboard.type('Ben');
+  // The freeze eases back to the resting place in 300 ms; wait it out.
+  await page.waitForTimeout(600);
+  const frozen = await formTransform(page);
+  await page.mouse.move(8, 8);
+  await page.waitForTimeout(600);
+  if ((await formTransform(page)) !== frozen) {
+    fail(`${label}: the form moved after the reader had typed`);
+  } else {
+    console.log(`check-site: ${label}: the form stays still once the reader has typed`);
+  }
+  const kept = await name.inputValue();
+  if (kept !== 'Ben') {
+    fail(`${label}: the name field reads "${kept}" after the pointer moved, expected "Ben"`);
+  } else {
+    console.log(`check-site: ${label}: the typed value "${kept}" is kept`);
+  }
+
+  // 4. The three fields filled, and the Send button ready to submit.
+  await page.locator('#contact-email').fill('ben@decent.tech');
+  await page.locator('#contact-message').fill('Hello.');
+  const send = page.locator('.contact-form button[type="submit"]');
+  if (!(await send.isEnabled())) {
+    fail(`${label}: the Send button is disabled with the three fields filled`);
+  } else {
+    console.log(`check-site: ${label}: the three fields are filled and Send is enabled`);
+  }
+  // Leave the form as the reader found it, so the screenshot shows the page
+  // and not a half-filled card.
+  await page.locator('.contact-form form').evaluate((form) => form.reset());
+}
+
 async function checkPage(browser, viewport, pagePath) {
   const label = `${viewport.name} ${pagePath}`;
   const context = await browser.newContext({
@@ -490,6 +600,13 @@ async function checkPage(browser, viewport, pagePath) {
       if (!hidden) fail(`${label}: a canvas in ${selector} is not aria-hidden`);
     }
   }
+  // The contact form is magnetic while the page is in live motion, so its
+  // checks run before the reduced-motion switch below. Below 720 pixels the
+  // form never moves, so only the desktop viewport runs the chase.
+  if (pagePath === '/contact/') {
+    await checkContactForm(page, label, viewport);
+  }
+
   // The scenes have settled live. Now ask for reduced motion: every scene
   // follows the query and pauses on its current frame, so the software
   // renderer stops starving the page. Split Text then lands its letters at
