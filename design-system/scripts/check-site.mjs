@@ -26,7 +26,9 @@
 // and changes nothing, a press on an off-centre disc reads "turn" and moves
 // the wordmark to that disc's phrase, and a press on the centred disc reads
 // "open" and opens its page. The discs come from data-hit-points, the list of
-// front-facing discs the stage publishes once a second.
+// front-facing discs the stage publishes once a second. That pass runs with
+// view transitions off, because the press that opens is read from the stage
+// and from the circle, and both need the stage to outlive the press.
 //
 // On the Get in touch page it drives the magnetic contact form, before the
 // reduced-motion switch: a pointer in a far corner pulls the form, a pointer
@@ -340,16 +342,7 @@ async function checkContinuityPaths(browser, viewport) {
       viewport: { width: viewport.width, height: viewport.height },
     });
     const page = await context.newPage();
-    if (!viewTransitions) {
-      // The bundle reads `startViewTransition` on the document when it opens
-      // a page, so taking it away before any script runs puts the site on the
-      // path it takes in a browser without the feature. `delete` removes the
-      // property from the prototype, so the site sees neither the key nor a
-      // callable value.
-      await page.addInitScript(() => {
-        delete Document.prototype.startViewTransition;
-      });
-    }
+    if (!viewTransitions) await withoutViewTransitions(page);
     await page.goto(SITE_URL, { waitUntil: 'load' });
     const state = await settle(page, '#menu-stage', `${viewport.name} / #menu-stage`);
     if (state === 'ready') {
@@ -420,6 +413,16 @@ async function hitPoints(page) {
   } catch {
     return [];
   }
+}
+
+// Take cross-document view transitions away from a page before any script
+// runs, so the site takes the path it takes in a browser without the feature.
+// `delete` removes the property from the prototype, so the site sees neither
+// the key nor a callable value.
+function withoutViewTransitions(page) {
+  return page.addInitScript(() => {
+    delete Document.prototype.startViewTransition;
+  });
 }
 
 function lastClick(page) {
@@ -863,12 +866,21 @@ async function checkPage(browser, viewport, pagePath) {
 
 // A home page of its own for the three presses on the sphere. It takes no
 // screenshot: the twelve the run saves come from `checkPage()`.
+//
+// The presses run without cross-document view transitions. The press that
+// opens a page is read through `data-last-click` on the stage and through the
+// .menu-expand circle, and both of those need the stage to still be there
+// after the press. With view transitions the site navigates at once, so the
+// stage is gone before either can be read; without them the circle holds the
+// page for its 450 ms and both are readable. `checkContinuityPaths` covers
+// the other path.
 async function checkDiscPage(browser, viewport) {
   const label = `${viewport.name} / discs`;
   const context = await browser.newContext({
     viewport: { width: viewport.width, height: viewport.height },
   });
   const page = await context.newPage();
+  await withoutViewTransitions(page);
   const consoleErrors = [];
   page.on('console', (message) => {
     if (message.type() === 'error') consoleErrors.push(message.text());
