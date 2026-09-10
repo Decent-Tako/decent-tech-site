@@ -377,13 +377,20 @@ a:focus-visible {
   margin-right: auto;
 }
 
-/* The four navy-plate pages take a cream full stop, because the contrasting
-   colour of a gold, vermilion, terracotta, or steel field is cream. The
-   Contact page is read as navy on cream, so its full stop is gold. */
-.page--about,
-.page--portfolio,
-.page--blog,
-.page--ben {
+/* Per-page tokens, one block per page. Every page takes the navy plate with
+   cream type from `.page` above; only the full stop of the wordmark changes,
+   because the contrasting colour of a gold, vermilion, terracotta, or steel
+   field is cream. The Contact page is read as navy on cream, so it takes a
+   gold full stop and no plate at all. */
+.page--about {
+  --wordmark-dot: var(--brand-cream);
+}
+
+.page--portfolio {
+  --wordmark-dot: var(--brand-cream);
+}
+
+.page--blog {
   --wordmark-dot: var(--brand-cream);
 }
 
@@ -392,6 +399,7 @@ a:focus-visible {
    steel field instead, so the page reads as the aurora in gold and cream on
    steel that the colour system asks for. */
 .page--ben {
+  --wordmark-dot: var(--brand-cream);
   --scene-veil: 0.62;
 }
 

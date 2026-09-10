@@ -39,6 +39,32 @@ PHRASES = {
 # The navy ink of every disc label. It passes 4.5:1 on all five disc colours.
 LABEL_INK = "#182534"
 
+# Every page is the inside of its dot: slug to field token, and the colour of
+# the full stop of the wordmark on that field. The word itself is navy on
+# every field; the full stop takes the contrasting brand colour.
+FIELDS = {
+    "about": ("gold", "#ffcb73"),
+    "portfolio": ("vermilion", "#e34234"),
+    "blog": ("terracotta", "#d97757"),
+    "ben": ("steel", "#5b8fa3"),
+    "contact": ("cream", "#f2f1e8"),
+}
+
+# The navy ink of the wordmark word and the running head on every field.
+FIELD_INK = "#182534"
+
+# The wordmark word and the running head are display type, so the WCAG
+# large-text threshold applies: 3:1, for text at least 24 pixels, or bold and
+# at least 19 pixels. The running head is set at 1.5rem bold, 24 pixels, and
+# 1.35rem bold on a phone, 21.6 pixels and over the 19 pixel bold floor.
+LARGE_TEXT_CONTRAST = 3.0
+
+# The small type of the right-hand list needs the full 4.5:1, so the list
+# keeps the navy scrim and the cream type it has on the home page.
+SMALL_TEXT_CONTRAST = 4.5
+LIST_SCRIM_INK = "#f2f1e8"
+LIST_SCRIM = "#182534"
+
 
 # The React Bits scene behind each page and the extra effects on it, in the
 # order the markup mounts them, as site/README.md and
@@ -86,6 +112,22 @@ def contrast_ratio(first, second):
 
 def css_variables(block):
     return dict(re.findall(r"--([a-z-]+):\s*(#[0-9a-fA-F]{6})", block))
+
+
+def wordmark_markup(phrase):
+    """The phrase as the markup writes it, with the full stop in its own span.
+
+    Ben's rule: the full stop of `decent.` is always a contrasting colour, so
+    every wordmark wraps it. The phrase holds exactly one full stop.
+    """
+    before, _, after = phrase.partition(".")
+    return f'{before}<span class="wordmark-dot">.</span>{after}'
+
+
+def css_rule(css, selector):
+    """The body of the first rule with this exact selector, or None."""
+    match = re.search(re.escape(selector) + r"\s*\{([^}]*)\}", css)
+    return match.group(1) if match else None
 
 
 class SiteParser(HTMLParser):
@@ -211,7 +253,9 @@ class SiteTests(unittest.TestCase):
 
     def test_company_identity_is_present_on_the_home_page(self):
         self.assertIn("Decent Technology Group", self.page_text)
-        self.assertIn("decent.", self.page_text)
+        # The full stop of the wordmark sits in its own span, so the markup
+        # carries `decent.` as two nodes. A reader still reads one word.
+        self.assertIn(wordmark_markup("decent."), self.html)
 
     def test_home_page_loads_the_site_bundle(self):
         module_scripts = [
@@ -260,10 +304,16 @@ class SiteTests(unittest.TestCase):
             self.assertIn(tag, self.parser.tags)
         # The home page is immersive: the stage fills the viewport, no footer.
         self.assertNotIn("footer", self.parser.tags)
+        # Ben, 2026-09-10: no header band and no footer on any page. Every
+        # page is the inside of its dot, so the wordmark and the list of pages
+        # overlay the field as they do on the home page. `main`, `nav`, and
+        # `section` stay.
         for slug, _, path, _ in PAGES:
             tags = parse(SITE / slug / "index.html").tags
-            for tag in ("header", "nav", "main", "section", "footer"):
+            for tag in ("nav", "main", "section"):
                 self.assertIn(tag, tags, f"{path} lacks a {tag} landmark")
+            for tag in ("header", "footer"):
+                self.assertNotIn(tag, tags, f"{path} still has a {tag} landmark")
 
     def test_skip_link_targets_main_content(self):
         self.assertIn('class="skip-link"', self.html)
@@ -515,7 +565,7 @@ class SiteTests(unittest.TestCase):
         # row are gone, in the markup and in the styles.
         self.assertEqual(self.html.count('class="wordmark"'), 1)
         self.assertIn('<span class="wordmark-phrase">', self.html)
-        self.assertIn(PHRASES["about"][0], self.page_text)
+        self.assertIn(wordmark_markup(PHRASES["about"][0]), self.html)
         self.assertNotIn("menu-overlay", self.html)
         menu_css = (DESIGN_SYSTEM / "src" / "site" / "menu.css").read_text()
         self.assertNotIn("menu-overlay", menu_css)
@@ -532,7 +582,11 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(self.parser.menu_list_links, [path for _, _, path, _ in PAGES])
         for slug, _, _, _ in PAGES:
             phrase = PHRASES[slug][0]
-            self.assertIn(phrase, self.html, f"the list lacks the phrase {phrase!r}")
+            self.assertIn(
+                wordmark_markup(phrase),
+                self.html,
+                f"the list lacks the phrase {phrase!r} with its coloured full stop",
+            )
         # The sphere starts on the gold About dot, so About is the active one.
         self.assertEqual(self.parser.current_page_links, ["/about/"])
 
@@ -802,6 +856,190 @@ class SiteTests(unittest.TestCase):
         self.assertGreaterEqual(contrast_ratio("#f2f1e8", "#182534"), 4.5)
         self.assertGreaterEqual(contrast_ratio("#f2f1e8", "#2c2c2c"), 4.5)
         self.assertGreaterEqual(contrast_ratio("#2c2c2c", "#f2f1e8"), 4.5)
+
+    def test_every_page_paints_in_the_colour_of_its_dot(self):
+        # The field colour sits on <html> as a class, so the page paints in
+        # the dot colour before any script or scene loads. That first paint is
+        # what the cross-document view transition lands on.
+        root = re.search(r":root\s*\{([^}]+)\}", self.css)
+        tokens = css_variables(root.group(1))
+        for slug, _, path, token in PAGES:
+            field_token, field_hex = FIELDS[slug]
+            self.assertEqual(field_token, token, f"{path} field token")
+            html = (SITE / slug / "index.html").read_text()
+            self.assertIn(
+                f'<html lang="en" class="field--{field_token}">',
+                html,
+                f"{path} does not carry its field class on <html>",
+            )
+            # The field class and the dot token hold the same colour.
+            body = css_rule(self.css, f".field--{field_token}")
+            self.assertIsNotNone(body, f"styles.css lacks .field--{field_token}")
+            self.assertIn(f"var(--dot-{field_token})", body)
+            self.assertEqual(
+                tokens[f"dot-{field_token}"].lower(),
+                field_hex.lower(),
+                f"--dot-{field_token} differs from the field of {path}",
+            )
+            # The theme colour of the page follows the field, one value in
+            # both colour schemes.
+            self.assertIn(
+                f'<meta name="theme-color" content="{field_hex}">',
+                html,
+                f"{path} theme colour does not follow its field",
+            )
+
+    def test_the_stylesheet_opts_into_cross_document_view_transitions(self):
+        # The circle on the home page and the field of the page it opens carry
+        # the same view-transition-name, so the circle morphs into the field.
+        self.assertRegex(self.css, r"@view-transition\s*\{\s*navigation: auto;")
+        self.assertRegex(self.css, r"\.scene \{[^}]*view-transition-name: field")
+        self.assertRegex(
+            self.css, r"\.home \.site-header \{[^}]*view-transition-name: wordmark"
+        )
+        self.assertRegex(
+            self.css, r"\.page-wordmark \{[^}]*view-transition-name: wordmark"
+        )
+        self.assertRegex(self.css, r"\.home \.menu-list \{[^}]*view-transition-name: pages")
+        self.assertRegex(self.css, r"\.page \.menu-list \{[^}]*view-transition-name: pages")
+        # The home circle is the other end of the shared element.
+        menu_css = (DESIGN_SYSTEM / "src" / "site" / "menu.css").read_text()
+        self.assertRegex(menu_css, r"\.menu-expand \{[^}]*view-transition-name: field")
+        # About 500 ms with an ease-out, and zero under reduced motion.
+        self.assertIn("animation-duration: 500ms", self.css)
+        self.assertIn("animation-timing-function: ease-out", self.css)
+        reduced = re.search(
+            r"@media \(prefers-reduced-motion: reduce\)\s*\{(.+)\n\}", self.css, re.S
+        )
+        self.assertIsNotNone(reduced)
+        self.assertIn("animation-duration: 0s", reduced.group(1))
+        # The site runs the circle or the shared element, never both. The
+        # bundle picks by feature detection.
+        menu = (DESIGN_SYSTEM / "src" / "site" / "SiteMenu.tsx").read_text()
+        self.assertIn("'startViewTransition' in document", menu)
+        self.assertIn("CSS.supports('view-transition-name: x')", menu)
+        self.assertIn("if (reduceRef.current || supportsViewTransition()) {", menu)
+
+    def test_the_scene_fades_in_from_the_flat_field(self):
+        # Where the browser lacks cross-document view transitions, the page
+        # still opens on its flat field colour and the scene fades in over it.
+        self.assertRegex(self.css, r"\.scene > \* \{[^}]*opacity: 0")
+        self.assertRegex(self.css, r"\.scene > \* \{[^}]*transition: opacity 400ms ease-out")
+        self.assertRegex(self.css, r'\.scene\[data-webgl="ready"\] > \* \{[^}]*opacity: 1')
+
+    def test_every_page_carries_the_wordmark_with_its_coloured_full_stop(self):
+        for slug, _, path, _ in PAGES:
+            html = (SITE / slug / "index.html").read_text()
+            phrase = PHRASES[slug][0]
+            self.assertIn('class="page-wordmark"', html, f"{path} lacks the wordmark")
+            self.assertIn(
+                f'<span class="wordmark-phrase">{wordmark_markup(phrase)}</span>',
+                html,
+                f"{path} wordmark does not read its phrase with a coloured full stop",
+            )
+            # One wordmark on the page, and it links home.
+            self.assertEqual(html.count('class="wordmark"'), 1, f"{path} wordmark count")
+        # The full stop takes its colour by rule, never inline.
+        self.assertRegex(self.css, r"\.wordmark-dot \{[^}]*color: var\(--wordmark-dot")
+        for slug, _, path, _ in PAGES:
+            body = css_rule(self.css, f".page--{slug}")
+            self.assertIsNotNone(body, f"styles.css lacks .page--{slug}")
+            self.assertIn("--wordmark-dot:", body, f"{path} sets no full-stop colour")
+
+    def test_the_wordmark_word_and_the_running_head_read_on_every_field(self):
+        # Both are navy on the field at display size, so the WCAG large-text
+        # threshold of 3:1 applies. Navy clears it on all five fields.
+        for slug, _, path, _ in PAGES:
+            _, field_hex = FIELDS[slug]
+            self.assertGreaterEqual(
+                contrast_ratio(FIELD_INK, field_hex),
+                LARGE_TEXT_CONTRAST,
+                f"the {path} wordmark and running head fail large-text AA on the field",
+            )
+        self.assertRegex(self.css, r"\.running-head \{[^}]*color: var\(--running-ink\)")
+        self.assertRegex(self.css, r"\.page-wordmark \.wordmark \{[^}]*color: var\(--running-ink\)")
+        self.assertRegex(self.css, r"\.page \{[^}]*--running-ink: var\(--brand-navy\)")
+        # The running head must be large text: 1.5rem bold is 24 pixels, and
+        # the phone size of 1.35rem bold is 21.6 pixels, over the 19 pixel
+        # bold floor the threshold allows.
+        head = css_rule(self.css, ".running-head")
+        size = re.search(r"font-size:\s*([0-9.]+)rem", head)
+        weight = re.search(r"font-weight:\s*([0-9]+)", head)
+        self.assertIsNotNone(size, ".running-head must set a font size")
+        self.assertIsNotNone(weight, ".running-head must set a font weight")
+        self.assertGreaterEqual(int(weight.group(1)), 700)
+        self.assertGreaterEqual(float(size.group(1)) * 16, 24)
+        phone = re.search(
+            r"@media \(max-width: 40rem\)\s*\{.*?\.running-head \{([^}]*)\}", self.css, re.S
+        )
+        self.assertIsNotNone(phone, "the phone breakpoint must size the running head")
+        phone_size = re.search(r"font-size:\s*([0-9.]+)rem", phone.group(1))
+        self.assertGreaterEqual(float(phone_size.group(1)) * 16, 19)
+
+    def test_every_page_shows_its_disc_label_as_a_running_head(self):
+        for slug, _, path, _ in PAGES:
+            html = (SITE / slug / "index.html").read_text()
+            label = PHRASES[slug][1]
+            self.assertIn(
+                f'<p class="running-head">{label}</p>',
+                html,
+                f"{path} lacks the running head {label!r}",
+            )
+
+    def test_every_page_carries_the_five_link_list_with_the_current_page_marked(self):
+        # The list is the site navigation on every page. The visible five-link
+        # markup stays in the HTML, so it works with no script.
+        for slug, _, path, _ in PAGES:
+            parser = parse(SITE / slug / "index.html")
+            self.assertEqual(
+                parser.menu_list_links,
+                [other for _, _, other, _ in PAGES],
+                f"{path} list does not hold the five pages in order",
+            )
+            self.assertEqual(parser.current_page_links, [path], f"{path} aria-current")
+        # The small type of the list needs the full 4.5:1, so it keeps the
+        # navy scrim and the cream type of the home page.
+        self.assertGreaterEqual(
+            contrast_ratio(LIST_SCRIM_INK, LIST_SCRIM), SMALL_TEXT_CONTRAST
+        )
+        self.assertRegex(self.css, r"\.page \.menu-list a \{[^}]*color: var\(--stage-ink\)")
+        self.assertRegex(self.css, r"\.menu-list \{[^}]*background: rgba\(24, 37, 52, 0\.88\)")
+
+    def test_plate_text_and_plate_pairs_keep_aa(self):
+        # Four pages take the navy plate with cream type. Get in touch is read
+        # as navy straight on the cream field, with no plate.
+        page_block = css_rule(self.css, ".page")
+        self.assertIn("--plate: var(--brand-navy)", page_block)
+        self.assertIn("--plate-ink: var(--brand-cream)", page_block)
+        contact = css_rule(self.css, ".page--contact")
+        self.assertIn("--plate: none", contact)
+        self.assertIn("--plate-ink: var(--brand-navy)", contact)
+        root = re.search(r":root\s*\{([^}]+)\}", self.css)
+        tokens = css_variables(root.group(1))
+        pairs = (
+            ("the navy plate", tokens["brand-cream"], tokens["brand-navy"]),
+            ("the cream Contact field", tokens["brand-navy"], tokens["brand-cream"]),
+            ("the navy plate accent", tokens["brand-gold"], tokens["brand-navy"]),
+        )
+        for label, ink, plate in pairs:
+            self.assertGreaterEqual(
+                contrast_ratio(ink, plate), 4.5, f"{label} fails AA"
+            )
+        # The muted and accent colours of both plate types keep AA too.
+        for name, ink, plate in (
+            ("navy plate muted", "#c9d1d8", tokens["brand-navy"]),
+            ("Contact muted", "#3d4a57", tokens["brand-cream"]),
+            ("Contact accent", "#8a4a1f", tokens["brand-cream"]),
+        ):
+            self.assertGreaterEqual(contrast_ratio(ink, plate), 4.5, f"{name} fails AA")
+
+    def test_no_page_keeps_a_header_band_or_a_footer(self):
+        # Ben, 2026-09-10: no header and no footer on any page for now.
+        for slug, _, path, _ in PAGES:
+            html = (SITE / slug / "index.html").read_text()
+            self.assertNotIn("<header", html, f"{path} still has a header band")
+            self.assertNotIn("<footer", html, f"{path} still has a footer")
+        self.assertNotIn("--header-height", self.css)
 
     def test_favicon_and_open_graph_image_exist(self):
         favicon = SITE / "favicon.svg"
