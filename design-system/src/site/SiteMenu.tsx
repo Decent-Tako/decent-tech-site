@@ -27,7 +27,7 @@ import InfiniteMenu, {
   type InfiniteGridMenu,
   type MenuItem,
 } from '../motion-examples/vendor/react-bits/infinite-menu/InfiniteMenu';
-import { SITE_PAGES, withBase, type SitePage } from './pages';
+import { SITE_PAGES, splitPhrase, withBase, type SitePage } from './pages';
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
@@ -78,6 +78,36 @@ type Expand = { page: SitePage; x: number; y: number };
 
 /** What the last press on the stage became. The stage carries it. */
 type LastClick = 'open' | 'turn' | 'miss' | 'drag';
+
+/**
+ * True when the browser can run a cross-document view transition. With it the
+ * expanding circle is the shared element the page field grows out of, so the
+ * browser owns the motion and the site must not also run its own circle.
+ * Without it the site runs the circle and then navigates, as before.
+ */
+function supportsViewTransition(): boolean {
+  return (
+    typeof document !== 'undefined' &&
+    // The value, not the key. A test that takes the feature away by setting
+    // it to undefined leaves the key in place, and so would a browser that
+    // ships the property without the behaviour.
+    typeof (document as Document & { startViewTransition?: unknown })
+      .startViewTransition === 'function' &&
+    CSS.supports('view-transition-name: x')
+  );
+}
+
+/** The phrase with its full stop in a span, so CSS can colour the stop. */
+function Phrase({ phrase }: { phrase: string }) {
+  const { before, after } = splitPhrase(phrase);
+  return (
+    <>
+      {before}
+      <span className="wordmark-dot">.</span>
+      {after}
+    </>
+  );
+}
 
 function useReducedMotion(): boolean {
   const [reduce, setReduce] = useState(
@@ -185,11 +215,18 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Open a page. Under reduced motion the circle is left out.
+  // Open a page. Three paths, and the site runs exactly one of them.
+  //
+  // 1. Reduced motion: open at once, no circle and no transition.
+  // 2. Cross-document view transitions: navigate straight away. The browser
+  //    morphs the shared `field` element into the field of the page it opens.
+  //    The site must not also grow its own circle, so the circle stays out.
+  // 3. No view transitions: grow the circle over the stage, then navigate.
+  //    The page still opens on its flat field colour at the far end.
   const open = useCallback((page: SitePage, x: number, y: number) => {
     if (openingRef.current) return;
     openingRef.current = true;
-    if (reduceRef.current) {
+    if (reduceRef.current || supportsViewTransition()) {
       location.assign(page.path);
       return;
     }
@@ -475,14 +512,14 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
                 the two cross while the box keeps the new width. */}
             {leaving === null ? null : (
               <span className="wordmark-phrase__out" aria-hidden="true">
-                {leaving}
+                <Phrase phrase={leaving} />
               </span>
             )}
             <span
               className="wordmark-phrase__in"
               data-fading={leaving === null ? 'false' : 'true'}
             >
-              {active.phrase}
+              <Phrase phrase={active.phrase} />
             </span>
           </span>
         </a>
@@ -511,7 +548,13 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
                   data-dot={page.token}
                   aria-hidden="true"
                 />
-                {page.phrase}
+                {/* The whole phrase in one span. The link is reversed so the
+                    swatch sits on the right, so the link must hold exactly
+                    two flex children; a bare phrase would give the reversal
+                    each of its nodes and the entry would read backwards. */}
+                <span className="menu-list__phrase">
+                  <Phrase phrase={page.phrase} />
+                </span>
               </a>
             </li>
           ))}

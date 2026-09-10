@@ -57,6 +57,11 @@
   pointer-events: none;
   transform: scale(0);
   animation: menu-expand-grow 450ms ease-in-out forwards;
+  /* The circle is the shared element of the cross-document view transition:
+     it carries the same name as the field of the page it opens, so the
+     circle morphs into that field. The site runs the circle or the shared
+     element, never both; SiteMenu.tsx picks by feature detection. */
+  view-transition-name: field;
 }
 
 /* The circle must cover the far corner of the stage from wherever it starts.

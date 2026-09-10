@@ -1,4 +1,7 @@
-// Get in touch page background. Brand default: gold plasma.
+// Get in touch page background, the light. Get in touch is the inside of the
+// cream dot, so the field is cream and the light is gold over it. The page is
+// read as navy on cream, so the light stays gentle and part transparent and
+// the cream field carries through it.
 //
 // The pointer does nothing here: Ben asked for no cursor features on
 // 2026-09-10. The scene keeps its own motion.
@@ -15,9 +18,9 @@ export default function PlasmaScene({ host, dataset, onReady }: SceneProps) {
     <Plasma
       key={reduce ? 'still' : 'live'}
       color={dataset.color ?? '#ffcb73'}
-      speed={number(dataset.speed, 1.2)}
-      scale={number(dataset.scale, 1.1)}
-      opacity={number(dataset.opacity, 1)}
+      speed={number(dataset.speed, 0.6)}
+      scale={number(dataset.scale, 1.4)}
+      opacity={number(dataset.opacity, 0.55)}
       mouseInteractive={false}
       maxDpr={1.5}
       paused={paused}

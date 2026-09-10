@@ -21,6 +21,17 @@ export function withBase(sitePath: string): string {
   return `${base}${sitePath}`;
 }
 
+/**
+ * A phrase split at its full stop, so the caller can colour the stop. Ben's
+ * rule: the full stop of `decent.` is always a contrasting colour. Every
+ * phrase holds exactly one full stop, the one that ends `decent`.
+ */
+export function splitPhrase(phrase: string): { before: string; after: string } {
+  const stop = phrase.indexOf('.');
+  if (stop === -1) return { before: phrase, after: '' };
+  return { before: phrase.slice(0, stop), after: phrase.slice(stop + 1) };
+}
+
 export const SITE_PAGES: readonly SitePage[] = [
   {
     slug: 'about',

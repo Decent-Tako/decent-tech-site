@@ -17,6 +17,15 @@
   display: block;
 }
 
+/* A scene whose component paints an opaque canvas cannot let the field show
+   through on its own. `data-veil` is the part of the field that stays
+   visible: the canvas is drawn at that opacity over the flat field colour,
+   so the motion reads as the field colour with the scene colours over it.
+   Only Iridescence needs this; Plasma, Threads, and Galaxy carry alpha. */
+.scene[data-veil] canvas {
+  opacity: var(--scene-veil, 0.7);
+}
+
 /* Text effects sit inline in their heading or link. The upstream
    Scrambled Text stylesheet sets a margin, a face, and white; the heading
    owns those. */

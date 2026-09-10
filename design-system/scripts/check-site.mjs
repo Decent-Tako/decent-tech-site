@@ -8,16 +8,27 @@
 // home page, when the menu is ready, it asserts that the wordmark reads
 // "Hey, we're decent." at load, then takes the home screenshot, which must
 // show the gold disc at the centre. It then asserts that one wheel step
-// changes the phrase, that a pointer over the "decent. read" entry of the
-// right-hand list turns the sphere to that dot, and that a click on the
-// wordmark grows the .menu-expand circle and opens the active page.
+// changes the phrase and that a pointer over the "decent. read" entry of the
+// right-hand list turns the sphere to that dot.
+//
+// On each of the five pages it also asserts that <html> is painted in the
+// dot colour of that page before the bundle runs, and that the wordmark reads
+// that page's phrase.
+//
+// Last per viewport it runs the two continuity paths: one click on the home
+// wordmark with cross-document view transitions on, where the browser owns
+// the motion and the site must not grow its own circle, and one with them
+// off, where the site grows the .menu-expand circle. Both must land on the
+// page with its field element present and painted in the dot colour.
 //
 // It then opens the home page once more, with no screenshot, for the three
 // presses on the sphere: a press on empty stage reads data-last-click "miss"
 // and changes nothing, a press on an off-centre disc reads "turn" and moves
 // the wordmark to that disc's phrase, and a press on the centred disc reads
 // "open" and opens its page. The discs come from data-hit-points, the list of
-// front-facing discs the stage publishes once a second.
+// front-facing discs the stage publishes once a second. That pass runs with
+// view transitions off, because the press that opens is read from the stage
+// and from the circle, and both need the stage to outlive the press.
 //
 // On the Get in touch page it drives the magnetic contact form, before the
 // reduced-motion switch: a pointer in a far corner pulls the form, a pointer
@@ -34,6 +45,28 @@ import { chromium } from 'playwright';
 
 const SITE_URL = process.argv[2] ?? process.env.SITE_URL ?? 'http://127.0.0.1:8080/';
 const PAGE_PATHS = ['/about/', '/portfolio/', '/blog/', '/ben/', '/contact/'];
+
+// Every page is the inside of its dot. The field colour sits on <html>, so
+// the page paints in the dot colour before any script or scene loads. These
+// are the same five values as the --dot-* tokens in site/styles.css and the
+// disc textures in site/menu/<slug>.svg.
+const FIELDS = {
+  '/about/': { token: 'gold', rgb: 'rgb(255, 203, 115)' },
+  '/portfolio/': { token: 'vermilion', rgb: 'rgb(227, 66, 52)' },
+  '/blog/': { token: 'terracotta', rgb: 'rgb(217, 119, 87)' },
+  '/ben/': { token: 'steel', rgb: 'rgb(91, 143, 163)' },
+  '/contact/': { token: 'cream', rgb: 'rgb(242, 241, 232)' },
+};
+
+// The wordmark phrase of each page. The full stop sits in its own span, so
+// the check reads the text of the whole wordmark, spans and all.
+const PAGE_PHRASES = {
+  '/about/': "Hey, we're decent.",
+  '/portfolio/': 'decent. work',
+  '/blog/': 'decent. read',
+  '/ben/': 'decent. people',
+  '/contact/': 'decent. contact',
+};
 // The phrase of the dot the sphere starts on, the phrases one and two wheel
 // steps along from it, and the phrase the check hovers. A step walks the five
 // pages in order, so the first two steps from load are fixed. The hover goes
@@ -223,32 +256,151 @@ async function checkHoverTurnsTheSphere(page, viewportName) {
   }
 }
 
-// A click on the wordmark grows a circle in the disc colour and then opens
-// the active page. This runs after the home screenshot, because it leaves the
+// A click on the wordmark opens the active page. The site has two paths to
+// get there and runs exactly one of them.
+//
+//   viewTransitions: true   the browser morphs the shared `field` element of
+//                           the home circle into the field of the page, so
+//                           the site must not also grow its own circle.
+//   viewTransitions: false  the site grows the .menu-expand circle in the
+//                           disc colour and then navigates.
+//
+// Either way the page must land with its field element present and painted in
+// the dot colour. This runs after the home screenshot, because it leaves the
 // home page.
-async function checkMenuClick(page, viewportName) {
+async function checkMenuClick(page, viewportName, viewTransitions) {
+  const path = viewTransitions ? 'with view transitions' : 'without view transitions';
   const wordmark = page.locator('a.wordmark');
   const expandSeen = page
     .waitForSelector('.menu-expand', { state: 'attached', timeout: 2000 })
     .then(() => true)
     .catch(() => false);
   await wordmark.click();
-  if (!(await expandSeen)) {
-    fail(`${viewportName}: no .menu-expand element appeared after the click on the wordmark`);
+  const grew = await expandSeen;
+  if (viewTransitions) {
+    if (grew) {
+      fail(
+        `${viewportName}: ${path}, the site grew its own .menu-expand circle as well; ` +
+          `the shared element and the circle must not both run`,
+      );
+    } else {
+      console.log(`check-site: ${viewportName} /: ${path}, the shared element owns the motion`);
+    }
+  } else if (!grew) {
+    fail(`${viewportName}: ${path}, no .menu-expand element appeared after the click`);
+  } else {
+    console.log(`check-site: ${viewportName} /: ${path}, the .menu-expand circle grew`);
   }
+
   // The sphere may still be easing on to a dot, so the page it opens is the
   // active one at the moment of the click. Any of the five is a pass.
+  let landed = null;
   try {
     await page.waitForURL((url) => PAGE_PATHS.includes(url.pathname), {
       timeout: STAGE_TIMEOUT_MS,
     });
-    console.log(`check-site: ${viewportName} /: the wordmark opened ${new URL(page.url()).pathname}`);
+    landed = new URL(page.url()).pathname;
+    console.log(`check-site: ${viewportName} /: ${path}, the wordmark opened ${landed}`);
   } catch {
     fail(
-      `${viewportName}: the click on the wordmark did not open one of ${PAGE_PATHS.join(', ')} ` +
-        `(the page is at ${new URL(page.url()).pathname})`,
+      `${viewportName}: ${path}, the click on the wordmark did not open one of ` +
+        `${PAGE_PATHS.join(', ')} (the page is at ${new URL(page.url()).pathname})`,
     );
+    return;
   }
+
+  // Both paths land the same way: the field element is present and <html> is
+  // painted in the dot colour of the page.
+  const field = FIELDS[landed];
+  const present = await page.locator('.scene').count();
+  if (present !== 1) {
+    fail(`${viewportName}: ${path}, ${landed} has ${present} field elements, expected 1`);
+    return;
+  }
+  const painted = await page.evaluate(
+    () => getComputedStyle(document.documentElement).backgroundColor,
+  );
+  if (painted !== field.rgb) {
+    fail(
+      `${viewportName}: ${path}, ${landed} landed on ${painted}, expected the ` +
+        `${field.token} field ${field.rgb}`,
+    );
+    return;
+  }
+  console.log(
+    `check-site: ${viewportName} /: ${path}, ${landed} landed on the ${field.token} ` +
+      `field with its field element`,
+  );
+}
+
+// One home click per continuity path. The second run opens its own page, so
+// the sphere starts on the gold disc again, and takes away the browser's
+// cross-document view transitions before the bundle can detect them.
+async function checkContinuityPaths(browser, viewport) {
+  for (const viewTransitions of [true, false]) {
+    const context = await browser.newContext({
+      viewport: { width: viewport.width, height: viewport.height },
+    });
+    const page = await context.newPage();
+    if (!viewTransitions) await withoutViewTransitions(page);
+    await page.goto(SITE_URL, { waitUntil: 'load' });
+    const state = await settle(page, '#menu-stage', `${viewport.name} / #menu-stage`);
+    if (state === 'ready') {
+      await checkMenuClick(page, viewport.name, viewTransitions);
+    } else {
+      console.log(
+        `check-site: ${viewport.name} /: menu branch "${state}", ` +
+          `the continuity paths need the sphere and are left out`,
+      );
+    }
+    await context.close();
+  }
+}
+
+// The field colour of <html> at first paint, before the bundle runs. The
+// route below holds the bundle back until the colour has been read, so the
+// value is the one the view transition lands on and not one a scene set.
+async function checkFirstPaint(page, label, pagePath) {
+  const field = FIELDS[pagePath];
+  if (!field) return;
+  const { html, body } = await page.evaluate(() => ({
+    html: getComputedStyle(document.documentElement).backgroundColor,
+    body: getComputedStyle(document.body).backgroundColor,
+  }));
+  if (html !== field.rgb) {
+    fail(
+      `${label}: at first paint <html> is ${html}, expected the ${field.token} ` +
+        `field ${field.rgb}`,
+    );
+    return;
+  }
+  // The body must not paint over the field, or the flat dot colour would
+  // never be seen and the transition would land on the paper colour.
+  if (body !== 'rgba(0, 0, 0, 0)') {
+    fail(
+      `${label}: the body paints ${body} over the ${field.token} field; it must be ` +
+        `transparent`,
+    );
+    return;
+  }
+  console.log(
+    `check-site: ${label}: first paint is the ${field.token} field ${html}`,
+  );
+}
+
+// The wordmark of a page reads that page's phrase. The full stop sits in its
+// own span for its contrasting colour, so the text of the whole wordmark is
+// read and its inner spacing is squeezed out.
+async function checkPageWordmark(page, label, pagePath) {
+  const wanted = PAGE_PHRASES[pagePath];
+  if (!wanted) return;
+  const wordmark = page.locator('.page-wordmark .wordmark-phrase').first();
+  const reads = (await wordmark.innerText()).replace(/\s+/g, ' ').trim();
+  if (reads !== wanted) {
+    fail(`${label}: the wordmark reads "${reads}", expected "${wanted}"`);
+    return;
+  }
+  console.log(`check-site: ${label}: the wordmark reads "${reads}"`);
 }
 
 // The discs the stage shows now, as {x, y, r, vertex} in stage pixels. The
@@ -261,6 +413,16 @@ async function hitPoints(page) {
   } catch {
     return [];
   }
+}
+
+// Take cross-document view transitions away from a page before any script
+// runs, so the site takes the path it takes in a browser without the feature.
+// `delete` removes the property from the prototype, so the site sees neither
+// the key nor a callable value.
+function withoutViewTransitions(page) {
+  return page.addInitScript(() => {
+    delete Document.prototype.startViewTransition;
+  });
 }
 
 function lastClick(page) {
@@ -584,6 +746,11 @@ async function checkPage(browser, viewport, pagePath) {
     fail(`${label}: ${url} answered ${response?.status() ?? 'no response'}`);
   }
 
+  // The field colour lives on <html>, which no scene touches, so the value
+  // read here is the one the page painted before the bundle ran.
+  await checkFirstPaint(page, label, pagePath);
+  await checkPageWordmark(page, label, pagePath);
+
   let menuState = null;
   if (pagePath === '/') {
     menuState = await settle(page, '#menu-stage', `${label} #menu-stage`);
@@ -683,13 +850,12 @@ async function checkPage(browser, viewport, pagePath) {
   await page.screenshot({ path: shot, fullPage: false, timeout: 60_000 });
   console.log(`check-site: ${label}: screenshot ${shot}`);
 
-  // The wheel step moves the sphere off gold and the presses leave the page,
-  // so all of them come after the screenshot. The wordmark press is last of
-  // the three that stay, and the disc presses need their own page, because
-  // the press that opens ends on another page.
+  // The wheel step moves the sphere off the gold disc, so it comes after the
+  // screenshot. The presses that leave the page run in a context of their
+  // own: checkDiscPage for the three presses on the sphere, and
+  // checkContinuityPaths once per continuity path.
   if (pagePath === '/' && menuState === 'ready') {
     await checkMenuWheel(page, viewport.name);
-    await checkMenuClick(page, viewport.name);
   }
 
   if (consoleErrors.length) {
@@ -700,12 +866,21 @@ async function checkPage(browser, viewport, pagePath) {
 
 // A home page of its own for the three presses on the sphere. It takes no
 // screenshot: the twelve the run saves come from `checkPage()`.
+//
+// The presses run without cross-document view transitions. The press that
+// opens a page is read through `data-last-click` on the stage and through the
+// .menu-expand circle, and both of those need the stage to still be there
+// after the press. With view transitions the site navigates at once, so the
+// stage is gone before either can be read; without them the circle holds the
+// page for its 450 ms and both are readable. `checkContinuityPaths` covers
+// the other path.
 async function checkDiscPage(browser, viewport) {
   const label = `${viewport.name} / discs`;
   const context = await browser.newContext({
     viewport: { width: viewport.width, height: viewport.height },
   });
   const page = await context.newPage();
+  await withoutViewTransitions(page);
   const consoleErrors = [];
   page.on('console', (message) => {
     if (message.type() === 'error') consoleErrors.push(message.text());
@@ -746,9 +921,11 @@ async function main() {
         await checkPage(browser, viewport, pagePath);
       }
       // The three presses on the sphere need a home page of their own: the
-      // press that opens ends on another page, as does the wordmark press
-      // the run above finishes with. This pass takes no screenshot.
+      // press that opens ends on another page. This pass takes no screenshot.
       await checkDiscPage(browser, viewport);
+      // One home click with cross-document view transitions on, and one with
+      // them off. Both must land on the page with its field element present.
+      await checkContinuityPaths(browser, viewport);
     }
   } finally {
     await browser.close();

@@ -8,7 +8,6 @@
   --accent-on-ink: #e17850;
   --line: rgba(23, 32, 29, 0.16);
   --inverse-muted: #c4cdc9;
-  --header-height: 6.4rem;
   /* The five page dots, from the brand palette Ben supplied on 2026-09-10.
      One source: site/menu/<slug>.svg repeats each value and
      tests/test_site.py keeps them equal. Same values in both colour schemes. */
@@ -68,6 +67,79 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Every page is the inside of its dot. The field colour sits on <html> as a
+   class, so the page paints in that colour before any script or scene loads.
+   That first paint is what the cross-document view transition lands on.
+   The five field classes and the five --dot-* tokens hold the same values.
+   The full stop colour sits here too, on the root, because the wordmark and
+   the list are siblings of <main>, not children of it: a value set on
+   .page--* never reaches them. The same values repeat on .page--* below for
+   the content inside main. */
+.field--gold {
+  --field: var(--dot-gold);
+  --wordmark-dot: var(--brand-vermilion);
+}
+
+.field--vermilion {
+  --field: var(--dot-vermilion);
+  --wordmark-dot: var(--brand-cream);
+}
+
+.field--terracotta {
+  --field: var(--dot-terracotta);
+  --wordmark-dot: var(--brand-cream);
+}
+
+.field--steel {
+  --field: var(--dot-steel);
+  --wordmark-dot: var(--brand-cream);
+}
+
+.field--cream {
+  --field: var(--dot-cream);
+  --wordmark-dot: var(--brand-vermilion);
+}
+
+.field--gold,
+.field--vermilion,
+.field--terracotta,
+.field--steel,
+.field--cream {
+  background: var(--field);
+}
+
+/* The body must not paint over the field, or the flat dot colour would never
+   be seen and the view transition would land on the paper colour instead. */
+.field--gold > body,
+.field--vermilion > body,
+.field--terracotta > body,
+.field--steel > body,
+.field--cream > body {
+  background: transparent;
+}
+
+/* Continuity between the home page and a page, the fancy version. The
+   expanding circle on the home page and the field of the page it opens carry
+   the same view-transition-name, so the circle morphs into the field. The
+   wordmark and the right-hand list slide from their home place to their page
+   place. About 500 ms with an ease-out. */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-group(field),
+::view-transition-group(wordmark),
+::view-transition-group(pages) {
+  animation-duration: 500ms;
+  animation-timing-function: ease-out;
+}
+
+::view-transition-old(field),
+::view-transition-new(field) {
+  animation-duration: 500ms;
+  animation-timing-function: ease-out;
+}
+
 body {
   margin: 0;
   overflow-x: clip;
@@ -104,20 +176,11 @@ a:focus-visible {
   transform: translateY(0);
 }
 
-.site-header,
-main,
-footer {
-  width: min(100% - 2rem, 72rem);
-  margin-inline: auto;
-}
-
 .site-header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 1.5rem;
-  padding-block: 1.75rem;
-  border-bottom: 1px solid var(--line);
 }
 
 .wordmark {
@@ -140,25 +203,17 @@ footer {
   text-transform: uppercase;
 }
 
-.site-header nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  font-size: 0.95rem;
-  font-weight: 650;
-}
-
-.site-header nav a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  padding-inline: 0.55rem;
-  text-decoration: none;
-}
-
-.site-header nav a:hover,
-.site-header nav a[aria-current="page"] {
-  text-decoration: underline;
+/* The full stop of the wordmark is always a contrasting colour. Ben's rule:
+   the word carries the meaning and the dot carries the brand. The dot must
+   differ from the word and must also read against the field. The word is
+   display size, so the large-text threshold of 3:1 applies to it; navy
+   clears it on all five fields, 3.77:1 on vermilion being the lowest. The dot
+   is a decorative accent inside the navy word, not text that stands alone, so
+   no 3:1 floor is set for it: no brand colour other than the word colour
+   reaches 3:1 on the terracotta field. site/README.md holds the table and the
+   measured ratios. */
+.wordmark-dot {
+  color: var(--wordmark-dot, var(--brand-gold));
 }
 
 .visually-hidden {
@@ -174,29 +229,48 @@ footer {
   border: 0;
 }
 
-/* Scenes. A page main holds one full-bleed scene behind its copy; the copy
-   sits on a plate. Loud behind, readable in front. */
+/* A page is the inside of its dot. The field fills the viewport in the dot
+   colour, a signature scene develops out of that field in the contrasting
+   brand colours, and the copy sits on a plate in front. There is no header
+   band and no footer; the wordmark overlays the field top left and the list
+   of pages overlays the right, exactly as on the home page. */
 .page {
   position: relative;
   isolation: isolate;
-  min-height: calc(100svh - var(--header-height));
-  padding-block: clamp(2.5rem, 8vw, 6rem) clamp(4rem, 12vw, 9rem);
-  --scene-bg: var(--brand-navy);
-  --plate: var(--brand-cream);
-  --plate-ink: var(--brand-charcoal);
-  --plate-muted: #4a4a4a;
-  --plate-accent: var(--brand-vermilion);
+  min-height: 100svh;
+  padding: clamp(7rem, 16vw, 11rem) clamp(1rem, 3vw, 2rem)
+    clamp(3rem, 8vw, 6rem);
+  --scene-bg: var(--field);
+  --plate: var(--brand-navy);
+  --plate-ink: var(--brand-cream);
+  --plate-muted: #c9d1d8;
+  --plate-accent: var(--brand-gold);
+  /* The running head and the wordmark word are navy on every field. */
+  --running-ink: var(--brand-navy);
 }
 
+/* The field is the full-bleed element the home circle morphs into. It paints
+   the flat dot colour; the scene mounts inside it and fades in over it. */
 .scene {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: calc(50% - 50vw);
-  right: calc(50% - 50vw);
+  inset: 0;
   z-index: -1;
   overflow: hidden;
   background: var(--scene-bg);
+  view-transition-name: field;
+}
+
+/* The scene fades in from the flat field once its first frame is ready. Where
+   the browser lacks cross-document view transitions this fade is the whole
+   continuity: the page still opens on its flat field colour and the motion
+   arrives over it. */
+.scene > * {
+  opacity: 0;
+  transition: opacity 400ms ease-out;
+}
+
+.scene[data-webgl="ready"] > * {
+  opacity: 1;
 }
 
 /* A cursor scene lies over the copy and passes the pointer through. */
@@ -257,69 +331,122 @@ footer {
   outline-color: var(--plate-accent);
 }
 
+/* On a page the hero is a plate, not a full-height band: the field already
+   fills the viewport and the plate takes the padding of a plate. */
 .page .hero {
+  display: block;
   min-height: 0;
+  padding-block: clamp(1.6rem, 5vw, 3.2rem);
 }
 
 .page .services {
   border-top: 0;
 }
 
-/* Per-page tokens. Each page has a different dominant colour. */
+/* The wordmark overlays the field top left, in the same place as on the home
+   page, and carries the same view-transition-name, so it slides from one to
+   the other. The word is navy on every field at display size. */
+.page-wordmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  padding: clamp(1rem, 2.5vw, 1.6rem) clamp(1rem, 3vw, 2rem);
+  view-transition-name: wordmark;
+}
+
+.page-wordmark .wordmark {
+  display: block;
+  color: var(--running-ink);
+  font-size: clamp(2.4rem, 6vw, 5.5rem);
+  line-height: 1.05;
+}
+
+.page-wordmark .wordmark-company {
+  display: none;
+}
+
+/* The right-hand list is the site navigation on every page, in the same place
+   as on the home page. It keeps the navy scrim and the cream type of the home
+   list, because its small text needs 4.5:1 over whatever the scene draws
+   behind it. On a page the entries are plain links; they turn no sphere. */
+.page .menu-list {
+  view-transition-name: pages;
+}
+
+.page .menu-list a {
+  color: var(--stage-ink);
+}
+
+/* The disc label of the page, as a small running head above the plate. It is
+   navy on the field. Navy clears 3:1 on all five fields, so the running head
+   is set at the large-text size the threshold asks for: 1.5rem, bold. */
+.running-head {
+  margin: 0 0 clamp(0.8rem, 2vw, 1.4rem);
+  color: var(--running-ink);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* The copy column sits below the wordmark and clear of the list. */
+.page-body {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 44rem);
+  margin-right: auto;
+}
+
+/* Per-page tokens, one block per page. Every page takes the navy plate with
+   cream type from `.page` above; only the full stop of the wordmark changes.
+   Ben's rule has two parts: the full stop differs from the navy word, and it
+   also reads against the field it sits on. Cream on gold is 1.3:1 and was
+   almost invisible, so the gold field takes vermilion and the cream field
+   takes vermilion as well. The measured ratios are in site/README.md. */
 .page--about {
-  --scene-bg: var(--brand-navy);
-  --plate: var(--brand-cream);
-  --plate-ink: var(--brand-charcoal);
-  --plate-accent: #2f6b80;
+  --wordmark-dot: var(--brand-vermilion);
 }
 
 .page--portfolio {
-  --scene-bg: var(--brand-vermilion);
-  --plate: var(--brand-navy);
-  --plate-ink: var(--brand-cream);
-  --plate-muted: #c9d1d8;
-  --plate-accent: var(--brand-gold);
+  --wordmark-dot: var(--brand-cream);
 }
 
 .page--blog {
-  --scene-bg: var(--brand-charcoal);
-  --plate: var(--brand-cream);
-  --plate-ink: var(--brand-charcoal);
-  --plate-accent: #b5533a;
+  --wordmark-dot: var(--brand-cream);
 }
 
+/* Iridescence paints an opaque canvas, so the steel field would be hidden
+   behind the gold aurora. The canvas is drawn part transparent over the flat
+   steel field instead, so the page reads as the aurora in gold and cream on
+   steel that the colour system asks for. */
 .page--ben {
-  --scene-bg: var(--brand-steel);
-  --plate: var(--brand-navy);
-  --plate-ink: var(--brand-cream);
-  --plate-muted: #c9d1d8;
-  --plate-accent: var(--brand-gold);
+  --wordmark-dot: var(--brand-cream);
+  --scene-veil: 0.62;
 }
 
+/* Get in touch: the field is cream, so the type sits straight on the field
+   with no plate. */
 .page--contact {
-  --scene-bg: var(--brand-navy);
-  --plate: var(--brand-charcoal);
-  --plate-ink: var(--brand-cream);
-  --plate-muted: #cfcfcf;
-  --plate-accent: var(--brand-gold);
+  --plate: none;
+  --plate-ink: var(--brand-navy);
+  --plate-muted: #3d4a57;
+  --plate-accent: #8a4a1f;
+  --wordmark-dot: var(--brand-vermilion);
 }
 
-.page--contact .contact {
-  margin-block: 0;
-  background: var(--plate);
-  color: var(--plate-ink);
+.page--contact .plate {
+  background: none;
+  padding-inline: 0;
 }
 
-.page--contact .contact .eyebrow {
-  color: var(--plate-accent);
-}
-
-.page--contact .contact p:not(.eyebrow) {
-  color: var(--plate-muted);
-}
-
-.page--contact .email-link {
-  color: var(--plate-ink);
+/* The contact form of issue #97 is a cream card, and this page is now the
+   inside of the cream dot, so the card has no edge against its own field.
+   This branch owns the page, not the form, so the edge is drawn from here
+   and the tokens of the form block stay as that worker set them. Navy at 12
+   per cent keeps the card readable and does not touch its type. */
+.page--contact .contact-form__card {
+  border: 1px solid rgba(24, 37, 52, 0.12);
 }
 
 /* Home page: immersive. The sphere stage fills the viewport edge to edge on
@@ -327,9 +454,12 @@ footer {
    the active dot; the list of pages sits over it on the right. No header
    band, no page padding, no footer. The stage tokens are the same in both
    colour schemes. */
+/* The home page is the navy stage the five dots turn on. Its wordmark is
+   cream on navy, so the full stop takes gold, the contrasting brand colour. */
 .home {
   background: var(--stage);
   color: var(--stage-ink);
+  --wordmark-dot: var(--brand-gold);
 }
 
 .home main {
@@ -354,6 +484,13 @@ footer {
   padding: clamp(1rem, 2.5vw, 1.6rem) clamp(1rem, 3vw, 2rem);
   border-bottom: 0;
   pointer-events: none;
+  /* The same name as the page wordmark, so it slides from the home place to
+     the page place across the navigation. */
+  view-transition-name: wordmark;
+}
+
+.home .menu-list {
+  view-transition-name: pages;
 }
 
 /* The home wordmark is the only text on the sphere. It is large, in the
@@ -433,6 +570,14 @@ footer {
 /* The active entry carries the weight and shows its dot colour. */
 .menu-list a[aria-current="page"] {
   font-weight: 750;
+}
+
+/* The whole phrase is one flex child, so `row-reverse` moves the swatch to
+   the right of the phrase and leaves the words of the phrase in their own
+   order. Without this span the reversal would take the full stop and the two
+   text nodes as separate children and the entry would read backwards. */
+.menu-list__phrase {
+  display: inline;
 }
 
 .menu-list__dot {
@@ -573,69 +718,26 @@ h3 {
   letter-spacing: 0.08em;
 }
 
+/* The Contact plate takes its colours from the page tokens, like every other
+   plate. Ben removed the footer from every page on 2026-09-10. */
 .contact {
-  margin-block: clamp(3.5rem, 8vw, 7.5rem);
-  padding: clamp(1.8rem, 6vw, 4.2rem);
-  background: var(--ink);
-  color: var(--paper);
-}
-
-.contact .eyebrow {
-  color: var(--accent-on-ink);
-}
-
-.contact p:not(.eyebrow) {
-  color: var(--inverse-muted);
+  margin-block: 0;
 }
 
 .email-link {
   display: inline-block;
   margin-top: 1.1rem;
-  color: var(--paper);
+  color: var(--plate-ink);
   font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   font-size: clamp(1.35rem, 4vw, 2.3rem);
   font-weight: 600;
   overflow-wrap: anywhere;
 }
 
-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 2rem;
-  padding-block: 1.8rem 2.8rem;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 0.86rem;
-}
-
-footer p {
-  margin: 0;
-}
-
 @media (max-width: 40rem) {
-  :root {
-    --header-height: 6.2rem;
-  }
-
-  .site-header {
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 0.4rem 1rem;
-    padding-block: 1.15rem;
-  }
-
   .wordmark {
     display: block;
     font-size: 1.5rem;
-  }
-
-  .wordmark-company {
-    display: block;
-    margin-top: 0.2rem;
-  }
-
-  .site-header nav {
-    margin-left: -0.55rem;
   }
 
   /* On a phone the list sits at the bottom right, where the wordmark and
@@ -677,12 +779,15 @@ footer p {
     margin-bottom: 1.6rem;
   }
 
-  footer {
-    display: block;
+  /* The list sits at the bottom on a phone, so the copy needs less room at
+     the foot of the field and more at the head, under the wordmark. */
+  .page {
+    padding-top: clamp(5rem, 22vw, 8rem);
+    padding-bottom: 8rem;
   }
 
-  footer p + p {
-    margin-top: 0.35rem;
+  .running-head {
+    font-size: 1.35rem;
   }
 }
 
@@ -786,5 +891,18 @@ footer p {
   /* The form never moves. The scene also reads the query. */
   .contact-form {
     transform: none !important;
+  }
+
+  /* Under reduced motion the transition durations go to zero: the page still
+     lands on its field colour, but nothing moves. The scene fade goes with
+     them. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0s;
+  }
+
+  .scene > * {
+    transition-duration: 0s;
   }
 }
