@@ -583,7 +583,8 @@ function wrap(value: number, min: number, max: number): number {
 }
 
 function scaleByPixelRatio(input: number): number {
-  const ratio = window.devicePixelRatio || 1;
+  // Capped at 2: a phone at 3x drew nine times the pixels of 1x for no gain.
+  const ratio = Math.min(window.devicePixelRatio || 1, 2);
   return Math.floor(input * ratio);
 }
 

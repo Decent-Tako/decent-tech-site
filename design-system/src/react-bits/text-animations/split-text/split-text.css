@@ -1,0 +1,18 @@
+.split-text__stage {
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.split-text__box {
+  max-width: 40rem;
+}
+
+.split-text__copy {
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+}

@@ -1,7 +1,7 @@
 /*
  * Stage and overlay styles for the site Infinite Menu. Site custom properties
  * only: --stage, --stage-ink, and the five --dot-* tokens come from
- * site/styles.css. Bundled into dist-site/assets/menu.css.
+ * site/styles.css. Bundled into dist-site/assets/site.css.
  */
 
 .menu-sphere {

@@ -20,6 +20,15 @@
   /* The brand navy plate behind the sphere and the only text colour on it. */
   --stage: #182534;
   --stage-ink: #f2f1e8;
+  /* The seven brand colours, for the scene plates. Same values in both
+     colour schemes: a plate keeps its own text colour against a loud scene. */
+  --brand-cream: #f2f1e8;
+  --brand-navy: #182534;
+  --brand-vermilion: #e34234;
+  --brand-gold: #ffcb73;
+  --brand-terracotta: #d97757;
+  --brand-charcoal: #2c2c2c;
+  --brand-steel: #5b8fa3;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
 }
@@ -41,6 +50,13 @@
     --dot-cream: #f2f1e8;
     --stage: #182534;
     --stage-ink: #f2f1e8;
+    --brand-cream: #f2f1e8;
+    --brand-navy: #182534;
+    --brand-vermilion: #e34234;
+    --brand-gold: #ffcb73;
+    --brand-terracotta: #d97757;
+    --brand-charcoal: #2c2c2c;
+    --brand-steel: #5b8fa3;
   }
 }
 
@@ -54,6 +70,7 @@ html {
 
 body {
   margin: 0;
+  overflow-x: clip;
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   background: var(--paper);
@@ -157,7 +174,164 @@ footer {
   border: 0;
 }
 
+/* Scenes. A page main holds one full-bleed scene behind its copy; the copy
+   sits on a plate. Loud behind, readable in front. */
+.page {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100svh - var(--header-height));
+  padding-block: clamp(2.5rem, 8vw, 6rem) clamp(4rem, 12vw, 9rem);
+  --scene-bg: var(--brand-navy);
+  --plate: var(--brand-cream);
+  --plate-ink: var(--brand-charcoal);
+  --plate-muted: #4a4a4a;
+  --plate-accent: var(--brand-vermilion);
+}
+
+.scene {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 50vw);
+  right: calc(50% - 50vw);
+  z-index: -1;
+  overflow: hidden;
+  background: var(--scene-bg);
+}
+
+/* A cursor scene lies over the copy and passes the pointer through. */
+.scene--cursor {
+  z-index: 1;
+  background: transparent;
+  pointer-events: none;
+}
+
+.plate {
+  position: relative;
+  padding: clamp(1.6rem, 5vw, 3.2rem);
+  background: var(--plate);
+  color: var(--plate-ink);
+}
+
+/* Copy plates take the width of their text so the scene shows around them.
+   The three-column services plate keeps the full width. */
+.plate.hero,
+.plate.contact {
+  max-width: 44rem;
+}
+
+.plate h1 {
+  font-size: clamp(2.4rem, 5vw + 0.4rem, 4.4rem);
+}
+
+.plate + .plate {
+  margin-top: clamp(1.5rem, 4vw, 3rem);
+}
+
+.plate .eyebrow,
+.plate .service-number {
+  color: var(--plate-accent);
+}
+
+.plate .hero-copy,
+.plate .service-grid article p:last-child {
+  color: var(--plate-muted);
+}
+
+.plate .service-grid article {
+  background: var(--plate);
+}
+
+.plate .button {
+  border-color: var(--plate-ink);
+  background: var(--plate-ink);
+  color: var(--plate);
+}
+
+.plate .button:hover {
+  background: transparent;
+  color: var(--plate-ink);
+}
+
+.plate a:focus-visible {
+  outline-color: var(--plate-accent);
+}
+
+.page .hero {
+  min-height: 0;
+}
+
+.page .services {
+  border-top: 0;
+}
+
+/* Per-page tokens. Each page has a different dominant colour. */
+.page--about {
+  --scene-bg: var(--brand-navy);
+  --plate: var(--brand-cream);
+  --plate-ink: var(--brand-charcoal);
+  --plate-accent: #2f6b80;
+}
+
+.page--portfolio {
+  --scene-bg: var(--brand-vermilion);
+  --plate: var(--brand-navy);
+  --plate-ink: var(--brand-cream);
+  --plate-muted: #c9d1d8;
+  --plate-accent: var(--brand-gold);
+}
+
+.page--blog {
+  --scene-bg: var(--brand-charcoal);
+  --plate: var(--brand-cream);
+  --plate-ink: var(--brand-charcoal);
+  --plate-accent: #b5533a;
+}
+
+.page--ben {
+  --scene-bg: var(--brand-steel);
+  --plate: var(--brand-navy);
+  --plate-ink: var(--brand-cream);
+  --plate-muted: #c9d1d8;
+  --plate-accent: var(--brand-gold);
+}
+
+.page--contact {
+  --scene-bg: var(--brand-navy);
+  --plate: var(--brand-charcoal);
+  --plate-ink: var(--brand-cream);
+  --plate-muted: #cfcfcf;
+  --plate-accent: var(--brand-gold);
+}
+
+.page--contact .contact {
+  margin-block: 0;
+  background: var(--plate);
+  color: var(--plate-ink);
+}
+
+.page--contact .contact .eyebrow {
+  color: var(--plate-accent);
+}
+
+.page--contact .contact p:not(.eyebrow) {
+  color: var(--plate-muted);
+}
+
+.page--contact .email-link {
+  color: var(--plate-ink);
+}
+
 /* Home page: the sphere on a fixed dark plate, then the link list. */
+.menu-stage-frame {
+  position: relative;
+}
+
+.menu-stage-frame .scene--cursor {
+  left: 0;
+  right: 0;
+}
+
 .menu {
   padding-block: 0 clamp(2.5rem, 6vw, 4.5rem);
 }

@@ -1,0 +1,27 @@
+.liquid-ether__stage {
+  height: 24rem;
+  cursor: crosshair;
+}
+
+.liquid-ether__fill {
+  position: absolute;
+  inset: 0;
+}
+
+.liquid-ether__fill canvas {
+  display: block;
+}
+
+.liquid-ether__caption {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  margin: 0;
+  padding: 0.35rem 0.6rem;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  pointer-events: none;
+}
