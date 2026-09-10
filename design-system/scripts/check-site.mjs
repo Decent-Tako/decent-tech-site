@@ -36,6 +36,18 @@
 // form and is kept, and the three fields filled leave Send enabled with a
 // mailto: action. The Contact screenshot comes after that first pull.
 //
+// On About it presses one of the three section discs: the section's plate must
+// become visible and the page must not navigate, and Escape must close it
+// again. It leaves one section open, so the About screenshot shows it.
+//
+// It then opens Blog in a context of its own and scrolls the disc's own height
+// past the next dot at the bottom. About Ben, the next page in the cycle, must
+// open with its field element present.
+//
+// Last it opens the home page once more and waits 21 seconds with no input of
+// any kind. The stage must then carry data-idle, and one pointer move must
+// clear it.
+//
 // Usage: node scripts/check-site.mjs [url]   (default http://127.0.0.1:8080/)
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -77,6 +89,9 @@ const THIRD_PHRASE = 'decent. read';
 const HOVER_PHRASE = 'decent. contact';
 const ALL_PATHS = ['/', ...PAGE_PATHS];
 const STAGE_TIMEOUT_MS = 10_000;
+// The page goes idle after 20 seconds with no input. The check waits a second
+// longer than that, so a slow runner does not read the flag too early.
+const IDLE_TIMEOUT_MS = 21_000;
 const SHOTS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'site-shots');
 const VIEWPORTS = [
   { name: 'desktop-1280x800', width: 1280, height: 800 },
@@ -744,6 +759,97 @@ async function checkContactForm(page, label, viewport) {
   await page.locator('.contact-form form').evaluate((form) => form.reset());
 }
 
+// About folds its three services into discs. A press opens one section: its
+// plate becomes visible and the page does not navigate. Escape closes it.
+//
+// This runs before the About screenshot, and it leaves the first section open,
+// so the shot shows the page with one section open.
+async function checkSectionDots(page, label) {
+  const discs = page.locator('.section-dot__disc');
+  const count = await discs.count();
+  if (count !== 3) {
+    fail(`${label}: found ${count} section discs, expected 3`);
+    return;
+  }
+  console.log(`check-site: ${label}: the About services folded into ${count} discs`);
+
+  const before = page.url();
+  const first = discs.first();
+  const panel = page.locator('.section-dot__panel').first();
+  if (await panel.isVisible()) {
+    fail(`${label}: a section plate was visible before any disc was pressed`);
+  }
+
+  await first.click();
+  try {
+    await panel.waitFor({ state: 'visible', timeout: 2000 });
+    console.log(`check-site: ${label}: a press on a section disc opened its plate`);
+  } catch {
+    fail(`${label}: a press on a section disc did not open its plate within 2 s`);
+    return;
+  }
+  if (page.url() !== before) {
+    fail(`${label}: the section press navigated to ${page.url()}, expected no route change`);
+    return;
+  }
+  console.log(`check-site: ${label}: the section press did not navigate`);
+
+  await page.keyboard.press('Escape');
+  try {
+    await panel.waitFor({ state: 'hidden', timeout: 2000 });
+    console.log(`check-site: ${label}: Escape closed the section`);
+  } catch {
+    fail(`${label}: Escape did not close the section within 2 s`);
+    return;
+  }
+
+  // Leave one section open, so the About screenshot shows it.
+  await first.click();
+  await panel.waitFor({ state: 'visible', timeout: 2000 });
+}
+
+// The whole site is one loop. A scroll to the bottom of a page, the disc's own
+// height past the next dot, opens the next page in the cycle.
+async function checkNextDot(page, label, expectedPath) {
+  const link = page.locator('.next-dot__link');
+  if ((await link.count()) !== 1) {
+    fail(`${label}: found ${await link.count()} next-dot links, expected 1`);
+    return;
+  }
+  const href = await link.getAttribute('href');
+  if (!href?.endsWith(expectedPath)) {
+    fail(`${label}: the next dot points at "${href}", expected ${expectedPath}`);
+    return;
+  }
+
+  // Scroll the disc's own height past the bottom of the document. The scene
+  // reads that and clicks the link, so the page opens through the same route
+  // a press takes.
+  await page.evaluate(() => {
+    const target = document.querySelector('.next-dot__link');
+    const extra = target ? target.getBoundingClientRect().height + 40 : 200;
+    window.scrollTo(0, document.documentElement.scrollHeight + extra);
+    window.dispatchEvent(new Event('scroll'));
+  });
+  try {
+    await page.waitForURL((url) => url.pathname.endsWith(expectedPath), { timeout: 5000 });
+    console.log(`check-site: ${label}: the scroll past the next dot opened ${expectedPath}`);
+  } catch {
+    fail(
+      `${label}: the scroll past the next dot did not open ${expectedPath}`
+        + ` within 5 s; the page is at ${page.url()}`,
+    );
+    return;
+  }
+  // The page it opened is the inside of its dot, so its field must be there.
+  try {
+    await page.waitForSelector('.scene', { state: 'attached', timeout: 5000 });
+    console.log(`check-site: ${label}: ${expectedPath} opened with its field present`);
+  } catch {
+    fail(`${label}: ${expectedPath} opened with no field element`);
+  }
+}
+
 async function checkPage(browser, viewport, pagePath) {
   const label = `${viewport.name} ${pagePath}`;
   const context = await browser.newContext({
@@ -859,6 +965,12 @@ async function checkPage(browser, viewport, pagePath) {
     }
   }
 
+  // About folds its services into discs. The check opens one and closes it,
+  // then leaves one open, so the About screenshot shows a section open.
+  if (pagePath === '/about/') {
+    await checkSectionDots(page, label);
+  }
+
   // The scenes are paused on their current frame (see above), so the
   // screenshot does not wait behind the software renderer.
   await page.waitForTimeout(300);
@@ -923,6 +1035,88 @@ async function checkDiscPage(browser, viewport) {
   await context.close();
 }
 
+// A page of its own for the scroll to the next dot: the scroll ends on
+// another page, so it cannot share the context that takes a screenshot. Blog
+// is the page the issue names; the next dot in the cycle is About Ben.
+async function checkNextDotPage(browser, viewport) {
+  const label = `${viewport.name} /blog/ next dot`;
+  const context = await browser.newContext({
+    viewport: { width: viewport.width, height: viewport.height },
+  });
+  const page = await context.newPage();
+  const consoleErrors = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  page.on('pageerror', (error) => consoleErrors.push(`pageerror: ${error.message}`));
+
+  const url = new URL('/blog/', SITE_URL).toString();
+  const response = await page.goto(url, { waitUntil: 'load' });
+  if (!response || !response.ok()) {
+    fail(`${label}: ${url} answered ${response?.status() ?? 'no response'}`);
+  }
+  // The scene must be mounted before the scroll, because the scene is what
+  // reads the threshold.
+  await page.waitForSelector('[data-effect="next-dot"][data-next-dot="ready"]', {
+    state: 'attached',
+    timeout: STAGE_TIMEOUT_MS,
+  }).catch(() => fail(`${label}: the next-dot scene did not report ready`));
+  await checkNextDot(page, label, '/ben/');
+
+  if (consoleErrors.length) {
+    fail(`${label}: ${consoleErrors.length} console error(s):\n  ${consoleErrors.join('\n  ')}`);
+  }
+  await context.close();
+}
+
+// Idle life. The home page with no input at all must raise data-idle after
+// 20 seconds, and the first pointer move must clear it.
+async function checkIdle(browser, viewport) {
+  const label = `${viewport.name} / idle`;
+  const context = await browser.newContext({
+    viewport: { width: viewport.width, height: viewport.height },
+  });
+  const page = await context.newPage();
+  const consoleErrors = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  page.on('pageerror', (error) => consoleErrors.push(`pageerror: ${error.message}`));
+
+  const response = await page.goto(SITE_URL, { waitUntil: 'load' });
+  if (!response || !response.ok()) {
+    fail(`${label}: ${SITE_URL} answered ${response?.status() ?? 'no response'}`);
+  }
+  await settle(page, '#menu-stage', `${label} #menu-stage`);
+
+  // 21 seconds with no input at all: no click, no move, no key.
+  try {
+    await page.waitForSelector('#menu-stage[data-idle="true"]', {
+      state: 'attached',
+      timeout: IDLE_TIMEOUT_MS,
+    });
+    console.log(`check-site: ${label}: the stage is idle after 20 s with no input`);
+  } catch {
+    fail(`${label}: the stage did not set data-idle within ${IDLE_TIMEOUT_MS} ms`);
+    await context.close();
+    return;
+  }
+
+  // The first input brings the motion back.
+  await page.mouse.move(viewport.width / 2, viewport.height / 2);
+  try {
+    await page.waitForSelector('#menu-stage[data-idle]', { state: 'detached', timeout: 2000 });
+    console.log(`check-site: ${label}: a pointer move cleared the idle flag`);
+  } catch {
+    fail(`${label}: the idle flag did not clear within 2 s of a pointer move`);
+  }
+
+  if (consoleErrors.length) {
+    fail(`${label}: ${consoleErrors.length} console error(s):\n  ${consoleErrors.join('\n  ')}`);
+  }
+  await context.close();
+}
+
 async function main() {
   await mkdir(SHOTS_DIR, { recursive: true });
   const browser = await chromium.launch({
@@ -942,6 +1136,11 @@ async function main() {
       // One home click with cross-document view transitions on, and one with
       // them off. Both must land on the page with its field element present.
       await checkContinuityPaths(browser, viewport);
+      // The scroll to the next dot ends on another page, so it takes a
+      // context of its own, as the presses above do.
+      await checkNextDotPage(browser, viewport);
+      // Idle life: 21 seconds with no input at all, then one pointer move.
+      await checkIdle(browser, viewport);
     }
   } finally {
     await browser.close();
