@@ -176,6 +176,13 @@ Get in touch holds one form: name, email, message, and a Send button. It is
 its own plate, navy type and fields on a cream card, and it works with no
 script at all.
 
+The page is now the inside of the cream dot, so the cream card has no edge
+against its own field. The page draws that edge, navy at 12 per cent, from
+the `.page--contact .contact-form__card` rule; the tokens of the form block
+itself are unchanged. The Shiny Text on the email link above the form also
+moved from cream to navy with a vermilion shine, because cream type would be
+invisible on the cream field.
+
 There is no backend yet. The form posts to `mailto:hello@decent.tech` with
 `enctype="text/plain"`, so Send opens the reader's mail program with the
 three fields in the body. `nginx.conf` already allows `form-action 'self'

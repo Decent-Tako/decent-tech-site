@@ -1046,6 +1046,25 @@ class SiteTests(unittest.TestCase):
         ):
             self.assertGreaterEqual(contrast_ratio(ink, plate), 4.5, f"{name} fails AA")
 
+    def test_the_email_link_reads_on_the_cream_contact_field(self):
+        # Get in touch is read as navy on cream, so the Shiny Text effect on
+        # the email link must not keep the cream it had on the old dark plate:
+        # cream on cream is invisible. The link is 1.35rem at its smallest and
+        # weight 600, so the large-text threshold of 3:1 applies to both the
+        # base colour and the shine that sweeps it.
+        html = (SITE / "contact" / "index.html").read_text()
+        base = re.search(r'data-effect="shiny-text"[^>]*data-color="(#[0-9a-fA-F]{6})"', html)
+        shine = re.search(r'data-effect="shiny-text"[^>]*data-shine="(#[0-9a-fA-F]{6})"', html)
+        self.assertIsNotNone(base, "the email link must set a Shiny Text colour")
+        self.assertIsNotNone(shine, "the email link must set a Shiny Text shine")
+        field = FIELDS["contact"][1]
+        for name, value in (("colour", base.group(1)), ("shine", shine.group(1))):
+            self.assertGreaterEqual(
+                contrast_ratio(value, field),
+                LARGE_TEXT_CONTRAST,
+                f"the email link {name} fails large-text AA on the cream field",
+            )
+
     def test_no_page_keeps_a_header_band_or_a_footer(self):
         # Ben, 2026-09-10: no header and no footer on any page for now.
         for slug, _, path, _ in PAGES:

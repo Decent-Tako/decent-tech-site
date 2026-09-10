@@ -428,6 +428,15 @@ a:focus-visible {
   padding-inline: 0;
 }
 
+/* The contact form of issue #97 is a cream card, and this page is now the
+   inside of the cream dot, so the card has no edge against its own field.
+   This branch owns the page, not the form, so the edge is drawn from here
+   and the tokens of the form block stay as that worker set them. Navy at 12
+   per cent keeps the card readable and does not touch its type. */
+.page--contact .contact-form__card {
+  border: 1px solid rgba(24, 37, 52, 0.12);
+}
+
 /* Home page: immersive. The sphere stage fills the viewport edge to edge on
    the navy plate. The wordmark sits over it top left and reads the phrase of
    the active dot; the list of pages sits over it on the right. No header
