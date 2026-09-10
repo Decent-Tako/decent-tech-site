@@ -1,0 +1,53 @@
+/*
+ * Vendored from React Bits.
+ * Source: https://github.com/DavidHDev/react-bits/blob/625f25025fed1c28e2de7d3ac5f12ee83542844d/src/ts-default/TextAnimations/EchoText/EchoText.css
+ * Page: https://reactbits.dev/text-animations/echo-text
+ * Commit: 625f25025fed1c28e2de7d3ac5f12ee83542844d
+ * Date: 2026-09-10
+ * Licence: MIT + Commons Clause (see ../../LICENSE.md). The Commons Clause forbids
+ * selling, sublicensing, or redistributing the components themselves.
+ *
+ * Local changes:
+ * (none)
+ */
+.echo-text {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  user-select: none;
+  contain: layout style;
+  font-kerning: normal;
+  text-rendering: geometricPrecision;
+}
+
+.echo-text__echo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+  transform: translate3d(0, 0, 0);
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.echo-text__echo--front {
+  position: relative;
+  z-index: 2;
+  opacity: 1;
+  filter: none;
+  text-shadow: 0 0.035em 0 rgba(255, 255, 255, 0.04);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .echo-text__echo:not(.echo-text__echo--front) {
+    display: none;
+  }
+
+  .echo-text__echo--front {
+    transform: none !important;
+  }
+}

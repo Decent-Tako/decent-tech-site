@@ -1,0 +1,12 @@
+.rb-frame .glitch {
+  margin: 2rem auto;
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+}
+
+.rb-frame .glitch::before,
+.rb-frame .glitch::after {
+  color: var(--paper);
+  background-color: var(--ink);
+}

@@ -1,0 +1,16 @@
+.rb-frame .falling-text-container {
+  min-height: 20rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.rb-frame .falling-text-target,
+.rb-frame .word {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.rb-frame .word.highlighted {
+  color: var(--accent-blue);
+  font-weight: 700;
+}

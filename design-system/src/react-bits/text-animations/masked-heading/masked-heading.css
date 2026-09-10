@@ -1,0 +1,10 @@
+.rb-frame .masked-heading {
+  min-height: 12rem;
+  margin: 1.5rem 1rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.rb-frame .masked-heading__measure {
+  color: transparent;
+}

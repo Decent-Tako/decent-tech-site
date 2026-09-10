@@ -1,0 +1,10 @@
+.rb-frame .animated-gradient-text {
+  margin: 2rem auto;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.rb-frame .gradient-overlay::before {
+  background-color: var(--paper);
+}
