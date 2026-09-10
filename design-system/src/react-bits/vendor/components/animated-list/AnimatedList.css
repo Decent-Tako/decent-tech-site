@@ -1,0 +1,83 @@
+/*
+ * Vendored from React Bits.
+ * Source: https://github.com/DavidHDev/react-bits/blob/625f25025fed1c28e2de7d3ac5f12ee83542844d/src/ts-default/Components/AnimatedList/AnimatedList.css
+ * Page: https://reactbits.dev/components/animated-list
+ * Commit: 625f25025fed1c28e2de7d3ac5f12ee83542844d
+ * Date: 2026-09-10
+ * Licence: MIT + Commons Clause (see ../../LICENSE.md). The Commons Clause forbids
+ * selling, sublicensing, or redistributing the components themselves.
+ *
+ * Local changes:
+ * 1. Scope generic .item and .item-text selectors under .scroll-list-container
+ *    so they do not leak into other stories.
+ */
+.scroll-list-container {
+  position: relative;
+  width: 500px;
+}
+
+.scroll-list-container .scroll-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.scroll-list-container .scroll-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroll-list-container .scroll-list::-webkit-scrollbar-track {
+  background: #060606;
+}
+
+.scroll-list-container .scroll-list::-webkit-scrollbar-thumb {
+  background: #222;
+  border-radius: 4px;
+}
+
+.scroll-list-container .no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-list-container .no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scroll-list-container .item {
+  padding: 16px;
+  background-color: #111;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.scroll-list-container .item.selected {
+  background-color: #222;
+}
+
+.scroll-list-container .item-text {
+  color: white;
+  margin: 0;
+}
+
+.scroll-list-container .top-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: linear-gradient(to bottom, #120F17, transparent);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-list-container .bottom-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to top, #120F17, transparent);
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
