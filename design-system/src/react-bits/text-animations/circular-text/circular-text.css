@@ -1,0 +1,11 @@
+.rb-frame .circular-text {
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+  position: relative;
+  margin: 2rem auto;
+}
+
+.rb-frame .circular-text span {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
