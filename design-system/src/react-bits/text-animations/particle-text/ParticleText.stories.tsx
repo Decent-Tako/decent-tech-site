@@ -123,7 +123,7 @@ async function playReady(canvas: Canvas) {
     expect(stage).toHaveAttribute('data-ready', 'true');
   }, SLOW);
   const drawing = canvas.getByTestId('particle-text-canvas') as HTMLCanvasElement;
-  await assertCanvasPainted(drawing, '#FFFFFF');
+  await assertCanvasPainted(drawing, '#FFFFFF', { grid: 24, timeoutMs: 8000 });
   await expect(stage).toHaveAttribute('data-copy', FEATURES[0].title);
   return stage;
 }

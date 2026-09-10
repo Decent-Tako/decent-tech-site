@@ -80,6 +80,8 @@ export function ScrollFloat({
         ref={scrollerRef}
         className="scroll-float__scroller"
         data-testid="scroll-float-scroller"
+        tabIndex={0}
+        aria-label="Scroll the example"
       >
         <div className="scroll-float__spacer" aria-hidden="true" />
         <UpstreamScrollFloat

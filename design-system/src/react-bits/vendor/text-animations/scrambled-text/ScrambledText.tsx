@@ -14,6 +14,8 @@
  * 4. `onScramble` reports a pointer scramble.
  * 5. The host carries data-testid="scrambled-text-copy".
  * 6. `React.FC` became a plain function.
+ * 7. The original copy sits in a visually hidden span. The split paragraph
+ *    is aria-hidden so SplitText cannot put aria-label on a `p`.
  */
 import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
@@ -60,11 +62,14 @@ const ScrambledText = ({
     if (!rootRef.current) return;
     if (reduced) return;
 
-    const split = SplitText.create(rootRef.current.querySelector('p'), {
+    const paragraph = rootRef.current.querySelector('p');
+    const split = SplitText.create(paragraph, {
       type: 'chars',
       charsClass: 'char'
     });
     charsRef.current = split.chars as HTMLElement[];
+    paragraph?.removeAttribute('aria-label');
+    paragraph?.setAttribute('aria-hidden', 'true');
 
     charsRef.current.forEach(c => {
       gsap.set(c, {
@@ -120,6 +125,7 @@ const ScrambledText = ({
       style={style}
       data-testid="scrambled-text-copy"
     >
+      <span className="scrambled-text__sr">{children}</span>
       <p>{children}</p>
     </div>
   );

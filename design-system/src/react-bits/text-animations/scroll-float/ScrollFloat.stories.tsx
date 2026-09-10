@@ -128,7 +128,7 @@ export const ReducedMotion: Story = {
     await playBrand(canvas);
     const stage = canvas.getByTestId('scroll-float-stage');
     await expect(stage).toHaveAttribute('data-reduced', 'true');
-    await expect(stage).toHaveAttribute('data-progress', '1');
+    await expect(Number(stage.getAttribute('data-progress'))).toBe(1);
     await expect(canvas.getByTestId('scroll-float-copy')).toHaveTextContent(FEATURES[0].title);
     await playPause(canvas, stage);
   },

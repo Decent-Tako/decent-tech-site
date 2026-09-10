@@ -43,6 +43,7 @@ export function RotatingText({
 }: RotatingTextProps) {
   const [paused, setPaused] = useState(false);
   const [run, setRun] = useState(0);
+  const [index, setIndex] = useState(0);
   const stageRef = useRef<HTMLDivElement>(null);
   const reduce = useReduce(reducedMotion);
 
@@ -71,6 +72,7 @@ export function RotatingText({
       onReplay={() => {
         setRun((value) => value + 1);
         setPaused(false);
+        setIndex(0);
       }}
       reducedMotion={reducedMotion}
       paused={paused}
@@ -79,8 +81,8 @@ export function RotatingText({
       stageData={{
         'data-reduced': reduce ? 'true' : 'false',
         'data-run': String(run),
-        'data-index': '0',
-        'data-copy': texts[0] ?? '',
+        'data-index': String(index),
+        'data-copy': texts[index] ?? texts[0] ?? '',
       }}
     >
       <p className="rotating-text__line">
@@ -103,9 +105,8 @@ export function RotatingText({
           initial={reduce ? { y: 0, opacity: 1 } : undefined}
           animate={reduce ? { y: 0, opacity: 1 } : undefined}
           exit={reduce ? { y: 0, opacity: 1 } : undefined}
-          onNext={(index) => {
-            stageRef.current?.setAttribute('data-index', String(index));
-            stageRef.current?.setAttribute('data-copy', texts[index] ?? '');
+          onNext={(nextIndex) => {
+            setIndex(nextIndex);
           }}
         />
       </p>

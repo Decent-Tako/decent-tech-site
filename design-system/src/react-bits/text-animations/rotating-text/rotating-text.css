@@ -17,7 +17,7 @@
 
 .rb-frame .rotating-text {
   overflow: hidden;
-  padding: 0.15rem 0.5rem;
-  background: var(--accent-yellow);
+  padding: 0.15rem 0;
   color: var(--ink);
+  border-bottom: 3px solid var(--accent-blue);
 }

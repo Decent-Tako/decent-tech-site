@@ -89,6 +89,8 @@ export function ScrollReveal({
         ref={scrollerRef}
         className="scroll-reveal__scroller"
         data-testid="scroll-reveal-scroller"
+        tabIndex={0}
+        aria-label="Scroll the example"
       >
         <div className="scroll-reveal__spacer" aria-hidden="true" />
         <UpstreamScrollReveal

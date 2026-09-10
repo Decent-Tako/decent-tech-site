@@ -120,7 +120,10 @@ export const Default: Story = {
     await playPause(canvas, stage);
     await userEvent.click(canvas.getByRole('button', { name: 'Replay' }));
     await expect(stage).toHaveAttribute('data-run', '1');
-    await expect(stage).toHaveAttribute('data-index', '0');
+    await expect(stage).toHaveAttribute('data-paused', 'false');
+    await waitFor(() => {
+      expect(stage).toHaveAttribute('data-index', '1');
+    }, SLOW);
   },
 };
 
