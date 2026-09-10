@@ -11,6 +11,7 @@
  * 1. preserveDrawingBuffer: true so play can sample the canvas after pause.
  * 2. paused, onReady, and onError props so the story can hold time and prove paint.
  * 3. Advance time for 12 frames before Pause holds, so a still frame has paint.
+ * 4. Add role="img" next to aria-label so a11y accepts the labelled container.
  */
 import { Effect, EffectComposer, EffectPass, RenderPass } from 'postprocessing';
 import React, { useEffect, useRef } from 'react';
@@ -741,6 +742,7 @@ const PixelBlast: React.FC<PixelBlastProps> = ({
       ref={containerRef}
       className={`pixel-blast-container ${className ?? ''}`}
       style={style}
+      role="img"
       aria-label="PixelBlast interactive background"
     />
   );
