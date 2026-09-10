@@ -1,0 +1,41 @@
+.gradual-blur-host {
+  position: relative;
+  overflow: hidden;
+  width: min(100%, 36rem);
+  margin: 1.25rem auto;
+  background: var(--soft);
+  border: 1px solid var(--line);
+}
+
+.gradual-blur-host img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 8 / 5;
+  object-fit: cover;
+}
+
+.gradual-blur-copy {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem 1rem 4rem;
+}
+
+.rb-frame .gradual-blur-copy p {
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .gradual-blur-kicker {
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-blue);
+}
+
+.rb-frame .gradual-blur-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
