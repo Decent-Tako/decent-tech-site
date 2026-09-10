@@ -798,7 +798,7 @@ function createBallpit(canvas: HTMLCanvasElement, config: any = {}): CreateBallp
     size: 'parent',
     rendererOptions: { antialias: true, alpha: true, preserveDrawingBuffer: true }
   });
-  let spheres: Z;
+  let spheres!: Z;
   threeInstance.renderer.toneMapping = ACESFilmicToneMapping;
   threeInstance.camera.position.set(0, 0, 20);
   threeInstance.camera.lookAt(0, 0, 0);
