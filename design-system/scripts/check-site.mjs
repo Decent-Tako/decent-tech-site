@@ -886,9 +886,20 @@ async function checkNextDot(page, label, expectedPath, fromPath) {
   // Now the deliberate push: three wheels at the bottom inside a second. The
   // scene gathers them and opens the next page once they pass the disc's
   // height.
-  await page.mouse.move(page.viewportSize().width / 2, page.viewportSize().height / 2);
+  const size = page.viewportSize();
+  await page.mouse.move(Math.round(size.width / 2), Math.round(size.height / 2));
   for (let round = 0; round < 3; round += 1) {
-    await page.mouse.wheel(0, 300);
+    // `page.mouse.wheel` needs a mouse. The phone viewport has none, so there
+    // the push is three dispatched wheel events instead.
+    if (size.width < 720) {
+      await page.evaluate(() => {
+        window.dispatchEvent(
+          new WheelEvent('wheel', { deltaY: 300, deltaMode: 0, bubbles: true, cancelable: true }),
+        );
+      });
+    } else {
+      await page.mouse.wheel(0, 300);
+    }
     await page.waitForTimeout(150);
   }
   try {
@@ -904,7 +915,9 @@ async function checkNextDot(page, label, expectedPath, fromPath) {
     );
     // A navigation may still be in flight. Let it land before the caller
     // closes the context, so a late load cannot report against the next page.
-    await page.waitForLoadState('load').catch(() => {});
+    // The wait carries a budget: with no navigation at all it must not hold
+    // the whole run until the job is cancelled.
+    await page.waitForLoadState('load', { timeout: 5000 }).catch(() => {});
     return;
   }
   // The page it opened is the inside of its dot, so its field must be there.
