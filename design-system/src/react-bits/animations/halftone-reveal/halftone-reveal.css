@@ -1,0 +1,22 @@
+.halftone-reveal-stage {
+  min-height: 24rem;
+}
+
+.halftone-reveal-host {
+  position: relative;
+  width: min(100%, 40rem);
+  height: 22rem;
+  margin: 1rem auto;
+}
+
+.halftone-reveal-host .halftone-reveal {
+  width: 100%;
+  height: 100%;
+}
+
+.rb-frame .halftone-reveal-copy {
+  margin: 0 1rem 1rem;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-align: center;
+}
