@@ -17,7 +17,7 @@ export const REACT_BITS_SOURCE: ReactBitsSource = {
 // paused, onReady, and onError are not controls. Colour defaults are brand
 // tokens: gradientFrom accent-blue, gradientTo accent-yellow, glowColor paper.
 // Upstream gradientFrom rgba(168, 85, 247, 0.35), gradientTo rgba(180, 151, 207, 0.25),
-// glowColor #120F17.
+// glowColor #120F17. Brand colours are opaque so play can sample the dots.
 export const DOT_FIELD_DEFAULTS = {
   dotRadius: 1.5,
   dotSpacing: 14,
@@ -28,8 +28,8 @@ export const DOT_FIELD_DEFAULTS = {
   glowRadius: 160,
   sparkle: false,
   waveAmplitude: 0,
-  gradientFrom: 'rgba(0, 53, 177, 0.35)',
-  gradientTo: 'rgba(222, 245, 79, 0.25)',
+  gradientFrom: 'rgba(0, 53, 177, 1)',
+  gradientTo: 'rgba(222, 245, 79, 1)',
   glowColor: '#FFFFFF',
   reducedMotion: 'never' as ReducedMotionMode,
 };

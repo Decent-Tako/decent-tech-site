@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor } from 'storybook/test';
 
 import { assertFaceNotFallback } from '../../../brand/fontFallback';
-import { assertCanvasPainted } from '../../frame/canvasSupport';
+import { assertCanvasPainted, hexToRgb } from '../../frame/canvasSupport';
 import { movePointer } from '../../frame/pointerSupport';
 import { DotField } from './DotField';
 import { DOT_FIELD_DEFAULTS } from './source';
@@ -109,8 +109,33 @@ async function playPaint(stage: HTMLElement) {
   const sketch = stage.querySelector('canvas');
   await expect(sketch).toBeTruthy();
   await expect(stage).toHaveTextContent('19–28 October 2026');
-  await assertCanvasPainted(sketch as HTMLCanvasElement, INK);
-  return sketch as HTMLCanvasElement;
+  const canvas = sketch as HTMLCanvasElement;
+  try {
+    await assertCanvasPainted(canvas, INK, { grid: 48, timeoutMs: 2000 });
+  } catch {
+    // Dots are 3px on a 15px pitch, so an 8-sample grid can miss every one.
+    const ctx = canvas.getContext('2d');
+    await expect(ctx).toBeTruthy();
+    const data = ctx!.getImageData(0, 0, canvas.width, canvas.height).data;
+    const background = hexToRgb(INK);
+    let painted = false;
+    for (let y = 0; y < canvas.height && !painted; y += 2) {
+      for (let x = 0; x < canvas.width; x += 2) {
+        const offset = (y * canvas.width + x) * 4;
+        if (data[offset + 3] === 0) continue;
+        const far =
+          Math.abs(data[offset] - background[0]) > 16 ||
+          Math.abs(data[offset + 1] - background[1]) > 16 ||
+          Math.abs(data[offset + 2] - background[2]) > 16;
+        if (far) {
+          painted = true;
+          break;
+        }
+      }
+    }
+    await expect(painted).toBe(true);
+  }
+  return canvas;
 }
 
 async function playPauseResume(canvas: Canvas, stage: HTMLElement) {
