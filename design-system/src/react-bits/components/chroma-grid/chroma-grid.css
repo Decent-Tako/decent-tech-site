@@ -1,0 +1,50 @@
+.rb-frame [data-testid='chroma-grid-stage'] {
+  min-height: 36rem;
+  overflow: auto;
+}
+
+.rb-frame .chroma-grid {
+  max-width: 100%;
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+}
+
+.rb-frame .chroma-card {
+  width: auto;
+  border-color: var(--line);
+}
+
+.rb-frame .chroma-img-wrapper img {
+  aspect-ratio: 8 / 5;
+  object-fit: cover;
+}
+
+.rb-frame .chroma-info,
+.rb-frame .chroma-info .name,
+.rb-frame .chroma-info .role,
+.rb-frame .chroma-info .handle,
+.rb-frame .chroma-info .location {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--paper);
+}
+
+.rb-frame .chroma-info .name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.rb-frame .chroma-info .role {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.rb-frame .chroma-info .handle,
+.rb-frame .chroma-info .location {
+  color: var(--accent-yellow);
+}
+
+.rb-frame .chroma-grid--instant .chroma-overlay,
+.rb-frame .chroma-grid--instant .chroma-fade {
+  opacity: 0;
+}
