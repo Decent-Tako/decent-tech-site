@@ -1,0 +1,21 @@
+.rb-frame [data-testid='line-sidebar-stage'] {
+  min-height: 22rem;
+  display: grid;
+  place-items: center start;
+  padding: 1.5rem 2rem;
+  background: var(--ink);
+}
+
+.rb-frame .line-sidebar__label,
+.rb-frame .line-sidebar__index,
+.rb-frame .line-sidebar__text {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .line-sidebar__text {
+  font-weight: 700;
+}
+
+.rb-frame .line-sidebar__index {
+  font-weight: 400;
+}
