@@ -1,0 +1,10 @@
+.rb-frame .curved-loop-jacket {
+  min-height: 10rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .curved-loop-svg {
+  fill: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 3rem;
+}
