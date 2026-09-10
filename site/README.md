@@ -9,9 +9,9 @@ The copy sits on a plate in front; the scene runs full-bleed behind it.
 
 | Page | Background scene (`data-scene`) | Extra (`data-effect`) | Dominant colour |
 | --- | --- | --- | --- |
-| Home `/` | Infinite Menu on `#menu-stage`, Splash Cursor over the stage (`splash-cursor`) | | navy `#182534`, gold splats `#ffcb73` |
+| Home `/` | Infinite Menu on `#menu-stage`, filling the viewport | | navy `#182534` |
 | About `/about/` | Liquid Ether (`liquid-ether`) | Split Text on the h1 (`split-text`) | navy and steel blue `#5b8fa3` |
-| Portfolio `/portfolio/` | Galaxy (`galaxy`) | | vermilion `#e34234` |
+| Portfolio `/portfolio/` | Galaxy (`galaxy`) | Splash Cursor over the page (`splash-cursor`) | vermilion `#e34234`, gold splats `#ffcb73` |
 | Blog `/blog/` | Threads (`threads`) | Scrambled Text on the h1 (`scrambled-text`) | terracotta `#d97757` on charcoal `#2c2c2c` |
 | About Ben `/ben/` | Iridescence (`iridescence`) | Ribbons cursor over the page (`ribbons`) | steel blue `#5b8fa3` |
 | Get in touch `/contact/` | Plasma (`plasma`) | Shiny Text on the email link (`shiny-text`) | gold `#ffcb73` on navy |
@@ -21,6 +21,15 @@ The scene names are the keys of `SCENES` in
 attributes on the mount element; every colour is one of the seven brand
 colours: cream `#f2f1e8`, navy `#182534`, vermilion `#e34234`, gold
 `#ffcb73`, terracotta `#d97757`, charcoal `#2c2c2c`, steel blue `#5b8fa3`.
+
+## Home layout
+
+The home page is immersive. The stage fills the viewport edge to edge; the
+wordmark sits over it top left in cream, and the five-link row sits over it
+at the bottom. There is no header band and no footer. The sphere shows many
+coloured discs at rest: `SiteMenu.tsx` passes `scale` to the vendored menu,
+whose frame height follows the scale (local change 10 in its header). The
+other five pages keep the header, the plate, and the footer.
 
 ## Behaviour
 

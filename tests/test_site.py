@@ -29,7 +29,7 @@ PAGES = (
 # site/README.md and design-system/src/site/scenes.ts list them.
 SCENES = {
     "about": ("liquid-ether", "split-text"),
-    "portfolio": ("galaxy", None),
+    "portfolio": ("galaxy", "splash-cursor"),
     "blog": ("threads", "scrambled-text"),
     "ben": ("iridescence", "ribbons"),
     "contact": ("plasma", "shiny-text"),
@@ -203,8 +203,14 @@ class SiteTests(unittest.TestCase):
             )
 
     def test_page_uses_semantic_landmarks(self):
-        for tag in ("header", "nav", "main", "section", "footer"):
+        for tag in ("header", "nav", "main", "section"):
             self.assertIn(tag, self.parser.tags)
+        # The home page is immersive: the stage fills the viewport, no footer.
+        self.assertNotIn("footer", self.parser.tags)
+        for slug, _, path, _ in PAGES:
+            tags = parse(SITE / slug / "index.html").tags
+            for tag in ("header", "nav", "main", "section", "footer"):
+                self.assertIn(tag, tags, f"{path} lacks a {tag} landmark")
 
     def test_skip_link_targets_main_content(self):
         self.assertIn('class="skip-link"', self.html)
@@ -339,10 +345,47 @@ class SiteTests(unittest.TestCase):
             self.assertIn('src="/assets/site.js"', html, f"{path} must load the bundle")
             self.assertIn(' plate"', html, f"{path} copy must sit on a plate")
 
-    def test_home_page_keeps_the_menu_and_adds_only_the_cursor_scene(self):
+    def test_home_page_holds_the_menu_and_no_scene_or_effect(self):
         self.assertIn('id="menu-stage"', self.html)
-        self.assertEqual(self.parser.scenes, ["splash-cursor"])
+        self.assertEqual(self.parser.scenes, [])
         self.assertEqual(self.parser.effects, [])
+        self.assertNotIn("menu-stage-frame", self.html)
+        self.assertNotIn("scene--cursor", self.html)
+
+    def test_home_page_is_immersive(self):
+        # The stage fills the viewport; the wordmark and the link row sit over
+        # it; there is no header band, no hero, and no footer.
+        self.assertIn('<body class="home">', self.html)
+        self.assertIn('class="site-header"', self.html)
+        self.assertIn('class="wordmark"', self.html)
+        self.assertNotIn("<footer", self.html)
+        self.assertIn(".home main {", self.css)
+        self.assertRegex(self.css, r"\.home main \{[^}]*min-height: 100svh")
+        self.assertRegex(self.css, r"\.home \.site-header \{[^}]*position: absolute")
+        self.assertRegex(self.css, r"\.menu-stage \{[^}]*min-height: 100svh")
+        self.assertRegex(self.css, r"\.menu-list \{[^}]*position: absolute")
+        self.assertRegex(self.css, r"\.menu-list \{[^}]*bottom: 0")
+        self.assertEqual(len(self.parser.menu_list_links), len(PAGES))
+
+    def test_site_menu_shows_many_discs_at_rest(self):
+        menu = (DESIGN_SYSTEM / "src" / "site" / "SiteMenu.tsx").read_text()
+        scale = re.search(r"const MENU_SCALE = ([0-9.]+);", menu)
+        self.assertIsNotNone(scale, "SiteMenu.tsx must set MENU_SCALE")
+        self.assertGreaterEqual(float(scale.group(1)), 2.0)
+        self.assertIn("scale={MENU_SCALE}", menu)
+        vendored = (
+            DESIGN_SYSTEM / "src" / "motion-examples" / "vendor" / "react-bits" / "infinite-menu" / "InfiniteMenu.tsx"
+        ).read_text()
+        self.assertIn("this.SPHERE_RADIUS * 0.35 * this.scaleFactor", vendored)
+        self.assertIn("10. `updateProjectionMatrix()`", vendored)
+
+    def test_ben_page_names_ben_davies(self):
+        page = SITE / "ben" / "index.html"
+        html = page.read_text()
+        self.assertIn("Ben Davies", " ".join(parse(page).text))
+        # Every "Ben <Surname>" on the page is the one correct name.
+        surnames = set(re.findall(r"Ben [A-Z][a-z]+", html))
+        self.assertEqual(surnames, {"Ben Davies"})
 
     def test_scene_registry_names_every_scene_the_pages_use(self):
         registry = (DESIGN_SYSTEM / "src" / "site" / "scenes.ts").read_text()

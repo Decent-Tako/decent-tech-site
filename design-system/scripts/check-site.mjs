@@ -1,9 +1,10 @@
 // Check of the site in a headless Chromium. Runs in GitHub Actions only,
 // never on a developer machine. Opens all six pages at two viewports,
 // asserts zero console errors, waits for #menu-stage and every [data-scene]
-// element to settle on data-webgl="ready" or "unavailable", prints which
-// WebGL branch each page took, and saves one screenshot per page per
-// viewport to site-shots/ (twelve in all). On the home page, when the menu
+// and [data-effect] element to settle on data-webgl="ready" or
+// "unavailable", prints which WebGL branch each page took, and saves one
+// screenshot per page per viewport to site-shots/ (twelve in all). The home
+// page holds the menu only, so it expects zero [data-scene] elements. On the home page, when the menu
 // is ready, it drags the sphere 200 pixels and asserts the overlay link
 // points at one of the five pages.
 //
@@ -114,8 +115,9 @@ async function checkPage(browser, viewport, pagePath) {
     await checkMenu(page, viewport.name, menuState);
   }
 
+  // One background scene on every page but the home page, which is the menu.
   const sceneCount = await page.locator('[data-scene]').count();
-  const expected = 1;
+  const expected = pagePath === '/' ? 0 : 1;
   if (sceneCount !== expected) {
     fail(`${label}: found ${sceneCount} [data-scene] elements, expected ${expected}`);
   }

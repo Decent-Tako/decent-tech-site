@@ -1,6 +1,6 @@
-// Home page: fluid splats over the Infinite Menu stage. The host sits over
-// the stage with pointer-events none, so the pointer is read from document
-// and the sphere below still takes the drag.
+// Portfolio page cursor: fluid splats over the whole page. The host sits
+// over the copy with pointer-events none, so the pointer is read from
+// document and the links below still take the click.
 import { useEffect, useRef } from 'react';
 
 import {
@@ -30,19 +30,21 @@ const CONFIG: FluidConfig = {
   COLOR: '#ffcb73',
 };
 
-export default function SplashCursorScene({ host, dataset, onReady }: SceneProps) {
+export default function SplashCursorScene({ host, dataset, onReady, onDone }: SceneProps) {
   const { paused, reduce } = useSceneState(host);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const simRef = useRef<FluidSimulation | null>(null);
   const pausedRef = useRef(paused);
   const reduceRef = useRef(reduce);
   const onReadyRef = useRef(onReady);
+  const onDoneRef = useRef(onDone);
   const color = dataset.color ?? CONFIG.COLOR;
   const radius = number(dataset.radius, CONFIG.SPLAT_RADIUS);
 
   useEffect(() => {
     onReadyRef.current = onReady;
-  }, [onReady]);
+    onDoneRef.current = onDone;
+  }, [onReady, onDone]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -55,6 +57,8 @@ export default function SplashCursorScene({ host, dataset, onReady }: SceneProps
     sim.splat(0.5, 0.5, 0, 0, hexToRgb(color, { r: 1, g: 0.8, b: 0.45 }));
     sim.tick();
     onReadyRef.current();
+    // A cursor has no entry animation: the first frame is the settled state.
+    onDoneRef.current();
     if (!pausedRef.current) sim.start();
     return () => {
       sim.destroy();
