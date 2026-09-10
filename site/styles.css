@@ -99,6 +99,16 @@ html {
   background: var(--field);
 }
 
+/* The body must not paint over the field, or the flat dot colour would never
+   be seen and the view transition would land on the paper colour instead. */
+.field--gold > body,
+.field--vermilion > body,
+.field--terracotta > body,
+.field--steel > body,
+.field--cream > body {
+  background: transparent;
+}
+
 /* Continuity between the home page and a page, the fancy version. The
    expanding circle on the home page and the field of the page it opens carry
    the same view-transition-name, so the circle morphs into the field. The

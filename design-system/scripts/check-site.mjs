@@ -371,18 +371,28 @@ async function checkContinuityPaths(browser, viewport) {
 async function checkFirstPaint(page, label, pagePath) {
   const field = FIELDS[pagePath];
   if (!field) return;
-  const painted = await page.evaluate(
-    () => getComputedStyle(document.documentElement).backgroundColor,
-  );
-  if (painted !== field.rgb) {
+  const { html, body } = await page.evaluate(() => ({
+    html: getComputedStyle(document.documentElement).backgroundColor,
+    body: getComputedStyle(document.body).backgroundColor,
+  }));
+  if (html !== field.rgb) {
     fail(
-      `${label}: at first paint <html> is ${painted}, expected the ${field.token} ` +
+      `${label}: at first paint <html> is ${html}, expected the ${field.token} ` +
         `field ${field.rgb}`,
     );
     return;
   }
+  // The body must not paint over the field, or the flat dot colour would
+  // never be seen and the transition would land on the paper colour.
+  if (body !== 'rgba(0, 0, 0, 0)') {
+    fail(
+      `${label}: the body paints ${body} over the ${field.token} field; it must be ` +
+        `transparent`,
+    );
+    return;
+  }
   console.log(
-    `check-site: ${label}: first paint is the ${field.token} field ${painted}`,
+    `check-site: ${label}: first paint is the ${field.token} field ${html}`,
   );
 }
 

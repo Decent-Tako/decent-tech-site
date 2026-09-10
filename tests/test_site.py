@@ -888,6 +888,15 @@ class SiteTests(unittest.TestCase):
                 html,
                 f"{path} theme colour does not follow its field",
             )
+            # The body must not paint over the field. `body` carries the paper
+            # colour for the rest of the site, so every field page clears it;
+            # otherwise the flat dot colour would never be seen and the view
+            # transition would land on the paper colour instead.
+            self.assertRegex(
+                self.css,
+                rf"\.field--{field_token} > body[^{{]*\{{[^}}]*background: transparent",
+                f"the body paints over the {field_token} field",
+            )
 
     def test_the_stylesheet_opts_into_cross_document_view_transitions(self):
         # The circle on the home page and the field of the page it opens carry
