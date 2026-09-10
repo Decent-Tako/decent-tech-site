@@ -267,6 +267,13 @@ Each disc is a real `button`, so Enter, Space, and the tab order work with
 nothing added. The heading names the section for assistive technology through
 `aria-label`, and the short word stays the visible label.
 
+The discs keep their row. The plate of the section that is open is a grid item
+of its own, under that row, with the class `section-dot__panel--full`: it spans
+every column, so the heading and the copy read at the measure of the other
+plates and the close control sits in its top right. In the article of its
+section the plate kept the width of one column, and the copy read in a strip
+about a third of the plate wide, beside the discs.
+
 Under reduced motion the plate appears at once: no circle, no fade.
 
 The same component is ready for Portfolio, Blog, and About Ben when their

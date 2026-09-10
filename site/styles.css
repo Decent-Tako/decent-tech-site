@@ -308,7 +308,8 @@ a:focus-visible {
 }
 
 .plate .hero-copy,
-.plate .service-grid article p:last-child {
+.plate .service-grid article p:last-child,
+.plate .section-dot__panel p:last-child {
   color: var(--plate-muted);
 }
 
@@ -902,9 +903,19 @@ h3 {
   position: relative;
 }
 
-/* A folded section is the disc and the panel it opens, stacked. */
+/* A folded grid is the row of discs and, under it, the plate of the section
+   that is open. The discs keep their row; the plate is a grid item of its own
+   that spans every column. */
 .service-grid:has(.section-dot__disc) {
   align-items: start;
+}
+
+/* The article of a folded section holds the disc alone, so it needs no card
+   height. It keeps the surface of the grid cell it always had. */
+.service-grid article:has(.section-dot__disc) {
+  min-height: 0;
+  display: flex;
+  justify-content: center;
 }
 
 /* The disc carries the short word, in the same serif and with the same dot
@@ -939,16 +950,25 @@ h3 {
 }
 
 /* The panel is the section's plate. It fades in over the circle that grew out
-   of the disc, and it is `hidden` while the section is closed. */
+   of the disc, and it is `hidden` while the section is closed.
+
+   The scene puts the panel in the grid, after the row of discs, and not in the
+   article of its section. Only a grid item can span the columns, so this is
+   what makes the heading and the copy read at the measure of the plate and not
+   in a strip of one column beside the discs. */
 .section-dot__panel {
   position: relative;
   z-index: 2;
-  grid-column: 1 / -1;
-  margin-top: clamp(1rem, 3vw, 1.6rem);
   padding: clamp(1.2rem, 4vw, 2.4rem);
   background: var(--plate);
   color: var(--plate-ink);
   animation: section-dot-plate 260ms ease-out both;
+}
+
+/* The full-width class the scene puts on every panel it opens. */
+.section-dot__panel--full {
+  grid-column: 1 / -1;
+  width: 100%;
 }
 
 @keyframes section-dot-plate {

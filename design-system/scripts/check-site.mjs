@@ -843,6 +843,27 @@ async function checkSectionDots(page, label) {
   }
   console.log(`check-site: ${label}: the section press did not navigate`);
 
+  // The open plate spans the services plate. Before, the panel sat in the
+  // article of its section and the copy read in a strip about one column wide,
+  // beside the discs. The plate must now take nearly the whole width.
+  const plateBox = await page.locator('.services').boundingBox();
+  const panelBox = await panel.boundingBox();
+  if (!plateBox || !panelBox) {
+    fail(`${label}: could not measure the open section plate`);
+    return;
+  }
+  const share = panelBox.width / plateBox.width;
+  if (share < 0.6) {
+    fail(
+      `${label}: the open section plate is ${Math.round(panelBox.width)} px, ` +
+        `${Math.round(share * 100)} % of the ${Math.round(plateBox.width)} px services plate, expected at least 60 %`,
+    );
+    return;
+  }
+  console.log(
+    `check-site: ${label}: the open section plate spans ${Math.round(share * 100)} % of the services plate`,
+  );
+
   await page.keyboard.press('Escape');
   try {
     await panel.waitFor({ state: 'hidden', timeout: 2000 });

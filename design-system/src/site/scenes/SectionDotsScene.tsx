@@ -9,6 +9,10 @@
 //
 // There is no route change and no scroll jump. The circle grows from the disc
 // the reader pressed, so the motion starts where the eye already is.
+//
+// The discs stay in their row. The plate of the section that is open is a grid
+// item of its own, under that row, and it spans every column, so the heading
+// and the copy read at the measure of the other plates.
 import { useEffect } from 'react';
 
 import type { SceneProps } from '../scenes';
@@ -33,6 +37,11 @@ function foldSections(host: HTMLElement, list: HTMLElement): () => void {
   const cleanups: Array<() => void> = [];
   let open: HTMLElement | null = null;
 
+  // The panel of a section no longer sits inside it: it is a grid item of its
+  // own, under the row of discs. This map keeps the pair, so open and close
+  // still start from the section the reader pressed.
+  const panels = new Map<HTMLElement, HTMLElement>();
+
   // The circle that grows out of the disc. One element, reused by every
   // section, so the page never holds more than one.
   const circle = document.createElement('div');
@@ -55,7 +64,7 @@ function foldSections(host: HTMLElement, list: HTMLElement): () => void {
 
   function closeSection(section: HTMLElement, moveFocus: boolean) {
     const disc = section.querySelector<HTMLElement>('.section-dot__disc');
-    const panel = section.querySelector<HTMLElement>('.section-dot__panel');
+    const panel = panels.get(section);
     if (!disc || !panel) return;
     section.dataset.open = 'false';
     disc.setAttribute('aria-expanded', 'false');
@@ -69,7 +78,7 @@ function foldSections(host: HTMLElement, list: HTMLElement): () => void {
 
   function openSection(section: HTMLElement) {
     const disc = section.querySelector<HTMLElement>('.section-dot__disc');
-    const panel = section.querySelector<HTMLElement>('.section-dot__panel');
+    const panel = panels.get(section);
     if (!disc || !panel) return;
     if (open && open !== section) closeSection(open, false);
     growFrom(disc);
@@ -88,12 +97,15 @@ function foldSections(host: HTMLElement, list: HTMLElement): () => void {
       return;
     }
 
-    // Wrap the body in the panel the disc opens. The panel keeps the copy in
-    // the document order it had, so the reading order never changes.
+    // Wrap the body in the panel the disc opens. The panel is a direct child
+    // of the grid, after the row of discs, so it spans the full width of the
+    // services plate: `grid-column: 1 / -1` only counts on a grid item. In the
+    // article it would keep the width of one column, about a third of the
+    // plate, and the copy would read in a narrow strip beside the discs.
     const wrapper = document.createElement('div');
-    wrapper.className = 'section-dot__panel';
+    wrapper.className = 'section-dot__panel section-dot__panel--full';
     wrapper.hidden = true;
-    panel.parentNode?.insertBefore(wrapper, panel);
+    list.appendChild(wrapper);
     wrapper.appendChild(panel);
 
     // The disc is a real button, so Enter, Space, and the tab order all work
@@ -120,7 +132,10 @@ function foldSections(host: HTMLElement, list: HTMLElement): () => void {
     // disc carries the full heading as its accessible name and the short word
     // stays the visible label.
     disc.setAttribute('aria-label', heading.textContent?.trim() ?? label);
-    section.insertBefore(disc, wrapper);
+    // The article now holds the disc alone. The panel it opens is the grid
+    // item below the row.
+    section.appendChild(disc);
+    panels.set(section, wrapper);
 
     // The close control: a small disc with an x, in the tab order.
     const close = document.createElement('button');
@@ -144,9 +159,11 @@ function foldSections(host: HTMLElement, list: HTMLElement): () => void {
       close.removeEventListener('click', onClose);
       close.remove();
       disc.remove();
-      // Put the body back where the HTML had it and drop the wrapper.
-      wrapper.parentNode?.insertBefore(panel, wrapper);
+      // Put the body back in its article, where the HTML had it, and drop the
+      // wrapper from the grid.
+      section.appendChild(panel);
       wrapper.remove();
+      panels.delete(section);
       delete section.dataset.open;
     });
   });

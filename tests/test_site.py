@@ -1449,6 +1449,19 @@ class PlayfulBitsTests(unittest.TestCase):
         self.assertIn("var(--running-ink)", disc)
         self.assertIn("var(--field)", disc)
 
+    def test_the_open_section_plate_spans_the_full_width_of_the_grid(self):
+        # The plate of an open section is a grid item under the row of discs,
+        # and it carries the full-width class. In the article of its section it
+        # kept the width of one column, and the copy read in a strip about a
+        # third of the plate wide, beside the discs.
+        scene = (
+            DESIGN_SYSTEM / "src" / "site" / "scenes" / "SectionDotsScene.tsx"
+        ).read_text()
+        self.assertIn("section-dot__panel section-dot__panel--full", scene)
+        self.assertIn("list.appendChild(wrapper)", scene)
+        full = self.css[self.css.index(".section-dot__panel--full {") :][:300]
+        self.assertIn("grid-column: 1 / -1", full)
+
     def test_the_close_control_is_a_disc_the_keyboard_reaches(self):
         close = self.css[self.css.index(".section-dot__close {") :][:600]
         self.assertIn("border-radius: 50%", close)
