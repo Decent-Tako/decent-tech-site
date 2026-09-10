@@ -1,0 +1,10 @@
+.rb-frame .shuffle-parent,
+.rb-frame .shuffle-copy {
+  margin: 1.25rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ink);
+  text-transform: none;
+}
