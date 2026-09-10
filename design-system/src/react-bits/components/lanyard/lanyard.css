@@ -1,0 +1,8 @@
+.rb-frame [data-testid='lanyard-stage'] {
+  height: 28rem;
+  min-height: 28rem;
+}
+
+.rb-frame .lanyard-wrapper {
+  min-height: 28rem;
+}
