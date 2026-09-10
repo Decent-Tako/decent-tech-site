@@ -28,6 +28,7 @@ import InfiniteMenu, {
   type MenuItem,
 } from '../motion-examples/vendor/react-bits/infinite-menu/InfiniteMenu';
 import { SITE_PAGES, splitPhrase, withBase, type SitePage } from './pages';
+import { IDLE_RATE, watchIdle } from './sceneSupport';
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
@@ -152,6 +153,15 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
   const [expand, setExpand] = useState<Expand | null>(null);
   const [steps, setSteps] = useState(0);
   const reduce = useReducedMotion();
+  // Idle life: after 20 s with no input the sphere runs at a third of its
+  // motion, and the first input puts it back. Reduced motion never idles,
+  // because nothing is moving to slow down.
+  const [idleState, setIdle] = useState(false);
+  useEffect(() => {
+    if (reduce) return;
+    return watchIdle(setIdle);
+  }, [reduce]);
+  const idle = idleState && !reduce;
   const rootRef = useRef<HTMLDivElement | null>(null);
   const menuRef = useRef<InfiniteGridMenu | null>(null);
   // The listeners below read the active page from a ref, so a dot change
@@ -567,6 +577,7 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
           scale={MENU_SCALE}
           backgroundColor={backgroundColor}
           inertia={!reduce}
+          rate={idle ? IDLE_RATE : 1}
           onInit={handleInit}
           onActiveItemChange={handleActive}
           onItemClick={handleItemClick}

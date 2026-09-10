@@ -8,12 +8,13 @@ import type { SceneProps } from '../scenes';
 import { number, rgb, useSceneState } from '../sceneSupport';
 
 export default function ThreadsScene({ host, dataset, onReady }: SceneProps) {
-  const { paused } = useSceneState(host);
+  const { paused, rate } = useSceneState(host);
   return (
     <Threads
       color={rgb(dataset.color, rgb('#182534', [1, 1, 1]))}
       amplitude={number(dataset.amplitude, 2)}
       distance={number(dataset.distance, 0.4)}
+      speed={rate}
       enableMouseInteraction={false}
       paused={paused}
       onReady={onReady}

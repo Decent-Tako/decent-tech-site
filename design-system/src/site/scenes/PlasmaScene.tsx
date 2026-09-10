@@ -13,12 +13,12 @@ import type { SceneProps } from '../scenes';
 import { number, useSceneState } from '../sceneSupport';
 
 export default function PlasmaScene({ host, dataset, onReady }: SceneProps) {
-  const { paused, reduce } = useSceneState(host);
+  const { paused, reduce, rate } = useSceneState(host);
   return (
     <Plasma
       key={reduce ? 'still' : 'live'}
       color={dataset.color ?? '#ffcb73'}
-      speed={number(dataset.speed, 0.6)}
+      speed={number(dataset.speed, 0.6) * rate}
       scale={number(dataset.scale, 1.4)}
       opacity={number(dataset.opacity, 0.55)}
       mouseInteractive={false}

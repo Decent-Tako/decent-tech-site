@@ -39,17 +39,78 @@ export function useOnScreen(host: HTMLElement): boolean {
   return visible && intersecting;
 }
 
+/** The page is idle after this long with no pointer, wheel, key, or touch. */
+export const IDLE_AFTER_MS = 20_000;
+/** The part of full motion a scene keeps while the page is idle. */
+export const IDLE_RATE = 1 / 3;
+
+/**
+ * Watch for an idle page. After IDLE_AFTER_MS with no input, `onChange(true)`
+ * runs; the first input after that runs `onChange(false)`. Returns the
+ * function that stops the watch.
+ *
+ * Every site scene shares one watcher, started by the site entry, so the
+ * timer runs once per page and not once per scene.
+ */
+export function watchIdle(onChange: (idle: boolean) => void): () => void {
+  let timer = 0;
+  let idle = false;
+
+  const wake = () => {
+    if (idle) {
+      idle = false;
+      onChange(false);
+    }
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => {
+      idle = true;
+      onChange(true);
+    }, IDLE_AFTER_MS);
+  };
+
+  // Any one of these is a reader who is still there.
+  const events = ['pointermove', 'pointerdown', 'wheel', 'keydown', 'touchstart'];
+  events.forEach((name) =>
+    window.addEventListener(name, wake, { passive: true, capture: true }),
+  );
+  wake();
+
+  return () => {
+    window.clearTimeout(timer);
+    events.forEach((name) => window.removeEventListener(name, wake, true));
+  };
+}
+
+/** True while the page is idle. Off under reduced motion, which never idles. */
+export function useIdle(): boolean {
+  const reduce = useReducedMotion();
+  const [idle, setIdle] = useState(false);
+  useEffect(() => {
+    if (reduce) return;
+    return watchIdle(setIdle);
+  }, [reduce]);
+  // Reduced motion never idles: nothing is moving to slow down. The state is
+  // read through the query rather than written back, so the effect body sets
+  // no state and the render stays one pass.
+  return idle && !reduce;
+}
+
 export type SceneState = {
   /** True when the loop must stop: reduced motion, hidden tab, or off screen. */
   paused: boolean;
   /** True while the user asks for reduced motion. */
   reduce: boolean;
+  /** True after 20 s with no input. The scene slows to IDLE_RATE. */
+  idle: boolean;
+  /** The part of full motion the scene runs at now: 1, or IDLE_RATE. */
+  rate: number;
 };
 
 export function useSceneState(host: HTMLElement): SceneState {
   const reduce = useReducedMotion();
   const onScreen = useOnScreen(host);
-  return { paused: reduce || !onScreen, reduce };
+  const idle = useIdle();
+  return { paused: reduce || !onScreen, reduce, idle, rate: idle ? IDLE_RATE : 1 };
 }
 
 /** A comma-separated data attribute as a list of trimmed strings. */

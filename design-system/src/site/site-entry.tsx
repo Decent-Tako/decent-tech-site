@@ -7,6 +7,7 @@ import { createElement, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { SCENES } from './scenes';
+import { watchIdle } from './sceneSupport';
 import { SiteMenu } from './SiteMenu';
 
 import './menu.css';
@@ -92,5 +93,23 @@ function mountScenes() {
     .forEach((host) => void mountScene(host));
 }
 
+// Idle life. After 20 seconds with no pointer, wheel, key, or touch, every
+// scene and the home sphere slow to about a third of their motion, and the
+// first input brings them back. The flag goes on the stage and on every scene
+// host, so the site check can read it and so CSS can slow what it animates.
+// Reduced motion never idles: nothing is moving to slow down.
+function watchIdleHosts() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const hosts = () =>
+    document.querySelectorAll<HTMLElement>('#menu-stage, [data-scene], [data-effect]');
+  watchIdle((idle) => {
+    hosts().forEach((host) => {
+      if (idle) host.dataset.idle = 'true';
+      else delete host.dataset.idle;
+    });
+  });
+}
+
 mountMenu();
 mountScenes();
+watchIdleHosts();

@@ -105,6 +105,12 @@
  *    pointer was over, so `pointerDownAt` was left set and the next press
  *    paired with the old one: an elapsed time of seconds that the drag rule
  *    threw away. That is the third cause of a press that did nothing.
+ * 17. `InfiniteGridMenu` got `setRate(rate)` and `InfiniteMenu` got the `rate`
+ *    prop. The frame loop scales the delta time it feeds `animate()` by the
+ *    rate, so the whole sphere runs at that part of its motion. The site
+ *    slows it to about a third while the page is idle and puts it back on the
+ *    first input. The clock the loop keeps is real time, so a change of rate
+ *    changes the speed and never jumps the sphere.
  * Everything else is unchanged.
  */
 import { type CSSProperties, type FC, useRef, useState, useEffect, type MutableRefObject } from 'react';
@@ -857,6 +863,9 @@ export class InfiniteGridMenu {
 
   private _time = 0;
   private _deltaTime = 0;
+
+  /** Local change 17: the part of full motion the sphere runs at. */
+  public rate = 1;
   private _deltaFrames = 0;
   private _frames = 0;
 
@@ -1106,9 +1115,16 @@ export class InfiniteGridMenu {
     }
   }
 
+  /** Local change 17: the part of full motion the sphere runs at. */
+  public setRate(rate: number): void {
+    this.rate = rate > 0 ? rate : 0;
+  }
+
   public run(time = 0): void {
     if (this.paused) return;
-    this._deltaTime = Math.min(32, time - this._time);
+    // Local change 17: the step the sphere takes is the real step scaled by
+    // the rate, so an idle page turns slowly and the clock stays real time.
+    this._deltaTime = Math.min(32, time - this._time) * this.rate;
     this._time = time;
     this._deltaFrames = this._deltaTime / this.TARGET_FRAME_DURATION;
     this._frames += this._deltaFrames;
@@ -1601,6 +1617,8 @@ interface InfiniteMenuProps {
   scale?: number;
   backgroundColor?: string;
   inertia?: boolean;
+  /** Local change 17: the part of full motion the sphere runs at. */
+  rate?: number;
   onInit?: (menu: InfiniteGridMenu) => void;
   onActiveItemChange?: (item: MenuItem, vertexIndex: number) => void;
   onItemClick?: (
@@ -1616,6 +1634,7 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({
   scale = 1.0,
   backgroundColor = '#000000',
   inertia = true,
+  rate = 1,
   onInit,
   onActiveItemChange,
   onItemClick
@@ -1626,6 +1645,7 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({
   const onActiveItemChangeRef = useRef(onActiveItemChange);
   const onItemClickRef = useRef(onItemClick);
   const inertiaRef = useRef(inertia);
+  const rateRef = useRef(rate);
   const [activeItem, setActiveItem] = useState<MenuItem | null>(null);
   const [isMoving, setIsMoving] = useState<boolean>(false);
 
@@ -1639,6 +1659,11 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({
     inertiaRef.current = inertia;
     sketchRef.current?.setInertia(inertia);
   }, [inertia]);
+
+  useEffect(() => {
+    rateRef.current = rate;
+    sketchRef.current?.setRate(rate);
+  }, [rate]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -1659,6 +1684,7 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({
         setIsMoving,
         sk => {
           sk.setInertia(inertiaRef.current);
+          sk.setRate(rateRef.current);
           sk.setItemClick((index, vertexIndex, screenPoint, hit) => {
             const list = items.length ? items : defaultItems;
             // Local change 16. A press the drag rule threw away reports index

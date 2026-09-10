@@ -9,11 +9,11 @@ import type { SceneProps } from '../scenes';
 import { number, rgb, useSceneState } from '../sceneSupport';
 
 export default function IridescenceScene({ host, dataset, onReady }: SceneProps) {
-  const { paused } = useSceneState(host);
+  const { paused, rate } = useSceneState(host);
   return (
     <Iridescence
       color={rgb(dataset.color, rgb('#ffcb73', [1, 1, 1]))}
-      speed={number(dataset.speed, 0.5)}
+      speed={number(dataset.speed, 0.5) * rate}
       amplitude={number(dataset.amplitude, 0.1)}
       mouseReact={false}
       paused={paused}
