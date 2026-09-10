@@ -1,0 +1,9 @@
+.rb-frame [data-testid='fluid-glass-stage'] {
+  min-height: 32rem;
+}
+
+.rb-frame [data-testid='fluid-glass-stage'] canvas {
+  display: block;
+  width: 100%;
+  height: 30rem;
+}
