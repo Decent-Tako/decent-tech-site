@@ -11,6 +11,7 @@
  * Local changes:
  * 1. Handle pointermove as well as mousemove so play helpers reach the host.
  * 2. data-testid="blob-cursor-host" on the container.
+ * 3. paused skips new tweens so Pause does not touch gsap.globalTimeline.
  */
 
 import React, { useRef, useEffect, useCallback } from 'react';
@@ -38,6 +39,7 @@ export interface BlobCursorProps {
   fastEase?: string;
   slowEase?: string;
   zIndex?: number;
+  paused?: boolean;
 }
 
 export default function BlobCursor({
@@ -60,10 +62,13 @@ export default function BlobCursor({
   slowDuration = 0.5,
   fastEase = 'power3.out',
   slowEase = 'power1.out',
-  zIndex = 100
+  zIndex = 100,
+  paused = false,
 }: BlobCursorProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const blobsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
 
   const updateOffset = useCallback(() => {
     if (!containerRef.current) return { left: 0, top: 0 };
@@ -73,6 +78,7 @@ export default function BlobCursor({
 
   const handleMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement> | React.PointerEvent<HTMLDivElement>) => {
+      if (pausedRef.current) return;
       const { left, top } = updateOffset();
       const x = 'clientX' in e ? e.clientX : e.touches[0].clientX;
       const y = 'clientY' in e ? e.clientY : e.touches[0].clientY;

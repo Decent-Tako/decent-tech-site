@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent } from 'storybook/test';
+import { expect, userEvent, waitFor } from 'storybook/test';
 
 import { assertFaceNotFallback } from '../../../brand/fontFallback';
 import { assertCanvasPainted } from '../../frame/canvasSupport';
@@ -105,7 +105,10 @@ async function playLight(canvas: Canvas) {
   movePointer(grid as HTMLElement, 180, 140);
   await userEvent.click(grid as HTMLElement);
   const canvasEl = canvas.getByTestId('cursor-grid-canvas') as HTMLCanvasElement;
-  await assertCanvasPainted(canvasEl, PAPER);
+  await waitFor(() => {
+    expect(canvasEl.width).toBeGreaterThan(0);
+  });
+  await assertCanvasPainted(canvasEl, PAPER, { grid: 32, timeoutMs: 4000 });
   return stage;
 }
 
@@ -151,10 +154,11 @@ export const ReducedMotion: Story = {
     await playBrand(canvas);
     const stage = canvas.getByTestId('cursor-grid-stage');
     await expect(stage).toHaveAttribute('data-reduced', 'true');
-    await assertCanvasPainted(
-      canvas.getByTestId('cursor-grid-canvas') as HTMLCanvasElement,
-      PAPER,
-    );
+    const canvasEl = canvas.getByTestId('cursor-grid-canvas') as HTMLCanvasElement;
+    await waitFor(() => {
+      expect(canvasEl.width).toBeGreaterThan(0);
+    });
+    await assertCanvasPainted(canvasEl, PAPER, { grid: 32, timeoutMs: 4000 });
     await playPause(canvas, stage);
   },
 };

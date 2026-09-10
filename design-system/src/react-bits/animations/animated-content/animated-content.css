@@ -26,9 +26,10 @@
 
 .rb-frame .animated-content__kicker {
   font-size: 0.8125rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--accent-blue);
+  color: var(--ink);
 }
 
 .rb-frame .animated-content__title {

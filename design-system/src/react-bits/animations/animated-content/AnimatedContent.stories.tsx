@@ -14,7 +14,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Vendored React Bits Animated Content, commit 625f250, 2026-09-10. Mechanism: gsap.set offsets, scales, and fades the wrapper, then a ScrollTrigger plays a timeline to the rest pose once the wrapper enters the viewport. Licence MIT + Commons Clause. Page https://reactbits.dev/animations/animated-content . Runtime gsap 3.15.0. Pause holds the gsap global timeline. Replay remounts the wrapper.',
+          'Vendored React Bits Animated Content, commit 625f250, 2026-09-10. Mechanism: gsap.set offsets, scales, and fades the wrapper, then a ScrollTrigger plays a timeline to the rest pose once the wrapper enters the viewport. Licence MIT + Commons Clause. Page https://reactbits.dev/animations/animated-content . Runtime gsap 3.15.0. Pause holds this timeline only. Replay remounts the wrapper.',
       },
     },
   },
@@ -102,8 +102,14 @@ async function playEnter(canvas: Canvas) {
   await waitFor(() => {
     expect(stage).toHaveAttribute('data-state', 'visible');
   }, SLOW);
-  await expect(canvas.getByTestId('animated-content-card')).toBeVisible();
-  await expect(canvas.getByText('Week 0')).toBeVisible();
+  const card = canvas.getByTestId('animated-content-card');
+  await waitFor(() => {
+    const style = getComputedStyle(card);
+    expect(style.visibility).toBe('visible');
+    expect(Number(style.opacity)).toBe(1);
+    expect(card).toBeVisible();
+    expect(canvas.getByText('Week 0')).toBeVisible();
+  }, SLOW);
   return stage;
 }
 

@@ -1,5 +1,4 @@
-import { gsap } from 'gsap';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { FEATURES } from '../../../pages/content';
 import { ReactBitsAttribution, ReactBitsRuntimeLine } from '../../frame/Attribution';
@@ -62,13 +61,6 @@ export function BlobCursor({
   const [run, setRun] = useState(0);
   const reduce = useReduce(reducedMotion);
 
-  useEffect(() => {
-    gsap.globalTimeline.paused(paused);
-    return () => {
-      gsap.globalTimeline.paused(false);
-    };
-  }, [paused]);
-
   const motion = reduce
     ? { fastDuration: 0, slowDuration: 0, useFilter: false }
     : { fastDuration, slowDuration, useFilter };
@@ -88,7 +80,7 @@ export function BlobCursor({
               upstream was <code>#5227FF</code>.
             </>
           }
-          controls="Pause holds the gsap global timeline. Replay remounts the blobs."
+          controls="Pause skips new pointer tweens. Replay remounts the blobs."
         />
       }
       extraRuntime={<ReactBitsRuntimeLine source={REACT_BITS_SOURCE} />}
@@ -132,6 +124,7 @@ export function BlobCursor({
         fastEase={fastEase}
         slowEase={slowEase}
         zIndex={zIndex}
+        paused={paused}
       />
       <div className="blob-cursor-copy">
         <p>{CARD.kicker}</p>

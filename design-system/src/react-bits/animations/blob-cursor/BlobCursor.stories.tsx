@@ -15,7 +15,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'Vendored React Bits Blob Cursor, commit 625f250, 2026-09-10. Mechanism: gsap tweens a lead blob and a slower trail toward the pointer, then an SVG goo filter merges them. Licence MIT + Commons Clause. Page https://reactbits.dev/animations/blob-cursor . Runtime gsap 3.15.0. Pause holds the gsap global timeline. Replay remounts the blobs. Fill default is brand accent blue #0035B1 (upstream #5227FF).',
+          'Vendored React Bits Blob Cursor, commit 625f250, 2026-09-10. Mechanism: gsap tweens a lead blob and a slower trail toward the pointer, then an SVG goo filter merges them. Licence MIT + Commons Clause. Page https://reactbits.dev/animations/blob-cursor . Runtime gsap 3.15.0. Pause skips new pointer tweens. Replay remounts the blobs. Fill default is brand accent blue #0035B1 (upstream #5227FF).',
       },
     },
   },

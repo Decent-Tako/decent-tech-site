@@ -1,5 +1,4 @@
-import { gsap } from 'gsap';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { FEATURES, HERO, PHOTOS } from '../../../pages/content';
 import { ReactBitsAttribution, ReactBitsRuntimeLine } from '../../frame/Attribution';
@@ -53,15 +52,6 @@ export function AnimatedContent({
   const [state, setState] = useState<AnimatedState>('pending');
   const reduce = useReduce(reducedMotion);
 
-  // The upstream file keeps its timeline private. Pause holds the gsap
-  // global timeline instead; one story renders at a time. Unmount resumes it.
-  useEffect(() => {
-    gsap.globalTimeline.paused(paused);
-    return () => {
-      gsap.globalTimeline.paused(false);
-    };
-  }, [paused]);
-
   // Reduced motion: no travel, no delay, and a zero duration, so the final
   // state shows at once. Disappearance keeps its timing.
   const motion = reduce
@@ -91,7 +81,7 @@ export function AnimatedContent({
               tween sends it off again.
             </>
           }
-          controls="Pause holds the gsap global timeline. Replay remounts the wrapper, so the trigger fires again."
+          controls="Pause holds this timeline only. Replay remounts the wrapper, so the trigger fires again."
         />
       }
       extraRuntime={<ReactBitsRuntimeLine source={REACT_BITS_SOURCE} />}
@@ -130,9 +120,11 @@ export function AnimatedContent({
         disappearAfter={disappearAfter}
         disappearDuration={disappearDuration}
         disappearEase={disappearEase}
+        paused={paused}
         onComplete={() => setState('visible')}
         onDisappearanceComplete={() => setState('gone')}
         data-testid="animated-content-card"
+        aria-hidden={state !== 'visible'}
       >
         <img
           className="animated-content__photo"

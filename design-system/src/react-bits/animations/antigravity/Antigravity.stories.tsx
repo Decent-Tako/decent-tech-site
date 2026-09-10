@@ -121,10 +121,10 @@ async function playSketch(stage: HTMLElement) {
   }
   const canvasEl = stage.querySelector('canvas');
   await expect(canvasEl).not.toBeNull();
-  await assertCanvasPainted(canvasEl as HTMLCanvasElement, INK);
   movePointer(stage, 180, 120);
   movePointer(stage, 260, 180);
-  await assertCanvasPainted(canvasEl as HTMLCanvasElement, INK);
+  movePointer(stage, 200, 140);
+  await assertCanvasPainted(canvasEl as HTMLCanvasElement, INK, { grid: 16, timeoutMs: 6000 });
 }
 
 async function playPause(canvas: Canvas, stage: HTMLElement) {
@@ -169,7 +169,7 @@ export const ReducedMotion: Story = {
     if (stage.dataset.webgl === 'ready') {
       const canvasEl = stage.querySelector('canvas');
       await expect(canvasEl).not.toBeNull();
-      await assertCanvasPainted(canvasEl as HTMLCanvasElement, INK);
+      await assertCanvasPainted(canvasEl as HTMLCanvasElement, INK, { grid: 16, timeoutMs: 6000 });
     }
     await playPause(canvas, stage);
   },

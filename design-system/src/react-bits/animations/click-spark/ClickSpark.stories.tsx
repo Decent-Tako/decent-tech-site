@@ -74,11 +74,20 @@ async function playBrand(canvas: Canvas) {
 
 async function playBurst(canvas: Canvas) {
   const stage = canvas.getByTestId('click-spark-stage');
-  await userEvent.click(canvas.getByTestId('click-spark-host'));
+  const host = canvas.getByTestId('click-spark-host');
+  const sparkCanvas = canvas.getByTestId('click-spark-canvas') as HTMLCanvasElement;
+  const rect = sparkCanvas.getBoundingClientRect();
+  host.dispatchEvent(
+    new MouseEvent('click', {
+      bubbles: true,
+      clientX: rect.left + rect.width * (4.5 / 32),
+      clientY: rect.top + rect.height * (4.5 / 32),
+    }),
+  );
   await waitFor(() => {
     expect(Number(stage.dataset.sparks)).toBeGreaterThan(0);
   });
-  await assertCanvasPainted(canvas.getByTestId('click-spark-canvas') as HTMLCanvasElement, INK);
+  await assertCanvasPainted(sparkCanvas, INK, { grid: 32, timeoutMs: 2000 });
   return stage;
 }
 

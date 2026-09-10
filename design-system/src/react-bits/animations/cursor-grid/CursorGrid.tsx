@@ -96,7 +96,7 @@ export function CursorGrid({
         lineWidth={lineWidth}
         maxOpacity={maxOpacity}
         fillOpacity={fillOpacity}
-        gridOpacity={reduce ? Math.max(gridOpacity, 0.25) : gridOpacity}
+        gridOpacity={reduce ? Math.max(gridOpacity, 0.45) : gridOpacity}
         cellRadius={cellRadius}
         clickPulse={reduce ? false : clickPulse}
         pulseSpeed={pulseSpeed}
