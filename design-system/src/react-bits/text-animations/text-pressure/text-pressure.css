@@ -1,0 +1,10 @@
+.rb-frame .text-pressure-title,
+.rb-frame .text-pressure-copy {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.rb-frame [data-testid='text-pressure-copy'] {
+  min-height: 8rem;
+  padding: 1.25rem 0;
+}

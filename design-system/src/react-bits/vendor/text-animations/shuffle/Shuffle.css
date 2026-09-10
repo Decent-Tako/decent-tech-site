@@ -1,0 +1,46 @@
+/*
+ * Vendored from React Bits.
+ * Source: https://github.com/DavidHDev/react-bits/blob/625f25025fed1c28e2de7d3ac5f12ee83542844d/src/ts-default/TextAnimations/Shuffle/Shuffle.css
+ * Page: https://reactbits.dev/text-animations/shuffle
+ * Commit: 625f25025fed1c28e2de7d3ac5f12ee83542844d
+ * Date: 2026-09-10
+ * Licence: MIT + Commons Clause (see ../../LICENSE.md). The Commons Clause forbids
+ * selling, sublicensing, or redistributing the components themselves.
+ *
+ * Local changes:
+ * 1. This header.
+ * 2. Brand Sans replaces Press Start 2P. The repository cannot load a remote face.
+ */
+.shuffle-parent {
+  display: inline-block;
+  white-space: normal;
+  word-wrap: break-word;
+  will-change: transform;
+  line-height: 1;
+  font-size: 4rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-transform: uppercase;
+  visibility: hidden;
+}
+
+.shuffle-parent.is-ready {
+  visibility: visible;
+}
+
+.shuffle-char-wrapper {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: baseline;
+  position: relative;
+}
+
+.shuffle-char-wrapper > span {
+  display: inline-flex;
+  will-change: transform;
+}
+
+.shuffle-char {
+  line-height: 1;
+  display: inline-block;
+  text-align: center;
+}

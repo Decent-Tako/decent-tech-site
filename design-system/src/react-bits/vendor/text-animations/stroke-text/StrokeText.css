@@ -1,0 +1,32 @@
+/*
+ * Vendored from React Bits.
+ * Source: https://github.com/DavidHDev/react-bits/blob/625f25025fed1c28e2de7d3ac5f12ee83542844d/src/ts-default/TextAnimations/StrokeText/StrokeText.css
+ * Page: https://reactbits.dev/text-animations/stroke-text
+ * Commit: 625f25025fed1c28e2de7d3ac5f12ee83542844d
+ * Date: 2026-09-10
+ * Licence: MIT + Commons Clause (see ../../LICENSE.md). The Commons Clause forbids
+ * selling, sublicensing, or redistributing the components themselves.
+ *
+ * Local changes:
+ * 1. This header.
+ */
+.stroke-text {
+  display: block;
+  width: 100%;
+  line-height: 0;
+}
+
+.stroke-text--hover {
+  cursor: pointer;
+}
+
+.stroke-text__svg {
+  display: block;
+  width: 100%;
+  height: var(--stroke-text-height, 160px);
+}
+
+.stroke-text__stroke,
+.stroke-text__fill {
+  user-select: none;
+}
