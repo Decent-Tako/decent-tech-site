@@ -140,6 +140,31 @@ async function checkPage(browser, viewport, pagePath) {
     console.log(`check-site: ${label}: effect "${name}" branch "${state}"`);
   }
 
+  // A text effect splits its text into letter spans. The letters of one word
+  // must stay on one line: every letter shares its wrapper's line top, and
+  // wrapping happens only at the spaces between wrappers.
+  const brokenWords = await page.evaluate(() => {
+    const groups = new Map();
+    document.querySelectorAll('[data-effect] .char, [data-effect] .split-char').forEach((letter) => {
+      const wrapper = letter.parentElement;
+      if (!wrapper) return;
+      if (!groups.has(wrapper)) groups.set(wrapper, []);
+      groups.get(wrapper).push(letter.getBoundingClientRect().top);
+    });
+    let broken = 0;
+    for (const tops of groups.values()) {
+      if (Math.max(...tops) - Math.min(...tops) > 1) broken += 1;
+    }
+    return { words: groups.size, broken };
+  });
+  if (brokenWords.words > 0) {
+    if (brokenWords.broken > 0) {
+      fail(`${label}: ${brokenWords.broken} of ${brokenWords.words} split words break across lines`);
+    } else {
+      console.log(`check-site: ${label}: ${brokenWords.words} split words each stay on one line`);
+    }
+  }
+
   // Let the first frames draw, then ask for reduced motion. Every scene
   // follows the query and pauses on its current frame, so the screenshot
   // does not wait behind a software renderer. This also proves the query is

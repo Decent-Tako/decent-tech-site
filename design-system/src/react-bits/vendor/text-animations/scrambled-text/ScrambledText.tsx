@@ -19,6 +19,9 @@
  *    the gsap default `auto`, which writes `aria-label` on the split element;
  *    axe forbids that on a `p` or `span` with no role, so a caller can pass
  *    `none`.
+ * 5. The split sets `smartWrap: true`, so gsap wraps the letters of each word
+ *    in a `white-space: nowrap` span and leaves the spaces outside. Without it
+ *    the browser wrapped between the inline-block letters, inside a word.
  * Everything else is unchanged.
  */
 import React, { useEffect, useRef } from 'react';
@@ -69,6 +72,7 @@ const ScrambledText: React.FC<ScrambledTextProps> = ({
     const split = SplitText.create(rootRef.current.firstElementChild, {
       type: 'chars',
       charsClass: 'char',
+      smartWrap: true,
       aria
     });
     charsRef.current = split.chars as HTMLElement[];
