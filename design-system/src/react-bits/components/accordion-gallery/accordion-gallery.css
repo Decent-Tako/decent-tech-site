@@ -1,0 +1,7 @@
+.rb-frame .ag-panel__text {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame [data-testid='accordion-gallery-stage']:has(.accordion-gallery--vertical) {
+  min-height: 40rem;
+}
