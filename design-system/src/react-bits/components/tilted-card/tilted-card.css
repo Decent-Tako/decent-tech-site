@@ -1,0 +1,39 @@
+.rb-frame [data-testid='tilted-card-stage'] {
+  min-height: 28rem;
+  display: grid;
+  place-items: center;
+  background: var(--soft);
+}
+
+.rb-frame .tilted-card-figure {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .tilted-card-caption,
+.rb-frame .tilted-card-mobile-alert,
+.rb-frame .tilted-card__overlay {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .tilted-card-caption {
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.rb-frame .tilted-card-mobile-alert {
+  color: var(--ink);
+}
+
+.rb-frame .tilted-card__overlay {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  color: var(--paper);
+  font-weight: 700;
+  text-shadow: 0 1px 2px #212121;
+}
+
+.rb-frame .tilted-card-img {
+  border: 1px solid var(--line);
+}
