@@ -1,0 +1,17 @@
+.cubes-stage {
+  min-height: 28rem;
+  display: grid;
+  place-items: center;
+}
+
+.rb-frame .cubes-stage .default-animation {
+  width: min(100%, 28rem);
+  margin: 1rem auto;
+}
+
+.rb-frame .cubes-caption {
+  margin: 0 1rem 1rem;
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-align: center;
+}
