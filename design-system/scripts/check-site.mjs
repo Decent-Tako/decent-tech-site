@@ -132,7 +132,15 @@ async function checkPage(browser, viewport, pagePath) {
       if (!hidden) fail(`${label}: a canvas in ${selector} is not aria-hidden`);
     }
   }
-  // Effects are text animations and cursors; they only need to settle.
+  // The scenes have settled live. Now ask for reduced motion: every scene
+  // follows the query and pauses on its current frame, so the software
+  // renderer stops starving the page. Split Text then lands its letters at
+  // once, the effects report done, and the screenshot returns in seconds.
+  // This also proves the query is followed after mount.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(300);
+
+  // Effects are text animations and cursors; they settle and report done.
   const effectCount = await page.locator('[data-effect]').count();
   for (let index = 0; index < effectCount; index += 1) {
     const name = await page.locator('[data-effect]').nth(index).getAttribute('data-effect');
@@ -178,12 +186,8 @@ async function checkPage(browser, viewport, pagePath) {
     }
   }
 
-  // Let the first frames draw, then ask for reduced motion. Every scene
-  // follows the query and pauses on its current frame, so the screenshot
-  // does not wait behind a software renderer. This also proves the query is
-  // followed after mount.
-  await page.waitForTimeout(800);
-  await page.emulateMedia({ reducedMotion: 'reduce' });
+  // The scenes are paused on their current frame (see above), so the
+  // screenshot does not wait behind the software renderer.
   await page.waitForTimeout(300);
   const shot = path.join(SHOTS_DIR, `${slugOf(pagePath)}-${viewport.name}.png`);
   await page.screenshot({ path: shot, fullPage: false, timeout: 60_000 });

@@ -6,8 +6,13 @@ import { list, number, useSceneState } from '../sceneSupport';
 
 const DEFAULT_COLORS = ['#ffcb73', '#5b8fa3', '#f2f1e8'];
 
-export default function RibbonsScene({ host, dataset, onReady }: SceneProps) {
+export default function RibbonsScene({ host, dataset, onReady, onDone }: SceneProps) {
   const { paused } = useSceneState(host);
+  // A cursor has no entry animation: the first frame is the settled state.
+  const ready = () => {
+    onReady();
+    onDone();
+  };
   return (
     <Ribbons
       colors={list(dataset.colors, DEFAULT_COLORS)}
@@ -22,7 +27,7 @@ export default function RibbonsScene({ host, dataset, onReady }: SceneProps) {
       effectAmplitude={2}
       trackDocument
       paused={paused}
-      onReady={onReady}
+      onReady={ready}
     />
   );
 }
