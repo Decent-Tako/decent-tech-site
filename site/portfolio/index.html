@@ -1,11 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="field--vermilion">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Selected work from Decent Technology Group.">
-    <meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#121614" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#e34234">
     <title>Portfolio · Decent Technology Group</title>
     <link rel="canonical" href="https://decent.tech/portfolio/">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -30,34 +29,35 @@
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
 
-    <header class="site-header">
+    <div class="page-wordmark">
       <a class="wordmark" href="/" aria-label="Decent Technology Group home">
-        <span aria-hidden="true">decent.</span>
+        <span class="wordmark-phrase">decent<span class="wordmark-dot">.</span> work</span>
         <span class="wordmark-company">Technology Group</span>
       </a>
-      <nav aria-label="Site pages">
-        <a href="/about/">About</a>
-        <a href="/portfolio/" aria-current="page">Portfolio</a>
-        <a href="/blog/">Blog</a>
-        <a href="/ben/">About Ben</a>
-        <a href="/contact/">Get in touch</a>
-      </nav>
-    </header>
+    </div>
 
     <main id="main-content" class="page page--portfolio">
       <div class="scene" data-scene="galaxy" data-density="1.4" data-hue="0" data-saturation="0" data-glow="0.5" data-speed="0.8"></div>
-      <section class="hero plate" aria-labelledby="portfolio-title">
-        <p class="eyebrow">Portfolio</p>
-        <h1 id="portfolio-title">Selected work will appear here.</h1>
-        <p class="hero-copy">
-          Until then, send an email to <a href="mailto:hello@decent.tech">hello@decent.tech</a> to ask about our work.
-        </p>
-      </section>
-    </main>
+      <div class="page-body">
+        <p class="running-head">work.</p>
+        <section class="hero plate" aria-labelledby="portfolio-title">
+          <p class="eyebrow">Portfolio</p>
+          <h1 id="portfolio-title">Selected work will appear here.</h1>
+          <p class="hero-copy">
+            Until then, send an email to <a href="mailto:hello@decent.tech">hello@decent.tech</a> to ask about our work.
+          </p>
+        </section>
+      </div>
 
-    <footer>
-      <p>Decent Technology Group</p>
-      <p>Consulting, software, and operations</p>
-    </footer>
+      <nav class="menu-list" aria-label="Site pages">
+        <ul>
+          <li><a href="/about/"><span class="menu-list__dot" data-dot="gold" aria-hidden="true"></span>Hey, we're decent<span class="wordmark-dot">.</span></a></li>
+          <li><a href="/portfolio/" aria-current="page"><span class="menu-list__dot" data-dot="vermilion" aria-hidden="true"></span>decent<span class="wordmark-dot">.</span> work</a></li>
+          <li><a href="/blog/"><span class="menu-list__dot" data-dot="terracotta" aria-hidden="true"></span>decent<span class="wordmark-dot">.</span> read</a></li>
+          <li><a href="/ben/"><span class="menu-list__dot" data-dot="steel" aria-hidden="true"></span>decent<span class="wordmark-dot">.</span> people</a></li>
+          <li><a href="/contact/"><span class="menu-list__dot" data-dot="cream" aria-hidden="true"></span>decent<span class="wordmark-dot">.</span> contact</a></li>
+        </ul>
+      </nav>
+    </main>
   </body>
 </html>

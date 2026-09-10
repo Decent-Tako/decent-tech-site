@@ -1,11 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="field--cream">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Contact Decent Technology Group by email.">
-    <meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
-    <meta name="theme-color" content="#121614" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f2f1e8">
     <title>Get in touch · Decent Technology Group</title>
     <link rel="canonical" href="https://decent.tech/contact/">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -30,58 +29,62 @@
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
 
-    <header class="site-header">
+    <div class="page-wordmark">
       <a class="wordmark" href="/" aria-label="Decent Technology Group home">
-        <span aria-hidden="true">decent.</span>
+        <span class="wordmark-phrase">decent<span class="wordmark-dot">.</span> contact</span>
         <span class="wordmark-company">Technology Group</span>
       </a>
-      <nav aria-label="Site pages">
-        <a href="/about/">About</a>
-        <a href="/portfolio/">Portfolio</a>
-        <a href="/blog/">Blog</a>
-        <a href="/ben/">About Ben</a>
-        <a href="/contact/" aria-current="page">Get in touch</a>
-      </nav>
-    </header>
+    </div>
 
     <main id="main-content" class="page page--contact">
       <div class="scene" data-scene="plasma" data-color="#ffcb73" data-speed="1.2" data-scale="1.1"></div>
-      <section class="contact plate" aria-labelledby="contact-title">
-        <p class="eyebrow">Get in touch</p>
-        <h1 id="contact-title">Have a useful problem to solve?</h1>
-        <p>Tell us what you are working on. We reply by email.</p>
-        <a class="email-link" href="mailto:hello@decent.tech" data-effect="shiny-text" data-color="#f2f1e8" data-shine="#ffcb73" data-speed="2.5">hello@decent.tech</a>
-      </section>
+      <div class="page-body">
+        <p class="running-head">contact.</p>
+        <section class="contact plate" aria-labelledby="contact-title">
+          <p class="eyebrow">Get in touch</p>
+          <h1 id="contact-title">Have a useful problem to solve?</h1>
+          <p>Tell us what you are working on. We reply by email.</p>
+          <a class="email-link" href="mailto:hello@decent.tech" data-effect="shiny-text" data-color="#f2f1e8" data-shine="#ffcb73" data-speed="2.5">hello@decent.tech</a>
+        </section>
 
-      <div class="contact-form" data-magnet="form">
-        <form class="contact-form__card" method="post" action="mailto:hello@decent.tech" enctype="text/plain" aria-labelledby="contact-form-title">
-          <h2 class="contact-form__title" id="contact-form-title">Send a message</h2>
-          <p class="contact-form__note">The Send button opens your mail program with these three fields.</p>
+        <!-- The magnetic contact form of issue #97. This branch owns the page
+             shell around it and leaves the block itself as that worker wrote
+             it. -->
+        <div class="contact-form" data-magnet="form">
+          <form class="contact-form__card" method="post" action="mailto:hello@decent.tech" enctype="text/plain" aria-labelledby="contact-form-title">
+            <h2 class="contact-form__title" id="contact-form-title">Send a message</h2>
+            <p class="contact-form__note">The Send button opens your mail program with these three fields.</p>
 
-          <div class="contact-form__field">
-            <label class="contact-form__label" for="contact-name">Name</label>
-            <input class="contact-form__input" id="contact-name" name="name" type="text" autocomplete="name" required>
-          </div>
+            <div class="contact-form__field">
+              <label class="contact-form__label" for="contact-name">Name</label>
+              <input class="contact-form__input" id="contact-name" name="name" type="text" autocomplete="name" required>
+            </div>
 
-          <div class="contact-form__field">
-            <label class="contact-form__label" for="contact-email">Email</label>
-            <input class="contact-form__input" id="contact-email" name="email" type="email" autocomplete="email" required>
-          </div>
+            <div class="contact-form__field">
+              <label class="contact-form__label" for="contact-email">Email</label>
+              <input class="contact-form__input" id="contact-email" name="email" type="email" autocomplete="email" required>
+            </div>
 
-          <div class="contact-form__field">
-            <label class="contact-form__label" for="contact-message">Message</label>
-            <textarea class="contact-form__input contact-form__textarea" id="contact-message" name="message" rows="5" autocomplete="off" required></textarea>
-          </div>
+            <div class="contact-form__field">
+              <label class="contact-form__label" for="contact-message">Message</label>
+              <textarea class="contact-form__input contact-form__textarea" id="contact-message" name="message" rows="5" autocomplete="off" required></textarea>
+            </div>
 
-          <button class="contact-form__send" type="submit">Send</button>
-        </form>
+            <button class="contact-form__send" type="submit">Send</button>
+          </form>
+        </div>
+        <div class="contact-form__magnet" data-effect="magnetic-form" data-target=".contact-form" aria-hidden="true"></div>
       </div>
-      <div class="contact-form__magnet" data-effect="magnetic-form" data-target=".contact-form" aria-hidden="true"></div>
-    </main>
 
-    <footer>
-      <p>Decent Technology Group</p>
-      <p>Consulting, software, and operations</p>
-    </footer>
+      <nav class="menu-list" aria-label="Site pages">
+        <ul>
+          <li><a href="/about/"><span class="menu-list__dot" data-dot="gold" aria-hidden="true"></span>Hey, we're decent<span class="wordmark-dot">.</span></a></li>
+          <li><a href="/portfolio/"><span class="menu-list__dot" data-dot="vermilion" aria-hidden="true"></span>decent<span class="wordmark-dot">.</span> work</a></li>
+          <li><a href="/blog/"><span class="menu-list__dot" data-dot="terracotta" aria-hidden="true"></span>decent<span class="wordmark-dot">.</span> read</a></li>
+          <li><a href="/ben/"><span class="menu-list__dot" data-dot="steel" aria-hidden="true"></span>decent<span class="wordmark-dot">.</span> people</a></li>
+          <li><a href="/contact/" aria-current="page"><span class="menu-list__dot" data-dot="cream" aria-hidden="true"></span>decent<span class="wordmark-dot">.</span> contact</a></li>
+        </ul>
+      </nav>
+    </main>
   </body>
 </html>
