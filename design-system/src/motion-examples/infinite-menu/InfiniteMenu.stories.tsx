@@ -3,7 +3,7 @@ import { expect, userEvent, waitFor } from 'storybook/test';
 
 import { assertFaceNotFallback } from '../../brand/fontFallback';
 import { InfiniteMenu } from './InfiniteMenu';
-import { dragPointer } from './playSupport';
+import { assertCanvasPainted, dragPointer } from './playSupport';
 import { INFINITE_DEFAULTS } from './source';
 
 const meta = {
@@ -49,6 +49,12 @@ type Canvas = Parameters<NonNullable<Story['play']>>[0]['canvas'];
 
 const SLOW = { timeout: 10000 };
 
+type Args = { backgroundColor?: string };
+
+function background(args: Args): string {
+  return args.backgroundColor ?? INFINITE_DEFAULTS.backgroundColor;
+}
+
 async function playBrand(canvas: Canvas) {
   await assertFaceNotFallback('Brand Sans', 400);
   await assertFaceNotFallback('Brand Sans', 700);
@@ -57,11 +63,12 @@ async function playBrand(canvas: Canvas) {
   ).toBeVisible();
 }
 
-// Wait for the WebGL probe, then branch. When WebGL 2 is ready, drag the
-// sphere 200 pixels and wait for the nearest vertex to change. The active
-// item title is that vertex modulo the item count, so with one item the
-// title cannot change; the vertex index proves the rotation in every story.
-async function playDrag(canvas: Canvas) {
+// Wait for the WebGL probe, then branch. When WebGL 2 is ready, prove that
+// the sphere paints, drag it 200 pixels, wait for the nearest vertex to
+// change, and prove that it paints again. The active item title is that vertex
+// modulo the item count, so with one item the title cannot change; the vertex
+// index proves the rotation in every story.
+async function playDrag(canvas: Canvas, background: string) {
   const stage = canvas.getByTestId('infinite-menu-stage');
   await expect(stage).toBeInTheDocument();
   await waitFor(() => {
@@ -71,22 +78,25 @@ async function playDrag(canvas: Canvas) {
   if (stage.dataset.webgl !== 'ready') {
     await expect(stage).toHaveAttribute('data-webgl', 'unavailable');
     await expect(canvas.getByText(/WebGL 2 is not available/)).toBeVisible();
-    return stage;
+    return { stage, target: null };
   }
 
   await waitFor(() => {
     expect(stage.dataset.vertex).toBeDefined();
     expect(stage.dataset.active).toBeTruthy();
   }, SLOW);
-  const before = stage.dataset.vertex;
   const target = stage.querySelector('canvas');
   if (!target) throw new Error('The menu canvas did not mount.');
+  await assertCanvasPainted(target, background);
+
+  const before = stage.dataset.vertex;
   await dragPointer(target, 200);
   await waitFor(() => {
     expect(stage.dataset.vertex).not.toBe(before);
     expect(stage.dataset.active).toBeTruthy();
   }, SLOW);
-  return stage;
+  await assertCanvasPainted(target, background);
+  return { stage, target };
 }
 
 async function playPause(canvas: Canvas, stage: HTMLElement) {
@@ -95,31 +105,48 @@ async function playPause(canvas: Canvas, stage: HTMLElement) {
   await expect(canvas.getByRole('button', { name: 'Resume' })).toBeVisible();
 }
 
+// Storybook runs the play on every view of the story, so the play must leave
+// the sketch running. A story that ends paused shows a frozen, pulled-back
+// sphere and a Resume button to every visitor.
+async function playResume(
+  canvas: Canvas,
+  stage: HTMLElement,
+  target: HTMLCanvasElement | null,
+  background: string,
+  button: 'Resume' | 'Replay',
+) {
+  await userEvent.click(canvas.getByRole('button', { name: button }));
+  await expect(stage).toHaveAttribute('data-paused', 'false');
+  await expect(canvas.getByRole('button', { name: 'Pause' })).toBeVisible();
+  if (target) await assertCanvasPainted(target, background);
+}
+
 export const Default: Story = {
   args: { ...INFINITE_DEFAULTS },
-  play: async ({ canvas }) => {
+  play: async ({ canvas, args }) => {
     await playBrand(canvas);
-    const stage = await playDrag(canvas);
+    const { stage, target } = await playDrag(canvas, background(args));
     await playPause(canvas, stage);
-    await userEvent.click(canvas.getByRole('button', { name: 'Replay' }));
-    await expect(stage).toHaveAttribute('data-paused', 'false');
+    await playResume(canvas, stage, target, background(args), 'Replay');
   },
 };
 
 export const FewItems: Story = {
   args: { ...INFINITE_DEFAULTS, itemCount: 1 },
-  play: async ({ canvas }) => {
+  play: async ({ canvas, args }) => {
     await playBrand(canvas);
-    const stage = await playDrag(canvas);
+    const { stage, target } = await playDrag(canvas, background(args));
     await playPause(canvas, stage);
+    await playResume(canvas, stage, target, background(args), 'Resume');
   },
 };
 
 export const ReducedMotion: Story = {
   args: { ...INFINITE_DEFAULTS, reducedMotion: 'always' },
-  play: async ({ canvas }) => {
+  play: async ({ canvas, args }) => {
     await playBrand(canvas);
-    const stage = await playDrag(canvas);
+    const { stage, target } = await playDrag(canvas, background(args));
     await playPause(canvas, stage);
+    await playResume(canvas, stage, target, background(args), 'Resume');
   },
 };
