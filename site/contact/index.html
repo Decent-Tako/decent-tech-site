@@ -52,6 +52,31 @@
         <p>Tell us what you are working on. We reply by email.</p>
         <a class="email-link" href="mailto:hello@decent.tech" data-effect="shiny-text" data-color="#f2f1e8" data-shine="#ffcb73" data-speed="2.5">hello@decent.tech</a>
       </section>
+
+      <div class="contact-form" data-magnet="form">
+        <form class="contact-form__card" method="post" action="mailto:hello@decent.tech" enctype="text/plain" aria-labelledby="contact-form-title">
+          <h2 class="contact-form__title" id="contact-form-title">Send a message</h2>
+          <p class="contact-form__note">The Send button opens your mail program with these three fields.</p>
+
+          <div class="contact-form__field">
+            <label class="contact-form__label" for="contact-name">Name</label>
+            <input class="contact-form__input" id="contact-name" name="name" type="text" autocomplete="name" required>
+          </div>
+
+          <div class="contact-form__field">
+            <label class="contact-form__label" for="contact-email">Email</label>
+            <input class="contact-form__input" id="contact-email" name="email" type="email" autocomplete="email" required>
+          </div>
+
+          <div class="contact-form__field">
+            <label class="contact-form__label" for="contact-message">Message</label>
+            <textarea class="contact-form__input contact-form__textarea" id="contact-message" name="message" rows="5" autocomplete="off" required></textarea>
+          </div>
+
+          <button class="contact-form__send" type="submit">Send</button>
+        </form>
+      </div>
+      <div class="contact-form__magnet" data-effect="magnetic-form" data-target=".contact-form" aria-hidden="true"></div>
     </main>
 
     <footer>

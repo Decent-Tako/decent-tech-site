@@ -37,6 +37,7 @@ export const SCENES: Readonly<Record<string, SceneEntry>> = {
   'split-text': { load: () => import('./scenes/SplitTextScene'), webgl: false },
   'scrambled-text': { load: () => import('./scenes/ScrambledTextScene'), webgl: false },
   'shiny-text': { load: () => import('./scenes/ShinyTextScene'), webgl: false },
+  'magnetic-form': { load: () => import('./scenes/MagneticFormScene'), webgl: false },
 };
 
 export const SCENE_NAMES = Object.keys(SCENES);

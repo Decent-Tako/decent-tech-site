@@ -40,16 +40,18 @@ PHRASES = {
 LABEL_INK = "#182534"
 
 
-# The React Bits scene behind each page and the extra effect on it, as
-# site/README.md and design-system/src/site/scenes.ts list them. Portfolio and
-# About Ben carry no effect: the cursor effects are off by Ben's request of
-# 2026-09-10. They stay in the registry and in Storybook.
+# The React Bits scene behind each page and the extra effects on it, in the
+# order the markup mounts them, as site/README.md and
+# design-system/src/site/scenes.ts list them. Portfolio and About Ben carry no
+# effect: the cursor effects are off by Ben's request of 2026-09-10. They stay
+# in the registry and in Storybook. Get in touch carries two: the shine on the
+# email link, and the magnet that moves the contact form.
 SCENES = {
-    "about": ("liquid-ether", "split-text"),
-    "portfolio": ("galaxy", None),
-    "blog": ("threads", "scrambled-text"),
-    "ben": ("iridescence", None),
-    "contact": ("plasma", "shiny-text"),
+    "about": ("liquid-ether", ("split-text",)),
+    "portfolio": ("galaxy", ()),
+    "blog": ("threads", ("scrambled-text",)),
+    "ben": ("iridescence", ()),
+    "contact": ("plasma", ("shiny-text", "magnetic-form")),
 }
 SCENE_NAMES = (
     "liquid-ether",
@@ -62,6 +64,7 @@ SCENE_NAMES = (
     "split-text",
     "scrambled-text",
     "shiny-text",
+    "magnetic-form",
 )
 
 
@@ -156,6 +159,39 @@ class SiteParser(HTMLParser):
             )
             self._script_type = None
             self._script_chunks = []
+
+
+class ContactFormParser(HTMLParser):
+    """Reads the forms, the fields, the labels, and the buttons of a page."""
+
+    def __init__(self):
+        super().__init__()
+        self.forms = []
+        self.controls = []
+        self.buttons = []
+        self.label_targets = []
+        self._button_text = None
+
+    def handle_starttag(self, tag, attrs):
+        attributes = dict(attrs)
+        if tag == "form":
+            self.forms.append(attributes)
+        if tag in ("input", "textarea"):
+            self.controls.append({"tag": tag, **attributes})
+        if tag == "label" and "for" in attributes:
+            self.label_targets.append(attributes["for"])
+        if tag == "button":
+            self.buttons.append({"type": attributes.get("type", "submit"), "text": ""})
+            self._button_text = []
+
+    def handle_data(self, data):
+        if self._button_text is not None:
+            self._button_text.append(data)
+
+    def handle_endtag(self, tag):
+        if tag == "button" and self._button_text is not None:
+            self.buttons[-1]["text"] = "".join(self._button_text)
+            self._button_text = None
 
 
 def parse(path):
@@ -349,14 +385,77 @@ class SiteTests(unittest.TestCase):
         self.assertIn("mailto:hello@decent.tech", parser.links)
         self.assertIn("hello@decent.tech", " ".join(parser.text))
 
+    def test_contact_page_holds_one_magnetic_mailto_form(self):
+        html = (SITE / "contact" / "index.html").read_text()
+        form = ContactFormParser()
+        form.feed(html)
+
+        self.assertEqual(len(form.forms), 1, "/contact/ must hold exactly one form")
+        attributes = form.forms[0]
+        self.assertEqual(attributes.get("method"), "post")
+        self.assertEqual(attributes.get("action"), "mailto:hello@decent.tech")
+        self.assertEqual(attributes.get("enctype"), "text/plain")
+
+        # The three fields, each with the name the mail body carries.
+        self.assertEqual(
+            [(control["tag"], control.get("name")) for control in form.controls],
+            [("input", "name"), ("input", "email"), ("textarea", "message")],
+        )
+        for control in form.controls:
+            self.assertIn("required", control, f"the {control['name']} field must be required")
+            self.assertIn("autocomplete", control, f"the {control['name']} field needs autocomplete")
+
+        # One submit button, labelled Send.
+        self.assertEqual(len(form.buttons), 1, "/contact/ must hold exactly one button")
+        self.assertEqual(form.buttons[0]["type"], "submit")
+        self.assertEqual(form.buttons[0]["text"].strip(), "Send")
+
+        # Every label is bound to its field by for, and every field has an id.
+        field_ids = {control["id"] for control in form.controls}
+        self.assertEqual(len(field_ids), 3, "every field needs its own id")
+        self.assertEqual(set(form.label_targets), field_ids, "labels must bind by for")
+
+        # No inline handler anywhere in the form block. The scene does the
+        # motion; the form works with no script at all.
+        self.assertNotRegex(html, r"\son[a-z]+=", "/contact/ has an inline handler")
+
+        # The magnet host names the wrapper it moves and holds no content.
+        self.assertIn('data-effect="magnetic-form" data-target=".contact-form"', html)
+
+    def test_magnetic_form_scene_holds_still_for_every_reason(self):
+        scene = (
+            DESIGN_SYSTEM / "src" / "site" / "scenes" / "MagneticFormScene.tsx"
+        ).read_text()
+        # The six reasons the form must hold still, and the transform-only rule.
+        for token in (
+            "prefers-reduced-motion: reduce",
+            "HOLD_MARGIN_PX = 24",
+            "NARROW_VIEWPORT_PX = 720",
+            "TRAVEL_FRACTION = 0.4",
+            "FOLLOW_PER_FRAME = 0.08",
+            "RETURN_MS = 300",
+            "pointerType !== 'mouse'",
+            "translate3d(",
+        ):
+            self.assertIn(token, scene, f"MagneticFormScene.tsx lacks {token}")
+        # It never moves the focus and never changes the layout.
+        self.assertNotIn(".focus()", scene)
+        self.assertNotRegex(scene, r"style\.(top|left|width|height|margin|position)\b")
+
+    def test_contact_form_styles_stay_under_the_contact_form_prefix(self):
+        rules = re.findall(r"^\.contact-form[^{]*\{", self.css, flags=re.MULTILINE)
+        self.assertGreater(len(rules), 5, "the contact form has no styles")
+        # Navy type on a cream card passes AA.
+        self.assertGreaterEqual(contrast_ratio("#182534", "#f2f1e8"), 4.5)
+
     def test_each_page_mounts_one_named_scene(self):
         for slug, _, path, _ in PAGES:
             parser = parse(SITE / slug / "index.html")
-            scene, effect = SCENES[slug]
+            scene, effects = SCENES[slug]
             self.assertEqual(parser.scenes, [scene], f"{path} must hold exactly one data-scene")
             self.assertIn(scene, SCENE_NAMES, f"{path} scene {scene} is not in the registry")
-            self.assertEqual(parser.effects, [effect] if effect else [], f"{path} data-effect")
-            if effect:
+            self.assertEqual(parser.effects, list(effects), f"{path} data-effect")
+            for effect in effects:
                 self.assertIn(effect, SCENE_NAMES, f"{path} effect {effect} is not in the registry")
             html = (SITE / slug / "index.html").read_text()
             self.assertIn('class="scene" data-scene=', html, f"{path} scene element lacks class scene")
@@ -667,9 +766,9 @@ class SiteTests(unittest.TestCase):
         registry = (DESIGN_SYSTEM / "src" / "site" / "scenes.ts").read_text()
         for name in SCENE_NAMES:
             self.assertRegex(registry, rf"['\"]?{name}['\"]?:\s*\{{ load:", f"scenes.ts lacks {name}")
-        for slug, (scene, effect) in SCENES.items():
+        for slug, (scene, effects) in SCENES.items():
             self.assertIn(scene, SCENE_NAMES, slug)
-            if effect:
+            for effect in effects:
                 self.assertIn(effect, SCENE_NAMES, slug)
 
     def test_scene_readme_names_every_scene(self):
