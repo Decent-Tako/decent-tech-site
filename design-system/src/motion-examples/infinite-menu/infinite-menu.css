@@ -1,0 +1,47 @@
+.infinite-menu__frame {
+  height: 420px;
+  min-height: 420px;
+  background: var(--ink);
+}
+
+.infinite-menu {
+  position: absolute;
+  inset: 0;
+  --infinite-menu-accent: var(--accent-yellow);
+  --infinite-menu-icon: var(--ink);
+}
+
+.infinite-menu .rb-infinite-menu .face-title,
+.infinite-menu .rb-infinite-menu .face-description {
+  color: var(--paper);
+}
+
+.infinite-menu .rb-infinite-menu .action-button:hover,
+.infinite-menu .rb-infinite-menu .action-button:focus-visible {
+  --infinite-menu-accent: var(--accent-blue);
+  --infinite-menu-icon: var(--paper);
+}
+
+/* Two class selectors beat .pointer-frame p, which sets ink. */
+.infinite-menu .infinite-menu__status,
+.infinite-menu .infinite-menu__fallback {
+  position: absolute;
+  margin: 0;
+  color: var(--paper);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.infinite-menu__status {
+  top: 0.75rem;
+  left: 0.75rem;
+  pointer-events: none;
+}
+
+.infinite-menu__fallback {
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  text-align: center;
+}
