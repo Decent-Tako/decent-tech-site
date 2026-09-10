@@ -704,21 +704,30 @@ async function checkContactForm(page, label, viewport) {
 
   // 2. A pointer on the form stops the chase at once.
   //
-  // The pointer goes to the middle of the form by coordinate, not through
-  // `hover()`. `hover()` waits for the element to hold still first, and this
-  // form is moving by design: it only stops once the pointer has arrived, so
-  // waiting for it to stop before moving the pointer never ends.
-  // The form drifts while the pointer travels, so the pointer chases it: it
-  // aims at the middle, reads where the form is now, and aims again. The form
-  // holds the moment the pointer is inside it plus the hold margin, so a few
-  // rounds are enough.
-  // The form comes to the pointer by design, so the pointer goes to one
-  // fixed point and waits there. Chasing the form's box makes it run ahead.
-  const centre = {
-    x: Math.round(viewport.width / 2),
-    y: Math.round(viewport.height / 2),
-  };
-  await page.mouse.move(centre.x, centre.y);
+  // The pointer goes to one fixed point and waits there, because the form
+  // comes to the pointer by design. `hover()` cannot be used: it waits for the
+  // element to hold still first, and this form holds still only once the
+  // pointer has arrived.
+  //
+  // The point is the middle of the form where it rests, offset by a little
+  // more than the hold margin. The travel is capped at 40 per cent of the
+  // viewport, so a point far from the resting place, such as the middle of the
+  // screen, may be one the form can never reach.
+  const aim = await page.evaluate((margin) => {
+    const node = document.querySelector('.contact-form');
+    if (!node) return null;
+    const box = node.getBoundingClientRect();
+    const shown = new DOMMatrixReadOnly(getComputedStyle(node).transform);
+    return {
+      x: Math.round(box.left + box.width / 2 - shown.e),
+      y: Math.round(box.top + box.height / 2 - shown.f - box.height / 2 - margin),
+    };
+  }, 32);
+  if (!aim) {
+    fail(`${label}: the form is missing for the hold check`);
+    return;
+  }
+  await page.mouse.move(aim.x, aim.y);
   const onTheForm = await page
     .waitForFunction(
       (point) => {
@@ -733,7 +742,7 @@ async function checkContactForm(page, label, viewport) {
           point.y <= box.bottom + margin
         );
       },
-      centre,
+      aim,
       { timeout: 3000 },
     )
     .then(() => true)

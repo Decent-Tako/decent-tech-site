@@ -55,22 +55,19 @@ function runNextDot(host: HTMLElement, link: HTMLAnchorElement): () => void {
     return link.getBoundingClientRect().height;
   }
 
-  /** Open the next page, once, by the same route a press takes. */
+  /**
+   * Open the next page, once, by the same route a press takes.
+   *
+   * The site opts the whole navigation into cross-document view transitions
+   * with `@view-transition { navigation: auto; }`, so the browser starts one
+   * itself for this navigation. A transition started here would be skipped by
+   * that one, and the skip is reported as a page error.
+   */
   function open() {
     if (opened) return;
     opened = true;
     host.dataset.nextOpen = 'true';
-    const href = link.href;
-    const view = document as Document & {
-      startViewTransition?: (callback: () => void) => unknown;
-    };
-    if (typeof view.startViewTransition === 'function') {
-      view.startViewTransition(() => {
-        window.location.assign(href);
-      });
-    } else {
-      window.location.assign(href);
-    }
+    window.location.assign(link.href);
   }
 
   /** Add to the push and open once it passes the disc's height. */
