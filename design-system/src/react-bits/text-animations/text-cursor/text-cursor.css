@@ -1,0 +1,8 @@
+.rb-frame .text-cursor-container {
+  min-height: 18rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .text-cursor-item {
+  color: var(--ink);
+}
