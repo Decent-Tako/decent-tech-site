@@ -1,0 +1,12 @@
+.rb-frame .depth-text,
+.rb-frame .depth-text__layer,
+.rb-frame .depth-text__face {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.depth-text__host {
+  display: grid;
+  place-items: center;
+  min-height: 14rem;
+  padding: 2rem 1rem;
+}
