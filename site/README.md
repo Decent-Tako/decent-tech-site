@@ -279,14 +279,19 @@ into view as a disc in its colour with its label. The cycle is About,
 Portfolio, Blog, About Ben, Get in touch, and back to About, so the whole site
 is one loop that echoes the sphere.
 
-A press opens that page through the view transition. So does a scroll of the
-disc's own height past the bottom of the document: the `next-dot` scene reads
-the scroll and clicks the link, so both paths take exactly the same route.
+A press opens that page through the view transition. Reaching the bottom of a
+page opens nothing: it only shows the disc. The next page opens on a deliberate
+push. Once the page is already at its bottom, the reader must keep pushing, and
+the wheel or the touch drag must gather more than the disc's own height within
+1.5 seconds. A reader who simply reads to the end of the page stays there.
+
+The scene listens to the wheel and to touch, never to the scroll event. The
+scroll event only drives the rise of the disc.
 
 The disc is a real link in the HTML, so a reader with no bundle still reaches
 the next page, and a keyboard reader simply tabs to it. Under reduced motion
-the disc is a plain link with no rise, and a scroll past it never opens the
-page on its own.
+the disc is a plain link with no rise, no listener is attached, and no push can
+open the next page.
 
 ## The wordmark morphs between pages
 

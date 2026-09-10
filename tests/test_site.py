@@ -1493,6 +1493,22 @@ class PlayfulBitsTests(unittest.TestCase):
                 self.assertLess(body, dot, f"{slug}: the next dot is above the plate")
                 self.assertLess(dot, nav, f"{slug}: the next dot is below the list")
 
+    def test_the_next_dot_opens_only_on_a_deliberate_push(self):
+        scene = (
+            DESIGN_SYSTEM / "src" / "site" / "scenes" / "NextDotScene.tsx"
+        ).read_text()
+        # Reaching the bottom must show the disc and open nothing. The next
+        # page opens only when the reader keeps pushing at the bottom.
+        self.assertIn("PUSH_WINDOW_MS = 1500", scene)
+        self.assertIn("wheel", scene)
+        self.assertIn("touchmove", scene)
+        # A scroll event alone never opens the page: the scroll listener only
+        # drives the rise.
+        rise = scene[scene.index("function step()") : scene.index("function onScroll()")]
+        self.assertNotIn("open()", rise)
+        # Under reduced motion no listener is attached at all.
+        self.assertIn("if (reduceQuery.matches)", scene)
+
     def test_the_next_dot_is_a_plain_link_with_no_script(self):
         # With no bundle nothing sets data-risen, so the disc must stand.
         self.assertIn('.next-dot__link:not([data-risen])', self.css)

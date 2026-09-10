@@ -40,9 +40,9 @@
 // become visible and the page must not navigate, and Escape must close it
 // again. It leaves one section open, so the About screenshot shows it.
 //
-// It then opens Blog in a context of its own and scrolls the disc's own height
-// past the next dot at the bottom. About Ben, the next page in the cycle, must
-// open with its field element present.
+// It then opens Blog in a context of its own, scrolls to the bottom and
+// asserts that nothing opened, then pushes with three wheel events. About Ben,
+// the next page in the cycle, must open with its field element present.
 //
 // Last it opens the home page once more and waits 21 seconds with no input of
 // any kind. The stage must then carry data-idle, and one pointer move must
@@ -712,24 +712,18 @@ async function checkContactForm(page, label, viewport) {
   // aims at the middle, reads where the form is now, and aims again. The form
   // holds the moment the pointer is inside it plus the hold margin, so a few
   // rounds are enough.
-  let onTheForm = false;
-  for (let round = 0; round < 12 && !onTheForm; round += 1) {
-    // Aim at the middle of the form where it rests, not where it is drawn.
-    // The form chases the pointer, so aiming at the drawn middle makes it run
-    // ahead; the resting middle is the one place it settles on.
-    const aim = await wrapper.evaluate((node) => {
-      const box = node.getBoundingClientRect();
-      const shown = new DOMMatrixReadOnly(getComputedStyle(node).transform);
-      return {
-        x: box.left + box.width / 2 - shown.e,
-        y: box.top + box.height / 2 - shown.f,
-      };
-    });
-    await page.mouse.move(aim.x, aim.y);
-    await page.waitForTimeout(120);
-    // The form holds once the pointer is inside it plus the hold margin.
-    onTheForm = await wrapper.evaluate(
-      (node, point) => {
+  // The form comes to the pointer by design, so the pointer goes to one
+  // fixed point and waits there. Chasing the form's box makes it run ahead.
+  const centre = {
+    x: Math.round(viewport.width / 2),
+    y: Math.round(viewport.height / 2),
+  };
+  await page.mouse.move(centre.x, centre.y);
+  const onTheForm = await page
+    .waitForFunction(
+      (point) => {
+        const node = document.querySelector('.contact-form');
+        if (!node) return false;
         const box = node.getBoundingClientRect();
         const margin = 24;
         return (
@@ -739,17 +733,21 @@ async function checkContactForm(page, label, viewport) {
           point.y <= box.bottom + margin
         );
       },
-      aim,
-    );
-  }
+      centre,
+      { timeout: 3000 },
+    )
+    .then(() => true)
+    .catch(() => false);
   if (!onTheForm) {
-    fail(`${label}: the pointer did not catch the form within twelve rounds`);
+    fail(`${label}: the form did not reach the pointer within 3 s`);
     return;
   }
-  await page.waitForTimeout(200);
-  const held = await formTransform(page);
+  // The chase closes a part of the distance each frame, so it needs a few
+  // frames to come to a stop after it has arrived.
   await page.waitForTimeout(400);
-  if ((await formTransform(page)) !== held) {
+  const held = restingPlace(await formTransform(page));
+  await page.waitForTimeout(500);
+  if (restingPlace(await formTransform(page)) !== held) {
     fail(`${label}: the form kept moving while the pointer was on it`);
   } else {
     console.log(`check-site: ${label}: the form holds still under the pointer`);
@@ -852,7 +850,7 @@ async function checkSectionDots(page, label) {
 
 // The whole site is one loop. A scroll to the bottom of a page, the disc's own
 // height past the next dot, opens the next page in the cycle.
-async function checkNextDot(page, label, expectedPath) {
+async function checkNextDot(page, label, expectedPath, fromPath) {
   const link = page.locator('.next-dot__link');
   if ((await link.count()) !== 1) {
     fail(`${label}: found ${await link.count()} next-dot links, expected 1`);
@@ -864,23 +862,35 @@ async function checkNextDot(page, label, expectedPath) {
     return;
   }
 
-  // Scroll to the bottom. The page carries a disc's height of room below the
-  // disc, so the bottom of the document is the disc's own height past it,
-  // which is the threshold the scene reads. The scene then clicks the link, so
-  // the page opens through the same route a press takes.
+  // Reaching the bottom shows the disc and opens nothing. Scrolling with
+  // `scrollTo` fires scroll events only, so it is never the deliberate push.
   await page.evaluate(() => {
     window.scrollTo(0, document.documentElement.scrollHeight);
-    window.dispatchEvent(new Event('scroll'));
   });
+  await page.waitForTimeout(200);
+  if (!page.url().endsWith(fromPath)) {
+    fail(`${label}: reaching the bottom opened ${page.url()} on its own`);
+    return;
+  }
+  console.log(`check-site: ${label}: reaching the bottom opened nothing`);
+
+  // Now the deliberate push: three wheels at the bottom inside a second. The
+  // scene gathers them and opens the next page once they pass the disc's
+  // height.
+  await page.mouse.move(page.viewportSize().width / 2, page.viewportSize().height / 2);
+  for (let round = 0; round < 3; round += 1) {
+    await page.mouse.wheel(0, 300);
+    await page.waitForTimeout(150);
+  }
   try {
     await page.waitForURL((url) => url.pathname.endsWith(expectedPath), {
       timeout: 5000,
       waitUntil: 'load',
     });
-    console.log(`check-site: ${label}: the scroll past the next dot opened ${expectedPath}`);
+    console.log(`check-site: ${label}: the push at the bottom opened ${expectedPath}`);
   } catch {
     fail(
-      `${label}: the scroll past the next dot did not open ${expectedPath}`
+      `${label}: the push at the bottom did not open ${expectedPath}`
         + ` within 5 s; the page is at ${page.url()}`,
     );
     // A navigation may still be in flight. Let it land before the caller
@@ -1108,7 +1118,7 @@ async function checkNextDotPage(browser, viewport) {
     state: 'attached',
     timeout: STAGE_TIMEOUT_MS,
   }).catch(() => fail(`${label}: the next-dot scene did not report ready`));
-  await checkNextDot(page, label, '/ben/');
+  await checkNextDot(page, label, '/ben/', '/blog/');
 
   if (consoleErrors.length) {
     fail(`${label}: ${consoleErrors.length} console error(s):\n  ${consoleErrors.join('\n  ')}`);
