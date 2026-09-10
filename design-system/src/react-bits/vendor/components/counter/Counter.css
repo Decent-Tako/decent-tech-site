@@ -1,0 +1,54 @@
+/*
+ * Vendored from React Bits.
+ * Source: https://github.com/DavidHDev/react-bits/blob/625f25025fed1c28e2de7d3ac5f12ee83542844d/src/ts-default/Components/Counter/Counter.css
+ * Page: https://reactbits.dev/components/counter
+ * Commit: 625f25025fed1c28e2de7d3ac5f12ee83542844d
+ * Date: 2026-09-10
+ * Licence: MIT + Commons Clause (see ../../LICENSE.md). The Commons Clause forbids
+ * selling, sublicensing, or redistributing the components themselves.
+ *
+ * Local changes:
+ * (none)
+ */
+.counter-container {
+  position: relative;
+  display: inline-block;
+}
+
+.counter-counter {
+  display: flex;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.counter-digit {
+  position: relative;
+  width: 1ch;
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-number {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gradient-container {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.bottom-gradient {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
