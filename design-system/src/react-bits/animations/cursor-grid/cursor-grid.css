@@ -1,0 +1,23 @@
+.cursor-grid-stage {
+  position: relative;
+  min-height: 24rem;
+}
+
+.cursor-grid-stage .cursor-grid {
+  width: 100%;
+  height: 24rem;
+}
+
+.rb-frame .cursor-grid-copy {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 1;
+  margin: 0;
+  max-width: 24rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  pointer-events: none;
+}
