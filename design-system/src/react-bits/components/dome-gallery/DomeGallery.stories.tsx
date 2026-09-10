@@ -119,17 +119,6 @@ async function playDrag(canvas: Canvas) {
   return stage;
 }
 
-async function playOpen(canvas: Canvas) {
-  const stage = canvas.getByTestId('dome-gallery-stage');
-  await new Promise((resolve) => setTimeout(resolve, 120));
-  const tile = stage.querySelector('.item__image');
-  await expect(tile).toBeTruthy();
-  await userEvent.click(tile as HTMLElement);
-  await waitFor(() => {
-    expect(stage).toHaveAttribute('data-open', 'true');
-  }, SLOW);
-}
-
 async function playPauseResume(canvas: Canvas, stage: HTMLElement) {
   await userEvent.click(canvas.getByRole('button', { name: 'Pause' }));
   await expect(stage).toHaveAttribute('data-paused', 'true');
