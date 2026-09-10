@@ -1,0 +1,41 @@
+.rb-frame [data-testid='glass-surface-stage'] {
+  min-height: 22rem;
+  display: grid;
+  place-items: center;
+}
+
+.glass-surface-stage {
+  display: grid;
+  place-items: center;
+}
+
+.rb-frame .glass-surface__content {
+  display: grid;
+  gap: 0.15rem;
+  place-items: center;
+  text-align: center;
+}
+
+.rb-frame .glass-surface__kicker,
+.rb-frame .glass-surface__title {
+  margin: 0;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.rb-frame .glass-surface__kicker {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.rb-frame .glass-surface__title {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.rb-frame .glass-surface:focus-visible {
+  outline-color: var(--accent-yellow);
+}
