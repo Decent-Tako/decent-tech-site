@@ -16,10 +16,11 @@
 }
 
 .rb-frame .dock-label {
-  background-color: var(--ink);
-  border-color: var(--quiet);
+  background-color: var(--charcoal);
+  border-color: var(--paper);
   color: var(--paper);
   font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
 }
 
 .rb-frame .dock-story__glyph {

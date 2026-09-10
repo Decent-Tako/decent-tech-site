@@ -10,6 +10,7 @@
  * Local changes:
  * 1. Default images are empty. The wrapper supplies Academy photographs.
  * 2. paused, onRotate, and onOpen so the story can hold the dome and prove drag.
+ * 3. Enlarged image copies the tile alt text.
  */
 import { useEffect, useMemo, useRef, useCallback } from 'react';
 import { useGesture } from '@use-gesture/react';
@@ -473,6 +474,7 @@ export default function DomeGallery({
     const rawSrc = parent.dataset.src || (el.querySelector('img') as HTMLImageElement)?.src || '';
     const img = document.createElement('img');
     img.src = rawSrc;
+    img.alt = (el.querySelector('img') as HTMLImageElement)?.alt || el.getAttribute('aria-label') || '';
     overlay.appendChild(img);
     viewerRef.current!.appendChild(overlay);
 

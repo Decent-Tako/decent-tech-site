@@ -12,6 +12,7 @@
  * 1. Pointer move uses clientX on the panel, not pageX on mouse move.
  * 2. paused ignores the pointer and returns items to rest.
  * 3. aria-haspopup is omitted. The label is a tooltip, not a menu.
+ * 4. Label opacity stays 1 so contrast holds during the enter motion.
  */
 
 import {
@@ -138,9 +139,9 @@ function DockLabel({ children, className = '', isHovered }: DockLabelProps) {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: 0 }}
-          animate={{ opacity: 1, y: -10 }}
-          exit={{ opacity: 0, y: 0 }}
+          initial={{ y: 0 }}
+          animate={{ y: -10 }}
+          exit={{ y: 0 }}
           transition={{ duration: 0.2 }}
           className={`dock-label ${className}`}
           role="tooltip"

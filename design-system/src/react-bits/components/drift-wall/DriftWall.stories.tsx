@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor } from 'storybook/test';
 
 import { assertFaceNotFallback } from '../../../brand/fontFallback';
-import { movePointer } from '../../frame/pointerSupport';
 import { DriftWall } from './DriftWall';
 import { DRIFT_DIRECTIONS, DRIFT_WALL_DEFAULTS } from './source';
 
@@ -126,10 +125,13 @@ async function playBrand(canvas: Canvas) {
 
 async function playHover(canvas: Canvas) {
   const stage = canvas.getByTestId('drift-wall-stage');
-  const tile = stage.querySelector('[data-tile-id]');
-  await expect(tile).toBeTruthy();
-  const rect = (tile as HTMLElement).getBoundingClientRect();
-  movePointer(tile as HTMLElement, rect.width / 2, rect.height / 2);
+  const tile = await waitFor(() => {
+    const next = stage.querySelector('[data-tile-id]') as HTMLElement | null;
+    expect(next).toBeTruthy();
+    expect(next?.getBoundingClientRect().width ?? 0).toBeGreaterThan(8);
+    return next as HTMLElement;
+  }, SLOW);
+  tile.focus();
   await waitFor(() => {
     expect(stage.getAttribute('data-active')).not.toBe('');
   }, SLOW);

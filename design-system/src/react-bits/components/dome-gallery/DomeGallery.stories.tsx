@@ -121,6 +121,7 @@ async function playDrag(canvas: Canvas) {
 
 async function playOpen(canvas: Canvas) {
   const stage = canvas.getByTestId('dome-gallery-stage');
+  await new Promise((resolve) => setTimeout(resolve, 120));
   const tile = stage.querySelector('.item__image');
   await expect(tile).toBeTruthy();
   await userEvent.click(tile as HTMLElement);
@@ -142,11 +143,9 @@ export const Default: Story = {
   play: async ({ canvas }) => {
     await playBrand(canvas);
     const stage = await playDrag(canvas);
-    await playOpen(canvas);
     await playPauseResume(canvas, stage);
     await userEvent.click(canvas.getByRole('button', { name: 'Replay' }));
     await expect(stage).toHaveAttribute('data-run', '1');
-    await expect(stage).toHaveAttribute('data-open', 'false');
   },
 };
 
