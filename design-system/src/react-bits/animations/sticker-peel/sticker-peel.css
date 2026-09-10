@@ -1,0 +1,15 @@
+.sticker-peel-stage {
+  position: relative;
+  min-height: 24rem;
+}
+
+.rb-frame .sticker-peel-copy {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  margin: 0;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-align: center;
+}

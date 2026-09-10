@@ -1,0 +1,23 @@
+.scroll-expand-stage {
+  min-height: 24rem;
+}
+
+.scroll-expand-stage .scroll-expand {
+  height: 24rem;
+}
+
+.rb-frame .scroll-expand__title,
+.rb-frame .scroll-expand__hint,
+.rb-frame .scroll-expand__overlay,
+.rb-frame .scroll-expand-copy {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--paper);
+}
+
+.rb-frame .scroll-expand-copy {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 700;
+  text-shadow: 0 1px 12px #212121;
+}

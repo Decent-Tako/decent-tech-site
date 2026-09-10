@@ -1,0 +1,19 @@
+.shape-blur-stage {
+  min-height: 24rem;
+}
+
+.shape-blur-stage [data-testid='shape-blur-host'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.rb-frame .shape-blur-copy {
+  position: relative;
+  z-index: 2;
+  margin: 0 1rem 1rem;
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-align: center;
+}

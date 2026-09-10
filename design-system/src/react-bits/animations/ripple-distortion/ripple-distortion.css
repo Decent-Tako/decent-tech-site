@@ -1,0 +1,20 @@
+.ripple-distortion-stage {
+  min-height: 24rem;
+}
+
+.ripple-distortion-stage .ripple-distortion {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.rb-frame .ripple-distortion-copy {
+  position: relative;
+  z-index: 2;
+  margin: 0 1rem 1rem;
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-align: center;
+  text-shadow: 0 1px 8px #212121;
+}
