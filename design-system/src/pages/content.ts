@@ -1,3 +1,5 @@
+import { publicAsset } from '../brand/assets';
+
 export const PAGE_NAV = [
   { id: 'start', label: 'Start' },
   { id: 'learn', label: 'Learn' },
@@ -10,27 +12,27 @@ export type PageId = (typeof PAGE_NAV)[number]['id'];
 
 export const PHOTOS = {
   hero: {
-    src: '/photos/find-your-uncomfortable.jpg',
+    src: publicAsset('photos/find-your-uncomfortable.jpg'),
     alt: 'A participant part way through a physical challenge outdoors',
     caption: 'Find Your Uncomfortable challenge',
   },
   crowd: {
-    src: '/photos/academy-crowd.jpg',
+    src: publicAsset('photos/academy-crowd.jpg'),
     alt: 'People gathered for an Academy session',
     caption: 'Academy session',
   },
   community: {
-    src: '/photos/challenge-community.jpg',
+    src: publicAsset('photos/challenge-community.jpg'),
     alt: 'Academy community standing together outdoors',
     caption: 'Buddy and Team',
   },
   run: {
-    src: '/photos/community-run.jpg',
+    src: publicAsset('photos/community-run.jpg'),
     alt: 'A group running together across a field',
     caption: 'Take it into the street',
   },
   night: {
-    src: '/photos/night-outreach.jpg',
+    src: publicAsset('photos/night-outreach.jpg'),
     alt: 'Volunteers doing night outreach on a city street',
     caption: 'Night outreach',
   },

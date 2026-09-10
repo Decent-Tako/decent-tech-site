@@ -1,3 +1,5 @@
+import { publicAsset } from '../../brand/assets';
+
 export const MOTION_RUNTIME = {
   package: 'motion',
   version: '13.2.0',
@@ -58,7 +60,7 @@ export const DRAG_DEFAULTS = {
   whileDragScale: 1,
   heading: 'Set the goal to $3,000.',
   kicker: 'Week 0',
-  photoSrc: '/photos/find-your-uncomfortable.jpg',
+  photoSrc: publicAsset('photos/find-your-uncomfortable.jpg'),
   photoAlt: 'A participant part way through a physical challenge outdoors',
   reducedMotion: 'user' as ReducedMotionMode,
 };
@@ -72,7 +74,7 @@ export const DRAG_CONSTRAINTS_DEFAULTS = {
   bottom: 80,
   heading: 'Challenge week is 19–28 October 2026.',
   kicker: 'Do it in public',
-  photoSrc: '/photos/night-outreach.jpg',
+  photoSrc: publicAsset('photos/night-outreach.jpg'),
   photoAlt: 'Volunteers doing night outreach on a city street',
   reducedMotion: 'user' as ReducedMotionMode,
 };
