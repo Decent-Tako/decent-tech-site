@@ -374,6 +374,8 @@ footer {
   background: var(--stage);
   color: var(--stage-ink);
   overflow: hidden;
+  /* The wheel turns the sphere, so the stage must not scroll or bounce. */
+  overscroll-behavior: none;
   /* The active-page pill from the bundle sits above the link row. */
   --menu-overlay-bottom: 5rem;
 }

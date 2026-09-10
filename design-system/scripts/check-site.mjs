@@ -4,9 +4,11 @@
 // and [data-effect] element to settle on data-webgl="ready" or
 // "unavailable", prints which WebGL branch each page took, and saves one
 // screenshot per page per viewport to site-shots/ (twelve in all). The home
-// page holds the menu only, so it expects zero [data-scene] elements. On the home page, when the menu
-// is ready, it drags the sphere 200 pixels and asserts the overlay link
-// points at one of the five pages.
+// page holds the menu only, so it expects zero [data-scene] elements. On the
+// home page, when the menu is ready, it asserts that the overlay pill links to
+// /about/ at load, that one wheel step changes the link, and that a click on
+// the centre of the stage grows the .menu-expand circle and opens one of the
+// five pages. The home screenshot is taken before that click.
 //
 // Usage: node scripts/check-site.mjs [url]   (default http://127.0.0.1:8080/)
 import { mkdir } from 'node:fs/promises';
@@ -56,30 +58,48 @@ async function settle(page, selector, label) {
   }
 }
 
+function pathOf(href) {
+  return href ? new URL(href, SITE_URL).pathname : null;
+}
+
+// The sphere starts on the gold disc, so the pill reads About with no drag.
+// One wheel step then moves the sphere on to another disc.
 async function checkMenu(page, viewportName, state) {
   const stage = page.locator('#menu-stage');
   if (state === 'ready') {
     const overlay = page.locator('a.menu-overlay');
     await overlay.waitFor({ state: 'visible', timeout: STAGE_TIMEOUT_MS });
+    const first = pathOf(await overlay.getAttribute('href'));
+    if (first !== '/about/') {
+      fail(`${viewportName}: at load the overlay links to "${first}", expected /about/`);
+    } else {
+      console.log(`check-site: ${viewportName} /: at load the overlay links to /about/`);
+    }
+
     const box = await stage.boundingBox();
     if (!box) {
       fail(`${viewportName}: #menu-stage has no bounding box`);
       return;
     }
-    const startX = box.x + box.width / 2 - 100;
-    const y = box.y + box.height / 2;
-    await page.mouse.move(startX, y);
-    await page.mouse.down();
-    await page.mouse.move(startX + 200, y, { steps: 20 });
-    await page.mouse.up();
-    // Let the sphere snap to the nearest vertex.
-    await page.waitForTimeout(1500);
-    const href = await overlay.getAttribute('href');
-    const pathname = href ? new URL(href, SITE_URL).pathname : null;
-    if (!pathname || !PAGE_PATHS.includes(pathname)) {
-      fail(`${viewportName}: overlay href "${href}" is not one of ${PAGE_PATHS.join(', ')}`);
-    } else {
-      console.log(`check-site: ${viewportName} /: after a 200 px drag the overlay links to ${pathname}`);
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, 200);
+    try {
+      await page.waitForFunction(
+        (before) => {
+          const link = document.querySelector('a.menu-overlay');
+          return link !== null && link.getAttribute('href') !== before;
+        },
+        await overlay.getAttribute('href'),
+        { timeout: 2000 },
+      );
+      const next = pathOf(await overlay.getAttribute('href'));
+      if (!next || !PAGE_PATHS.includes(next)) {
+        fail(`${viewportName}: after one wheel step the overlay href "${next}" is not a page`);
+      } else {
+        console.log(`check-site: ${viewportName} /: one wheel step moves the overlay to ${next}`);
+      }
+    } catch {
+      fail(`${viewportName}: one wheel step did not change the overlay href within 2 s`);
     }
   } else if (state === 'unavailable') {
     const linkCount = await page.locator('.menu-list a').count();
@@ -88,6 +108,34 @@ async function checkMenu(page, viewportName, state) {
     } else {
       console.log(`check-site: ${viewportName} /: the link list is the navigation (${linkCount} links)`);
     }
+  }
+}
+
+// A click on the centre of the stage grows a circle in the disc colour and
+// then opens the page behind that disc. This runs after the home screenshot,
+// because it leaves the home page.
+async function checkMenuClick(page, viewportName) {
+  const box = await page.locator('#menu-stage').boundingBox();
+  if (!box) {
+    fail(`${viewportName}: #menu-stage has no bounding box for the click`);
+    return;
+  }
+  const expandSeen = page
+    .waitForSelector('.menu-expand', { state: 'attached', timeout: 2000 })
+    .then(() => true)
+    .catch(() => false);
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  if (!(await expandSeen)) {
+    fail(`${viewportName}: no .menu-expand element appeared after the click`);
+  }
+  try {
+    await page.waitForURL(
+      (url) => PAGE_PATHS.includes(url.pathname),
+      { timeout: STAGE_TIMEOUT_MS },
+    );
+    console.log(`check-site: ${viewportName} /: the click opened ${new URL(page.url()).pathname}`);
+  } catch {
+    fail(`${viewportName}: the click did not open one of ${PAGE_PATHS.join(', ')}`);
   }
 }
 
@@ -109,8 +157,9 @@ async function checkPage(browser, viewport, pagePath) {
     fail(`${label}: ${url} answered ${response?.status() ?? 'no response'}`);
   }
 
+  let menuState = null;
   if (pagePath === '/') {
-    const menuState = await settle(page, '#menu-stage', `${label} #menu-stage`);
+    menuState = await settle(page, '#menu-stage', `${label} #menu-stage`);
     console.log(`check-site: ${label}: menu WebGL branch "${menuState}"`);
     await checkMenu(page, viewport.name, menuState);
   }
@@ -139,8 +188,13 @@ async function checkPage(browser, viewport, pagePath) {
   // renderer stops starving the page. Split Text then lands its letters at
   // once, the effects report done, and the screenshot returns in seconds.
   // This also proves the query is followed after mount.
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.waitForTimeout(300);
+  //
+  // The home page holds no scene, and reduced motion there removes the expand
+  // circle the click below asserts. So the home page stays in live motion.
+  if (pagePath !== '/') {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.waitForTimeout(300);
+  }
 
   // Effects are text animations and cursors; they settle and report done.
   const effectCount = await page.locator('[data-effect]').count();
@@ -194,6 +248,11 @@ async function checkPage(browser, viewport, pagePath) {
   const shot = path.join(SHOTS_DIR, `${slugOf(pagePath)}-${viewport.name}.png`);
   await page.screenshot({ path: shot, fullPage: false, timeout: 60_000 });
   console.log(`check-site: ${label}: screenshot ${shot}`);
+
+  // The click leaves the home page, so it comes after the screenshot.
+  if (pagePath === '/' && menuState === 'ready') {
+    await checkMenuClick(page, viewport.name);
+  }
 
   if (consoleErrors.length) {
     fail(`${label}: ${consoleErrors.length} console error(s):\n  ${consoleErrors.join('\n  ')}`);

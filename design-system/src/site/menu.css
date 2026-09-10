@@ -28,6 +28,56 @@
   touch-action: none;
 }
 
+/* The page transition. A circle in the colour of the disc grows from the
+   disc, or from the pill, until it covers the stage; then the page opens.
+   The element is decorative and takes no pointer. Under reduced motion the
+   site opens the page at once and this element never renders. */
+.menu-expand {
+  position: absolute;
+  z-index: 3;
+  width: 2rem;
+  height: 2rem;
+  margin: -1rem 0 0 -1rem;
+  border-radius: 50%;
+  background: var(--stage-ink);
+  pointer-events: none;
+  transform: scale(0);
+  animation: menu-expand-grow 450ms ease-in-out forwards;
+}
+
+/* The circle must cover the far corner of the stage from wherever it starts.
+   The circle is 2rem wide, so a factor of 200 gives a radius of 3200 pixels
+   at the usual root size: more than the diagonal of any screen the site
+   meets. */
+@keyframes menu-expand-grow {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(200);
+  }
+}
+
+.menu-expand[data-dot="gold"] {
+  background: var(--dot-gold);
+}
+
+.menu-expand[data-dot="vermilion"] {
+  background: var(--dot-vermilion);
+}
+
+.menu-expand[data-dot="terracotta"] {
+  background: var(--dot-terracotta);
+}
+
+.menu-expand[data-dot="steel"] {
+  background: var(--dot-steel);
+}
+
+.menu-expand[data-dot="cream"] {
+  background: var(--dot-cream);
+}
+
 .menu-overlay {
   position: absolute;
   left: 50%;

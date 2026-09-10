@@ -27,6 +27,19 @@
  *    Upstream derives the field of view from the camera distance, so `scale`
  *    moved the camera back without showing more of the sphere. Now a larger
  *    `scale` shows more discs at rest.
+ * 11. `InfiniteGridMenu` got `faceVertex(index)`, which turns the sphere so
+ *    that vertex `index` faces the camera. `init()` and `reset()` call it with
+ *    vertex 0, so the first item is the first one the menu reports.
+ * 12. `InfiniteGridMenu` got `step(direction)` and `vertexSpacingAngle()`.
+ *    `step()` turns the sphere about the view up axis by the angle between
+ *    neighbouring vertices, until the nearest vertex carries a different item.
+ *    The existing snap then settles it. `InfiniteMenu` does not call `step()`;
+ *    the page that holds the menu does, from a wheel or a key.
+ * 13. `InfiniteGridMenu` got `setItemClick()` and the canvas got a pointer
+ *    pair that reports a click: a `pointerdown` and a `pointerup` within 8
+ *    pixels and 350 ms. `InfiniteMenu` got the prop `onItemClick(item,
+ *    vertexIndex, screenPoint)`, where `screenPoint` is the centre of the
+ *    nearest vertex in canvas pixels.
  * Everything else is unchanged.
  */
 import { type CSSProperties, type FC, useRef, useState, useEffect, type MutableRefObject } from 'react';
@@ -682,6 +695,11 @@ export interface MenuItem {
 }
 
 type ActiveItemCallback = (index: number, vertexIndex: number) => void;
+type ItemClickCallback = (
+  index: number,
+  vertexIndex: number,
+  screenPoint: { x: number; y: number }
+) => void;
 type MovementChangeCallback = (isMoving: boolean) => void;
 type InitCallback = (instance: InfiniteGridMenu) => void;
 
@@ -779,6 +797,13 @@ export class InfiniteGridMenu {
   private onMovementChange: MovementChangeCallback;
   private rafId: number | null = null;
   private paused = false;
+  private onItemClick: ItemClickCallback | null = null;
+  private pointerDownAt: { x: number; y: number; time: number } | null = null;
+
+  // A click is a pointer pair that stays inside this many pixels for less
+  // than this many milliseconds. A longer or a wider pair is a drag.
+  private readonly CLICK_MOVE_LIMIT = 8;
+  private readonly CLICK_TIME_LIMIT = 350;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -814,6 +839,7 @@ export class InfiniteGridMenu {
 
   public reset(): void {
     this.control.reset();
+    this.faceVertex(0);
     this.camera.position[2] = 3 * this.scaleFactor;
     this.smoothRotationVelocity = 0;
     this.updateCameraMatrix();
@@ -822,6 +848,64 @@ export class InfiniteGridMenu {
       this.animate(this.TARGET_FRAME_DURATION);
       this.render();
     }
+  }
+
+  // Local change 11. Turn the sphere so that the given vertex faces the
+  // camera. The snap direction is where the active vertex rests, so the
+  // orientation is the rotation from the vertex direction onto it.
+  public faceVertex(index: number): void {
+    const position = this.instancePositions[index];
+    if (!position) return;
+    const from = vec3.normalize(vec3.create(), position);
+    const to = vec3.normalize(vec3.create(), this.control.snapDirection);
+    quat.rotationTo(this.control.orientation, from, to);
+    quat.normalize(this.control.orientation, this.control.orientation);
+    this.control.snapTargetDirection = null;
+  }
+
+  // Local change 12. Turn the sphere by one vertex step about the view up
+  // axis. The nearest vertex is then the neighbour along that axis, and the
+  // snap in `update()` settles it.
+  public step(direction: 1 | -1): void {
+    const spacing = this.vertexSpacingAngle();
+    if (spacing === 0) return;
+    const count = Math.max(1, this.items.length);
+    const before = this.findNearestVertexIndex();
+    const start = quat.clone(this.control.orientation);
+    // One spacing lands on a neighbour on most of the sphere. Where the
+    // neighbours do not line up with the axis, or where the neighbour carries
+    // the same item as the vertex before it, a longer turn finds the next
+    // one. The loop stops at the first vertex with a different item.
+    for (let multiple = 1; multiple <= 12; ++multiple) {
+      const turn = quat.setAxisAngle(quat.create(), [0, 1, 0], spacing * multiple * direction);
+      quat.multiply(this.control.orientation, turn, start);
+      quat.normalize(this.control.orientation, this.control.orientation);
+      const now = this.findNearestVertexIndex();
+      if (now !== before && now % count !== before % count) break;
+    }
+    this.control.snapTargetDirection = null;
+  }
+
+  // The angle between the active vertex and its nearest neighbour. One step
+  // of this angle moves the snap on to that neighbour.
+  private vertexSpacingAngle(): number {
+    const active = this.instancePositions[this.findNearestVertexIndex()];
+    if (!active) return 0;
+    const from = vec3.normalize(vec3.create(), active);
+    let smallest = Math.PI;
+    for (const position of this.instancePositions) {
+      const other = vec3.normalize(vec3.create(), position);
+      const dot = Math.max(-1, Math.min(1, vec3.dot(from, other)));
+      const angle = Math.acos(dot);
+      if (angle > 1e-4 && angle < smallest) smallest = angle;
+    }
+    return smallest;
+  }
+
+  // Local change 13. The page uses the click to open the page behind the
+  // disc. A null callback removes the listeners' effect.
+  public setItemClick(callback: ItemClickCallback | null): void {
+    this.onItemClick = callback;
   }
 
   public setInertia(value: boolean): void {
@@ -908,6 +992,8 @@ export class InfiniteGridMenu {
     this.initTexture();
 
     this.control = new ArcballControl(this.canvas, deltaTime => this.onControlUpdate(deltaTime));
+    this.initClickListeners();
+    this.faceVertex(0);
 
     this.updateCameraMatrix();
     this.updateProjectionMatrix();
@@ -1140,6 +1226,47 @@ export class InfiniteGridMenu {
     const nearestVertexPos = this.instancePositions[index];
     return vec3.transformQuat(vec3.create(), nearestVertexPos, this.control.orientation);
   }
+
+  // Local change 13. A `pointerdown` and a `pointerup` that stay together are
+  // a click on the disc that is nearest the centre at that moment.
+  private initClickListeners(): void {
+    this.canvas.addEventListener('pointerdown', (e: PointerEvent) => {
+      this.pointerDownAt = { x: e.clientX, y: e.clientY, time: performance.now() };
+    });
+    this.canvas.addEventListener('pointercancel', () => {
+      this.pointerDownAt = null;
+    });
+    this.canvas.addEventListener('pointerup', (e: PointerEvent) => {
+      const down = this.pointerDownAt;
+      this.pointerDownAt = null;
+      if (!down || !this.onItemClick) return;
+      const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+      const elapsed = performance.now() - down.time;
+      if (moved > this.CLICK_MOVE_LIMIT || elapsed > this.CLICK_TIME_LIMIT) return;
+      const vertexIndex = this.findNearestVertexIndex();
+      const itemIndex = vertexIndex % Math.max(1, this.items.length);
+      this.onItemClick(itemIndex, vertexIndex, this.getVertexScreenPoint(vertexIndex));
+    });
+  }
+
+  // The centre of a vertex in canvas pixels, from the same matrices the
+  // shader uses.
+  private getVertexScreenPoint(index: number): { x: number; y: number } {
+    const world = this.getVertexWorldPosition(index);
+    const clip = vec3.transformMat4(vec3.create(), world, this.camera.matrices.view);
+    const point = [clip[0], clip[1], clip[2], 1];
+    const p = this.camera.matrices.projection;
+    const x = p[0] * point[0] + p[4] * point[1] + p[8] * point[2] + p[12];
+    const y = p[1] * point[0] + p[5] * point[1] + p[9] * point[2] + p[13];
+    const w = p[3] * point[0] + p[7] * point[1] + p[11] * point[2] + p[15];
+    const width = this.canvas.clientWidth;
+    const height = this.canvas.clientHeight;
+    if (!w) return { x: width / 2, y: height / 2 };
+    return {
+      x: ((x / w) * 0.5 + 0.5) * width,
+      y: (0.5 - (y / w) * 0.5) * height
+    };
+  }
 }
 
 const defaultItems: MenuItem[] = [
@@ -1159,6 +1286,7 @@ interface InfiniteMenuProps {
   inertia?: boolean;
   onInit?: (menu: InfiniteGridMenu) => void;
   onActiveItemChange?: (item: MenuItem, vertexIndex: number) => void;
+  onItemClick?: (item: MenuItem, vertexIndex: number, screenPoint: { x: number; y: number }) => void;
 }
 
 const InfiniteMenu: FC<InfiniteMenuProps> = ({
@@ -1167,12 +1295,14 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({
   backgroundColor = '#000000',
   inertia = true,
   onInit,
-  onActiveItemChange
+  onActiveItemChange,
+  onItemClick
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null) as MutableRefObject<HTMLCanvasElement | null>;
   const sketchRef = useRef<InfiniteGridMenu | null>(null);
   const onInitRef = useRef(onInit);
   const onActiveItemChangeRef = useRef(onActiveItemChange);
+  const onItemClickRef = useRef(onItemClick);
   const inertiaRef = useRef(inertia);
   const [activeItem, setActiveItem] = useState<MenuItem | null>(null);
   const [isMoving, setIsMoving] = useState<boolean>(false);
@@ -1180,7 +1310,8 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({
   useEffect(() => {
     onInitRef.current = onInit;
     onActiveItemChangeRef.current = onActiveItemChange;
-  }, [onInit, onActiveItemChange]);
+    onItemClickRef.current = onItemClick;
+  }, [onInit, onActiveItemChange, onItemClick]);
 
   useEffect(() => {
     inertiaRef.current = inertia;
@@ -1206,6 +1337,10 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({
         setIsMoving,
         sk => {
           sk.setInertia(inertiaRef.current);
+          sk.setItemClick((index, vertexIndex, screenPoint) => {
+            const list = items.length ? items : defaultItems;
+            onItemClickRef.current?.(list[index % list.length], vertexIndex, screenPoint);
+          });
           sk.run();
           onInitRef.current?.(sk);
         },

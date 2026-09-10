@@ -1,4 +1,7 @@
 // About page background. Brand default: navy, steel blue, gold on navy.
+//
+// The pointer does nothing here: Ben asked for no cursor features on
+// 2026-09-10. The scene keeps its own motion.
 import LiquidEther from '../../react-bits/vendor/backgrounds/liquid-ether/LiquidEther';
 import type { SceneProps } from '../scenes';
 import { list, number, useSceneState } from '../sceneSupport';
@@ -11,7 +14,7 @@ export default function LiquidEtherScene({ host, dataset, onReady }: SceneProps)
     <LiquidEther
       colors={list(dataset.colors, DEFAULT_COLORS)}
       backgroundColor={dataset.background ?? '#182534'}
-      mouseForce={number(dataset.force, 24)}
+      mouseForce={number(dataset.force, 0)}
       cursorSize={number(dataset.cursor, 120)}
       autoDemo
       autoSpeed={number(dataset.speed, 0.6)}
