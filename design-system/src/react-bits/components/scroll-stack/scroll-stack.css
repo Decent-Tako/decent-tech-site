@@ -1,0 +1,51 @@
+.rb-frame [data-testid='scroll-stack-stage'] {
+  height: 24rem;
+  padding: 0;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.rb-frame .scroll-stack-scroller {
+  height: 24rem;
+}
+
+.rb-frame .scroll-stack-inner {
+  padding: 4rem 1.5rem 20rem;
+  min-height: 0;
+}
+
+.rb-frame .scroll-stack-card {
+  height: auto;
+  min-height: 10rem;
+  padding: 1.25rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--line);
+  background: var(--soft);
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.scroll-stack-card__kicker,
+.scroll-stack-card__title,
+.scroll-stack-card__copy {
+  margin: 0;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.rb-frame .scroll-stack-card__kicker {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+}
+
+.rb-frame .scroll-stack-card__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.rb-frame .scroll-stack-card__copy {
+  margin-top: 0.4rem;
+  line-height: 1.45;
+}
