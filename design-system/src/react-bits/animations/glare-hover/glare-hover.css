@@ -1,0 +1,39 @@
+.glare-hover-copy {
+  display: grid;
+  gap: 0.5rem;
+  width: min(100%, 22rem);
+  padding: 1rem;
+}
+
+.glare-hover-copy img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 8 / 5;
+  object-fit: cover;
+}
+
+.rb-frame .glare-hover-copy p {
+  margin: 0;
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .glare-hover-kicker {
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-yellow);
+}
+
+.rb-frame .glare-hover-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.rb-frame .glare-hover {
+  max-width: 100%;
+  height: auto;
+  min-height: 22rem;
+}
