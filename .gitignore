@@ -3,3 +3,6 @@
 design-system/node_modules/
 design-system/storybook-static/
 .DS_Store
+
+# Agent worktrees
+.worktrees/
