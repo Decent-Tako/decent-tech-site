@@ -80,11 +80,13 @@ async function playBrand(canvas: Canvas) {
 
 async function playScroll(canvas: Canvas) {
   const stage = canvas.getByTestId('scroll-stack-stage');
+  await expect(canvas.getByRole('heading', { name: 'Scroll Stack' })).toBeVisible();
   const scroller = stage.querySelector('.scroll-stack-scroller');
   if (!(scroller instanceof HTMLElement)) throw new Error('The Scroll Stack scroller is missing.');
   await expect(canvas.getByText('Week 0')).toBeVisible();
+  scroller.focus();
   scroller.scrollTop = scroller.scrollHeight;
-  scroller.dispatchEvent(new Event('scroll'));
+  scroller.dispatchEvent(new Event('scroll', { bubbles: true }));
   await waitFor(() => {
     expect(stage).toHaveAttribute('data-complete', 'true');
   }, SLOW);

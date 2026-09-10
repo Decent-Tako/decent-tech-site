@@ -9,7 +9,7 @@
  *
  * Local changes:
  * 1. This header.
- * 2. The displacement filter URL is a custom property so two cards can mount.
+ * 2. The displacement filter is a custom property so two cards can mount.
  * Everything else is unchanged.
  */
 .reflective-card-container {
@@ -44,7 +44,7 @@
   transform: scale(1.2) scaleX(-1);
 
   filter: saturate(var(--saturation, 0)) contrast(120%) brightness(110%) blur(var(--blur-strength, 12px))
-    url(var(--reflective-filter));
+    var(--reflective-filter);
 
   z-index: 0;
   opacity: 0.9;

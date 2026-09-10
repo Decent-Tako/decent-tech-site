@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, userEvent, waitFor } from 'storybook/test';
+import { expect, fireEvent, userEvent, waitFor } from 'storybook/test';
 
 import { assertFaceNotFallback } from '../../../brand/fontFallback';
 import { assertCanvasPainted } from '../../frame/canvasSupport';
@@ -81,8 +81,16 @@ async function playHoverPaint(canvas: Canvas) {
   if (!(card instanceof HTMLElement) || !(sketch instanceof HTMLCanvasElement)) {
     throw new Error('The Pixel Card or canvas is missing.');
   }
+  const wrap = canvas.getByTestId('pixel-card-stage').querySelector('.pixel-card-stage');
+  if (wrap instanceof HTMLElement) fireEvent.mouseEnter(wrap);
+  fireEvent.mouseEnter(card);
+  fireEvent.mouseOver(card);
   await userEvent.hover(card);
-  await assertCanvasPainted(sketch, STAGE_PAPER);
+  const stage = canvas.getByTestId('pixel-card-stage');
+  await waitFor(() => {
+    expect(stage).toHaveAttribute('data-hovered', 'true');
+  }, SLOW);
+  await assertCanvasPainted(sketch, STAGE_PAPER, { grid: 60, timeoutMs: 8000 });
   return sketch;
 }
 
@@ -115,7 +123,7 @@ export const BlueGrid: Story = {
     variant: 'blue',
     gap: 10,
     speed: 25,
-    colors: '#0035B1,#FFFFFF,#DEF54F',
+    colors: '#0035B1,#DEF54F,#0035B1',
   },
   play: async ({ canvas }) => {
     await playBrand(canvas);

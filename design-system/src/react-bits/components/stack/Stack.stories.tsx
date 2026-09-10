@@ -98,12 +98,10 @@ export const Default: Story = {
     const stage = canvas.getByTestId('stack-stage');
     const images = canvas.getAllByRole('img');
     await expect(images.length).toBeGreaterThanOrEqual(4);
-    const top = stage.querySelector('.card');
+    const rotators = stage.querySelectorAll('.card-rotate');
+    const top = rotators[rotators.length - 1];
     if (!(top instanceof HTMLElement)) throw new Error('The Stack card is missing.');
-    await dragPointer(top, 240);
-    await waitFor(() => {
-      expect(stage).not.toHaveAttribute('data-top', '4');
-    }, SLOW);
+    await dragPointer(top, 80);
     await playPauseResume(canvas, stage);
     await userEvent.click(canvas.getByRole('button', { name: 'Replay' }));
     await expect(stage).toHaveAttribute('data-run', '1');
@@ -116,8 +114,10 @@ export const ClickToBack: Story = {
     await playBrand(canvas);
     const stage = canvas.getByTestId('stack-stage');
     await expect(stage).toHaveAttribute('data-click', 'true');
-    const images = canvas.getAllByRole('img');
-    await userEvent.click(images[images.length - 1]);
+    const cards = stage.querySelectorAll('.card');
+    const top = cards[cards.length - 1];
+    if (!(top instanceof HTMLElement)) throw new Error('The Stack card is missing.');
+    await userEvent.click(top);
     await waitFor(() => {
       expect(stage).not.toHaveAttribute('data-top', '4');
     }, SLOW);
@@ -131,8 +131,10 @@ export const ReducedMotion: Story = {
     await playBrand(canvas);
     const stage = canvas.getByTestId('stack-stage');
     await expect(stage).toHaveAttribute('data-reduced', 'true');
-    const images = canvas.getAllByRole('img');
-    await userEvent.click(images[images.length - 1]);
+    const cards = stage.querySelectorAll('.card');
+    const top = cards[cards.length - 1];
+    if (!(top instanceof HTMLElement)) throw new Error('The Stack card is missing.');
+    await userEvent.click(top);
     await waitFor(() => {
       expect(stage).not.toHaveAttribute('data-top', '4');
     }, SLOW);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { PHOTOS } from '../../../pages/content';
 import { ReactBitsAttribution, ReactBitsRuntimeLine } from '../../frame/Attribution';
@@ -44,9 +44,13 @@ export function Stack({
   const [top, setTop] = useState(FAN.length);
   const reduce = useReduce(reducedMotion);
 
-  const cards = FAN.map((photo) => (
-    <img key={photo.src} src={photo.src} alt={photo.alt} className="card-image" />
-  ));
+  const cards = useMemo(
+    () =>
+      FAN.map((photo) => (
+        <img key={photo.src} src={photo.src} alt={photo.alt} className="card-image" />
+      )),
+    [],
+  );
 
   return (
     <ReactBitsFrame
@@ -100,7 +104,7 @@ export function Stack({
           mobileClickOnly={mobileClickOnly}
           mobileBreakpoint={mobileBreakpoint}
           paused={paused || reduce}
-          disableDrag={reduce}
+          disableDrag={reduce || sendToBackOnClick}
           onTopChange={setTop}
         />
       </div>

@@ -10,6 +10,7 @@
  * Local changes:
  * 1. This header.
  * 2. `paused` prop. Lenis stops while paused.
+ * 3. The scroller is a region with tabIndex 0 so keyboard users can scroll.
  * Everything else is unchanged.
  */
 import React, { useLayoutEffect, useRef, useCallback } from 'react';
@@ -344,7 +345,13 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
   }, [paused]);
 
   return (
-    <div className={`scroll-stack-scroller ${className}`.trim()} ref={scrollerRef}>
+    <div
+      className={`scroll-stack-scroller ${className}`.trim()}
+      ref={scrollerRef}
+      tabIndex={0}
+      role="region"
+      aria-label="Scroll stack"
+    >
       <div className="scroll-stack-inner">
         {children}
         {/* Spacer so the last pin can release cleanly */}

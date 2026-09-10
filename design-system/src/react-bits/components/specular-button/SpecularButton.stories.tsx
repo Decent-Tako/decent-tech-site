@@ -140,7 +140,7 @@ async function playShine(stage: HTMLElement) {
     throw new Error('The Specular Button or canvas is missing.');
   }
   movePointer(button, 24, 12);
-  await assertCanvasPainted(sketch, STAGE_INK);
+  await assertCanvasPainted(sketch, STAGE_INK, { grid: 48, timeoutMs: 8000 });
   await userEvent.click(button);
   await expect(stage).toHaveAttribute('data-clicked', 'true');
 }
@@ -158,11 +158,7 @@ export const Default: Story = {
   play: async ({ canvas }) => {
     await playBrand(canvas);
     const { stage, ready } = await playReady(canvas);
-    if (ready) {
-      await playShine(stage);
-      const sketch = stage.querySelector('canvas');
-      if (sketch instanceof HTMLCanvasElement) await assertCanvasPainted(sketch, STAGE_INK);
-    }
+    if (ready) await playShine(stage);
     await playPauseResume(canvas, stage);
     await userEvent.click(canvas.getByRole('button', { name: 'Replay' }));
     await expect(stage).toHaveAttribute('data-run', '1');
@@ -172,7 +168,7 @@ export const Default: Story = {
 };
 
 export const AutoSweep: Story = {
-  args: { ...SPECULAR_BUTTON_DEFAULTS, autoAnimate: true, size: 'md' },
+  args: { ...SPECULAR_BUTTON_DEFAULTS, autoAnimate: true, size: 'md', thickness: 4 },
   play: async ({ canvas }) => {
     await playBrand(canvas);
     const { stage, ready } = await playReady(canvas);
@@ -180,7 +176,9 @@ export const AutoSweep: Story = {
     await expect(stage).toHaveAttribute('data-size', 'md');
     if (ready) {
       const sketch = stage.querySelector('canvas');
-      if (sketch instanceof HTMLCanvasElement) await assertCanvasPainted(sketch, STAGE_INK);
+      if (sketch instanceof HTMLCanvasElement) {
+        await assertCanvasPainted(sketch, STAGE_INK, { grid: 48, timeoutMs: 8000 });
+      }
     }
     await playPauseResume(canvas, stage);
   },

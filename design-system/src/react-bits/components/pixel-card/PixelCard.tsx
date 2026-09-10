@@ -32,6 +32,7 @@ export function PixelCard({
   const [paused, setPaused] = useState(false);
   const [run, setRun] = useState(0);
   const [ready, setReady] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const reduce = useReduce(reducedMotion);
 
   return (
@@ -60,6 +61,7 @@ export function PixelCard({
         setRun((value) => value + 1);
         setPaused(false);
         setReady(false);
+        setHovered(false);
       }}
       reducedMotion={reducedMotion}
       paused={paused}
@@ -68,11 +70,16 @@ export function PixelCard({
         'data-reduced': reduce ? 'true' : 'false',
         'data-run': String(run),
         'data-ready': ready ? 'true' : 'false',
+        'data-hovered': hovered ? 'true' : 'false',
         'data-variant': variant,
         'data-gap': String(gap),
       }}
     >
-      <div className="pixel-card-stage">
+      <div
+        className="pixel-card-stage"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
         <UpstreamPixelCard
           key={run}
           variant={variant}
