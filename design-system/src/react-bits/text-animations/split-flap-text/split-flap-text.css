@@ -1,0 +1,10 @@
+.rb-frame .split-flap-text,
+.rb-frame .split-flap-text-copy {
+  margin: 1.25rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+}
+
+.rb-frame__stage--ink .split-flap-text {
+  color: var(--paper);
+}
