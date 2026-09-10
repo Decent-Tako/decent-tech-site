@@ -179,7 +179,8 @@ footer {
 .page {
   position: relative;
   isolation: isolate;
-  padding-block: clamp(2rem, 5vw, 4rem) clamp(3rem, 8vw, 6rem);
+  min-height: calc(100svh - var(--header-height));
+  padding-block: clamp(2.5rem, 8vw, 6rem) clamp(4rem, 12vw, 9rem);
   --scene-bg: var(--brand-navy);
   --plate: var(--brand-cream);
   --plate-ink: var(--brand-charcoal);
@@ -207,9 +208,20 @@ footer {
 
 .plate {
   position: relative;
-  padding: clamp(1.6rem, 5vw, 3.6rem);
+  padding: clamp(1.6rem, 5vw, 3.2rem);
   background: var(--plate);
   color: var(--plate-ink);
+}
+
+/* Copy plates take the width of their text so the scene shows around them.
+   The three-column services plate keeps the full width. */
+.plate.hero,
+.plate.contact {
+  max-width: 44rem;
+}
+
+.plate h1 {
+  font-size: clamp(2.4rem, 5vw + 0.4rem, 4.4rem);
 }
 
 .plate + .plate {
