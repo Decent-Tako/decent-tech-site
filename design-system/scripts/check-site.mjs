@@ -912,14 +912,21 @@ async function checkNextDot(page, label, expectedPath, fromPath) {
   for (let round = 0; round < 3; round += 1) {
     // `page.mouse.wheel` needs a mouse. The phone viewport has none, so there
     // the push is three dispatched wheel events instead.
+    // One wheel of the push can already open the next page. The rounds that
+    // follow then land on a document that is going away, and the evaluate
+    // throws "Execution context was destroyed". The push is done at that
+    // point, so the loop stops instead.
+    if (!page.url().endsWith(fromPath)) break;
     if (size.width < 720) {
-      await page.evaluate(() => {
-        window.dispatchEvent(
-          new WheelEvent('wheel', { deltaY: 300, deltaMode: 0, bubbles: true, cancelable: true }),
-        );
-      });
+      await page
+        .evaluate(() => {
+          window.dispatchEvent(
+            new WheelEvent('wheel', { deltaY: 300, deltaMode: 0, bubbles: true, cancelable: true }),
+          );
+        })
+        .catch(() => {});
     } else {
-      await page.mouse.wheel(0, 300);
+      await page.mouse.wheel(0, 300).catch(() => {});
     }
     await page.waitForTimeout(150);
   }
