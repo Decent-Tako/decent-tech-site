@@ -115,9 +115,11 @@ export const ManualHover: Story = {
     const stage = canvas.getByTestId('true-focus-stage');
     const second = canvas.getByTestId('true-focus-word-1');
     await expect(second).toHaveTextContent(FEATURES[1].title);
+    await userEvent.hover(second);
     movePointer(second, 12, 12);
     await waitFor(() => {
       expect(stage).toHaveAttribute('data-index', '1');
+      expect(second).toHaveAttribute('data-active', 'true');
     }, SLOW);
     await playPause(canvas, stage);
   },

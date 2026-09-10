@@ -15,7 +15,7 @@
  * 5. `onIndex` reports the active word.
  * 6. The host carries data-testid="true-focus-copy". Each word carries
  *    data-testid="true-focus-word-{i}" and data-active.
- * 7. pointerenter is accepted so play helpers reach the word.
+ * 7. pointerover and pointermove are accepted so play helpers reach the word.
  */
 
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
@@ -138,7 +138,10 @@ const TrueFocus = ({
               } as CSSProperties
             }
             onMouseEnter={() => handleEnter(index)}
+            onMouseOver={() => handleEnter(index)}
             onPointerEnter={() => handleEnter(index)}
+            onPointerOver={() => handleEnter(index)}
+            onPointerMove={() => handleEnter(index)}
             onMouseLeave={handleLeave}
             onPointerLeave={handleLeave}
           >
