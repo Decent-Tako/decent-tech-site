@@ -125,16 +125,16 @@ class SiteTests(unittest.TestCase):
         self.assertIn("Decent Technology Group", self.page_text)
         self.assertIn("decent.", self.page_text)
 
-    def test_home_page_loads_the_menu_bundle(self):
+    def test_home_page_loads_the_site_bundle(self):
         module_scripts = [
-            script for script in self.parser.scripts if script["src"] == "/assets/menu.js"
+            script for script in self.parser.scripts if script["src"] == "/assets/site.js"
         ]
         self.assertEqual(len(module_scripts), 1)
         self.assertEqual(module_scripts[0]["type"], "module")
         stylesheets = [
             item.get("href") for item in self.parser.link_tags if item.get("rel") == "stylesheet"
         ]
-        self.assertIn("/assets/menu.css", stylesheets)
+        self.assertIn("/assets/site.css", stylesheets)
         self.assertIn("/styles.css", stylesheets)
 
     def test_home_page_holds_the_menu_stage_and_the_link_list(self):

@@ -1,5 +1,5 @@
-// Builds the site bundle: src/site/menu-entry.tsx into dist-site/assets/menu.js
-// and dist-site/assets/menu.css, with fixed names so site/index.html can link
+// Builds the site bundle: src/site/site-entry.tsx into dist-site/assets/site.js
+// and dist-site/assets/site.css, with fixed names so site/index.html can link
 // them. Run with `npm run build:site`. The Dockerfile copies dist-site/assets/.
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
@@ -15,14 +15,14 @@ export default defineConfig({
     cssCodeSplit: false,
     modulePreload: { polyfill: false },
     rollupOptions: {
-      input: 'src/site/menu-entry.tsx',
+      input: 'src/site/site-entry.tsx',
       output: {
         format: 'es',
-        entryFileNames: 'assets/menu.js',
-        chunkFileNames: 'assets/menu-[name].js',
+        entryFileNames: 'assets/site.js',
+        chunkFileNames: 'assets/site-[name].js',
         assetFileNames: (asset) =>
           asset.names?.some((name) => name.endsWith('.css'))
-            ? 'assets/menu.css'
+            ? 'assets/site.css'
             : 'assets/[name][extname]',
       },
     },
