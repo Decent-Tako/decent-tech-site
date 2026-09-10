@@ -888,16 +888,22 @@ export class InfiniteGridMenu {
 
   // The angle between the active vertex and its nearest neighbour. One step
   // of this angle moves the snap on to that neighbour.
+  //
+  // The vertex itself is left out by its index, not by its angle. `acos` near
+  // 1 loses precision, so the angle to the vertex itself is a small number,
+  // not zero, and an angle threshold would take it for a neighbour.
   private vertexSpacingAngle(): number {
-    const active = this.instancePositions[this.findNearestVertexIndex()];
+    const activeIndex = this.findNearestVertexIndex();
+    const active = this.instancePositions[activeIndex];
     if (!active) return 0;
     const from = vec3.normalize(vec3.create(), active);
     let smallest = Math.PI;
-    for (const position of this.instancePositions) {
-      const other = vec3.normalize(vec3.create(), position);
+    for (let i = 0; i < this.instancePositions.length; ++i) {
+      if (i === activeIndex) continue;
+      const other = vec3.normalize(vec3.create(), this.instancePositions[i]);
       const dot = Math.max(-1, Math.min(1, vec3.dot(from, other)));
       const angle = Math.acos(dot);
-      if (angle > 1e-4 && angle < smallest) smallest = angle;
+      if (angle < smallest) smallest = angle;
     }
     return smallest;
   }
