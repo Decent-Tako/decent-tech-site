@@ -883,7 +883,14 @@ export class InfiniteGridMenu {
       const now = this.findNearestVertexIndex();
       if (now !== before && now % count !== before % count) break;
     }
-    this.control.snapTargetDirection = null;
+    // The step lands on the new vertex, not part way to it, so the snap
+    // settles it there instead of pulling the sphere back. The pointer
+    // rotation from an earlier drag would also fight the step.
+    quat.identity(this.control.pointerRotation);
+    this.control.snapTargetDirection = vec3.normalize(
+      vec3.create(),
+      this.getVertexWorldPosition(this.findNearestVertexIndex())
+    );
   }
 
   // The angle between the active vertex and its nearest neighbour. One step

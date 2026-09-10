@@ -145,16 +145,18 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
 
   // The home page itself does not scroll, so the wheel drives the sphere.
   // The listener is not passive; it stops the page from bouncing.
+  // The listener sits on the stage, the element the site owns, not on the
+  // sphere inside it. A wheel anywhere over the stage turns the sphere.
   useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
+    const stage = rootRef.current?.parentElement ?? rootRef.current;
+    if (!stage) return;
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       if (event.deltaY === 0) return;
       step(event.deltaY > 0 ? 1 : -1);
     };
-    root.addEventListener('wheel', onWheel, { passive: false });
-    return () => root.removeEventListener('wheel', onWheel);
+    stage.addEventListener('wheel', onWheel, { passive: false });
+    return () => stage.removeEventListener('wheel', onWheel);
   }, [step]);
 
   const handlePillKeyDown = (event: ReactKeyboardEvent<HTMLAnchorElement>) => {

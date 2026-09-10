@@ -81,15 +81,20 @@ async function checkMenu(page, viewportName, state) {
       fail(`${viewportName}: #menu-stage has no bounding box`);
       return;
     }
+    // Read the link before the wheel. The sphere may move before the next
+    // command runs, so a value read afterwards can already be the new one.
+    const beforeWheel = await overlay.getAttribute('href');
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await page.mouse.wheel(0, 200);
+    // One wheel event on the stage. A dispatched event is one step; the
+    // trackpad-like stream of page.mouse.wheel is not.
+    await stage.dispatchEvent('wheel', { deltaY: 200, deltaMode: 0 });
     try {
       await page.waitForFunction(
         (before) => {
           const link = document.querySelector('a.menu-overlay');
           return link !== null && link.getAttribute('href') !== before;
         },
-        await overlay.getAttribute('href'),
+        beforeWheel,
         { timeout: 2000 },
       );
       const next = pathOf(await overlay.getAttribute('href'));
