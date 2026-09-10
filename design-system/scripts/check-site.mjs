@@ -822,23 +822,28 @@ async function checkNextDot(page, label, expectedPath) {
     return;
   }
 
-  // Scroll the disc's own height past the bottom of the document. The scene
-  // reads that and clicks the link, so the page opens through the same route
-  // a press takes.
+  // Scroll to the bottom. The page carries a disc's height of room below the
+  // disc, so the bottom of the document is the disc's own height past it,
+  // which is the threshold the scene reads. The scene then clicks the link, so
+  // the page opens through the same route a press takes.
   await page.evaluate(() => {
-    const target = document.querySelector('.next-dot__link');
-    const extra = target ? target.getBoundingClientRect().height + 40 : 200;
-    window.scrollTo(0, document.documentElement.scrollHeight + extra);
+    window.scrollTo(0, document.documentElement.scrollHeight);
     window.dispatchEvent(new Event('scroll'));
   });
   try {
-    await page.waitForURL((url) => url.pathname.endsWith(expectedPath), { timeout: 5000 });
+    await page.waitForURL((url) => url.pathname.endsWith(expectedPath), {
+      timeout: 5000,
+      waitUntil: 'load',
+    });
     console.log(`check-site: ${label}: the scroll past the next dot opened ${expectedPath}`);
   } catch {
     fail(
       `${label}: the scroll past the next dot did not open ${expectedPath}`
         + ` within 5 s; the page is at ${page.url()}`,
     );
+    // A navigation may still be in flight. Let it land before the caller
+    // closes the context, so a late load cannot report against the next page.
+    await page.waitForLoadState('load').catch(() => {});
     return;
   }
   // The page it opened is the inside of its dot, so its field must be there.

@@ -1029,6 +1029,11 @@ h3 {
   display: none;
 }
 
+/* The threshold is a scroll of the disc's own height past the bottom, so the
+   page must hold that much room below the disc for the reader to scroll into.
+   Without it the disc sits on the last line of the document and the reader can
+   never get past it. The room is the tallest the disc becomes, plus a margin
+   the rise needs. */
 .next-dot {
   position: relative;
   z-index: 1;
@@ -1036,6 +1041,7 @@ h3 {
   justify-content: center;
   width: min(100%, 44rem);
   margin: clamp(4rem, 12vw, 8rem) auto 0;
+  padding-bottom: calc(clamp(7rem, 18vw, 11rem) + 6rem);
 }
 
 .next-dot__link {
