@@ -1,0 +1,19 @@
+.magnet-lines-stage {
+  min-height: 24rem;
+  display: grid;
+  place-items: center;
+}
+
+.magnet-lines-stage .magnetLines-container {
+  width: min(100%, 20rem);
+  height: min(100%, 20rem);
+  max-width: 20rem;
+  max-height: 20rem;
+}
+
+.rb-frame .magnet-lines-copy {
+  margin: 0 1rem 1rem;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-align: center;
+}
