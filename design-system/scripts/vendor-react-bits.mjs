@@ -58,6 +58,11 @@ function display(name) {
     .replace(/([a-z0-9])([A-Z])/g, '$1 $2');
 }
 
+// A single-quoted string literal for generated code. Backslashes first.
+function quote(value) {
+  return `'${String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
+}
+
 function constName(name) {
   return kebab(name).replace(/-/g, '_').toUpperCase();
 }
@@ -203,7 +208,7 @@ function templateSource({ section, name, files, page, runtime, defaults }) {
       (r) => `    {
       package: '${r.pkg}',
       version: '${r.version}',
-      licence: '${r.licence.replace(/'/g, "\\'")}',
+      licence: ${quote(r.licence)},
       unpackedKb: ${r.unpackedKb},
       why: 'TODO: what the package does here that motion cannot.',
       repo: '${r.repo}',
@@ -310,7 +315,7 @@ function templateStory({ section, name, page, defaults }) {
     .map(
       (d) => `    ${d.prop}: {
       control: ${controlFor(d.value)},
-      description: 'Upstream default ${d.value.replace(/'/g, "\\'")}.',
+      description: ${quote(`Upstream default ${d.value}.`)},
     },`,
     )
     .join('\n');
