@@ -87,9 +87,9 @@ jobs:
         working-directory: design-system
         run: npx playwright install --with-deps chromium
 
-      - name: Check the site menu in Chromium
+      - name: Check the site pages and scenes in Chromium
         working-directory: design-system
-        run: node scripts/check-site-menu.mjs http://127.0.0.1:8080/
+        run: node scripts/check-site.mjs http://127.0.0.1:8080/
 
       - name: Upload the site screenshots
         if: always()
