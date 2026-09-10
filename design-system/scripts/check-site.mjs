@@ -12,6 +12,13 @@
 // right-hand list turns the sphere to that dot, and that a click on the
 // wordmark grows the .menu-expand circle and opens the active page.
 //
+// It then opens the home page once more, with no screenshot, for the three
+// presses on the sphere: a press on empty stage reads data-last-click "miss"
+// and changes nothing, a press on an off-centre disc reads "turn" and moves
+// the wordmark to that disc's phrase, and a press on the centred disc reads
+// "open" and opens its page. The discs come from data-hit-points, the list of
+// front-facing discs the stage publishes once a second.
+//
 // Usage: node scripts/check-site.mjs [url]   (default http://127.0.0.1:8080/)
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -238,6 +245,191 @@ async function checkMenuClick(page, viewportName) {
   }
 }
 
+// The discs the stage shows now, as {x, y, r, vertex} in stage pixels. The
+// stage republishes them once a second, so a stale read is at most that old;
+// the checks below read them again right before they click.
+async function hitPoints(page) {
+  const raw = await page.locator('#menu-stage').getAttribute('data-hit-points');
+  try {
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function lastClick(page) {
+  return page.locator('#menu-stage').getAttribute('data-last-click');
+}
+
+// A point on the stage that no disc covers. The corners are the emptiest part
+// of the frame, so the search starts there and keeps the one furthest from
+// every disc, in units of that disc's own radius.
+function emptyPoint(box, discs) {
+  const inset = 6;
+  const corners = [
+    { x: inset, y: inset },
+    { x: box.width - inset, y: inset },
+    { x: inset, y: box.height - inset },
+    { x: box.width - inset, y: box.height - inset },
+  ];
+  let best = corners[0];
+  let bestClearance = -Infinity;
+  for (const corner of corners) {
+    let clearance = Infinity;
+    for (const disc of discs) {
+      clearance = Math.min(clearance, Math.hypot(corner.x - disc.x, corner.y - disc.y) / disc.r);
+    }
+    if (clearance > bestClearance) {
+      bestClearance = clearance;
+      best = corner;
+    }
+  }
+  return { point: best, clearance: bestClearance };
+}
+
+// A press on empty stage changes nothing and reads `miss`.
+async function checkMissClick(page, viewportName, box) {
+  const discs = await hitPoints(page);
+  if (!discs.length) {
+    fail(`${viewportName}: the stage published no data-hit-points`);
+    return;
+  }
+  const { point, clearance } = emptyPoint(box, discs);
+  const beforePhrase = (await wordmarkPhrase(page)).trim();
+  await page.mouse.click(box.x + point.x, box.y + point.y);
+  await page.waitForTimeout(300);
+  const what = await lastClick(page);
+  const afterPhrase = (await wordmarkPhrase(page)).trim();
+  if (what !== 'miss') {
+    fail(
+      `${viewportName}: a press on empty stage reads data-last-click "${what}", expected "miss" ` +
+        `(the point was ${clearance.toFixed(1)} disc radii from the nearest disc)`,
+    );
+  } else if (afterPhrase !== beforePhrase) {
+    fail(
+      `${viewportName}: a press on empty stage changed the wordmark from ` +
+        `"${beforePhrase}" to "${afterPhrase}"`,
+    );
+  } else {
+    console.log(`check-site: ${viewportName} /: a press on empty stage reads "miss" and changes nothing`);
+  }
+}
+
+// A press on a visible off-centre disc turns the sphere to it and reads
+// `turn`. The disc is the one furthest from the centre of the stage, so it is
+// certainly not the centred one.
+async function checkTurnClick(page, viewportName, box) {
+  const discs = await hitPoints(page);
+  const centre = { x: box.width / 2, y: box.height / 2 };
+  let target = null;
+  let furthest = -Infinity;
+  for (const disc of discs) {
+    // Big enough to click without landing on a neighbour, and wholly on the
+    // stage, so the click cannot fall outside the viewport.
+    if (disc.r < 12) continue;
+    if (disc.x - disc.r < 0 || disc.x + disc.r > box.width) continue;
+    if (disc.y - disc.r < 0 || disc.y + disc.r > box.height) continue;
+    const away = Math.hypot(disc.x - centre.x, disc.y - centre.y);
+    if (away > furthest) {
+      furthest = away;
+      target = disc;
+    }
+  }
+  if (!target) {
+    fail(`${viewportName}: no off-centre disc big enough to click among ${discs.length} discs`);
+    return;
+  }
+  const beforePhrase = (await wordmarkPhrase(page)).trim();
+  await page.mouse.click(box.x + target.x, box.y + target.y);
+  const what = await lastClick(page);
+  if (what !== 'turn') {
+    fail(
+      `${viewportName}: a press on an off-centre disc reads data-last-click "${what}", ` +
+        `expected "turn"`,
+    );
+    return;
+  }
+  try {
+    await waitForPhrase(page, { before: beforePhrase });
+    const now = (await wordmarkPhrase(page)).trim();
+    console.log(
+      `check-site: ${viewportName} /: a press on an off-centre disc reads "turn" ` +
+        `and moves the wordmark to "${now}"`,
+    );
+  } catch {
+    fail(
+      `${viewportName}: a press on an off-centre disc read "turn" but the wordmark stayed ` +
+        `at "${beforePhrase}" for 2 s`,
+    );
+  }
+}
+
+// A press on the centred disc opens its page and reads `open`. This is the
+// last check, because it leaves the home page.
+async function checkOpenClick(page, viewportName, box) {
+  // The turn above is still gliding, so wait for it to settle before asking
+  // which disc is the centred one.
+  await page.waitForTimeout(1000);
+  const discs = await hitPoints(page);
+  const centre = { x: box.width / 2, y: box.height / 2 };
+  let target = null;
+  let nearest = Infinity;
+  for (const disc of discs) {
+    const away = Math.hypot(disc.x - centre.x, disc.y - centre.y);
+    if (away < nearest) {
+      nearest = away;
+      target = disc;
+    }
+  }
+  if (!target) {
+    fail(`${viewportName}: no centred disc to click`);
+    return;
+  }
+  const expandSeen = page
+    .waitForSelector('.menu-expand', { state: 'attached', timeout: 2000 })
+    .then(() => true)
+    .catch(() => false);
+  await page.mouse.click(box.x + target.x, box.y + target.y);
+  const what = await lastClick(page);
+  if (what !== 'open') {
+    fail(
+      `${viewportName}: a press on the centred disc reads data-last-click "${what}", ` +
+        `expected "open"`,
+    );
+    return;
+  }
+  if (!(await expandSeen)) {
+    fail(`${viewportName}: no .menu-expand element appeared after the press on the centred disc`);
+  }
+  try {
+    await page.waitForURL((url) => PAGE_PATHS.includes(url.pathname), {
+      timeout: STAGE_TIMEOUT_MS,
+    });
+    console.log(
+      `check-site: ${viewportName} /: a press on the centred disc reads "open" and opened ` +
+        `${new URL(page.url()).pathname}`,
+    );
+  } catch {
+    fail(
+      `${viewportName}: the press on the centred disc did not open one of ${PAGE_PATHS.join(', ')} ` +
+        `(the page is at ${new URL(page.url()).pathname})`,
+    );
+  }
+}
+
+// The three presses, in the order the issue asks for: miss, turn, open. The
+// last one leaves the home page, so it comes last.
+async function checkDiscClicks(page, viewportName) {
+  const box = await page.locator('#menu-stage').boundingBox();
+  if (!box) {
+    fail(`${viewportName}: #menu-stage has no bounding box for the presses`);
+    return;
+  }
+  await checkMissClick(page, viewportName, box);
+  await checkTurnClick(page, viewportName, box);
+  await checkOpenClick(page, viewportName, box);
+}
+
 async function checkPage(browser, viewport, pagePath) {
   const label = `${viewport.name} ${pagePath}`;
   const context = await browser.newContext({
@@ -348,11 +540,47 @@ async function checkPage(browser, viewport, pagePath) {
   await page.screenshot({ path: shot, fullPage: false, timeout: 60_000 });
   console.log(`check-site: ${label}: screenshot ${shot}`);
 
-  // The wheel step moves the sphere off gold and the click leaves the page,
-  // so both come after the screenshot.
+  // The wheel step moves the sphere off gold and the presses leave the page,
+  // so all of them come after the screenshot. The wordmark press is last of
+  // the three that stay, and the disc presses need their own page, because
+  // the press that opens ends on another page.
   if (pagePath === '/' && menuState === 'ready') {
     await checkMenuWheel(page, viewport.name);
     await checkMenuClick(page, viewport.name);
+  }
+
+  if (consoleErrors.length) {
+    fail(`${label}: ${consoleErrors.length} console error(s):\n  ${consoleErrors.join('\n  ')}`);
+  }
+  await context.close();
+}
+
+// A home page of its own for the three presses on the sphere. It takes no
+// screenshot: the twelve the run saves come from `checkPage()`.
+async function checkDiscPage(browser, viewport) {
+  const label = `${viewport.name} / discs`;
+  const context = await browser.newContext({
+    viewport: { width: viewport.width, height: viewport.height },
+  });
+  const page = await context.newPage();
+  const consoleErrors = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  page.on('pageerror', (error) => consoleErrors.push(`pageerror: ${error.message}`));
+
+  const response = await page.goto(SITE_URL, { waitUntil: 'load' });
+  if (!response || !response.ok()) {
+    fail(`${label}: ${SITE_URL} answered ${response?.status() ?? 'no response'}`);
+  }
+  const state = await settle(page, '#menu-stage', `${label} #menu-stage`);
+  if (state === 'ready') {
+    // The stage publishes the discs on its first frame, but the sphere is
+    // still settling on to the gold disc it starts on. Let it arrive.
+    await page.waitForTimeout(1000);
+    await checkDiscClicks(page, viewport.name);
+  } else {
+    console.log(`check-site: ${label}: menu WebGL branch "${state}", the presses do not apply`);
   }
 
   if (consoleErrors.length) {
@@ -374,6 +602,10 @@ async function main() {
       for (const pagePath of ALL_PATHS) {
         await checkPage(browser, viewport, pagePath);
       }
+      // The three presses on the sphere need a home page of their own: the
+      // press that opens ends on another page, as does the wordmark press
+      // the run above finishes with. This pass takes no screenshot.
+      await checkDiscPage(browser, viewport);
     }
   } finally {
     await browser.close();

@@ -537,6 +537,75 @@ class SiteTests(unittest.TestCase):
         # A drag and a reset drop the glide with the turn.
         self.assertEqual(vendored.count("this.control.gentleSnap = false;"), 3)
 
+    def test_the_stage_markup_carries_no_inline_handlers(self):
+        # The stage is driven from the bundle, never from the markup. An
+        # inline handler would also be blocked by the Content Security Policy
+        # in nginx.conf, which allows scripts from the site's own origin only.
+        for page in SITE.rglob("*.html"):
+            html = page.read_text()
+            self.assertNotRegex(
+                html,
+                r"""\son[a-z]+\s*=\s*["']""",
+                f"{page.relative_to(ROOT)} has an inline event handler",
+            )
+
+    def test_only_a_direct_disc_press_opens_a_page(self):
+        # Ben asked on 2026-09-10 that a press open a page only when it lands
+        # on the centred disc. Any other disc turns the sphere; empty stage
+        # does nothing.
+        menu = (DESIGN_SYSTEM / "src" / "site" / "SiteMenu.tsx").read_text()
+        self.assertIn("vertexIndex === menu.getCentredVertex()", menu)
+        self.assertIn("menu?.turnToVertex(vertexIndex);", menu)
+        # Every outcome of a press is named on the stage.
+        for what in ("open", "turn", "miss", "drag"):
+            self.assertIn(f"markClick('{what}')", menu, f"the stage never reports {what!r}")
+        self.assertIn("'data-last-click'", menu)
+        self.assertIn("'data-hit-points'", menu)
+        # The cursor follows the same hit test, once a frame.
+        self.assertIn("requestAnimationFrame(test)", menu)
+        self.assertIn("overDisc", menu)
+        css = (DESIGN_SYSTEM / "src" / "site" / "menu.css").read_text()
+        self.assertRegex(css, r"\.menu-sphere \{[^}]*cursor: grab")
+        self.assertRegex(css, r'\.menu-sphere\[data-over-disc="true"\] \{[^}]*cursor: pointer')
+
+    def test_the_stage_recovers_from_a_left_over_circle(self):
+        # The back-forward cache restores this page with its DOM as it was, so
+        # the circle and the opening guard survived the back button and every
+        # later press was ignored. The stage now clears itself.
+        menu = (DESIGN_SYSTEM / "src" / "site" / "SiteMenu.tsx").read_text()
+        self.assertIn("if (event.persisted) cancelOpen();", menu)
+        self.assertIn("'pageshow'", menu)
+        self.assertIn("'pagehide'", menu)
+        self.assertIn("'visibilitychange'", menu)
+        self.assertIn("NAVIGATION_GRACE_MS", menu)
+        # Clearing must cancel the timer as well, or the page opens later.
+        self.assertIn("window.clearTimeout(openTimerRef.current);", menu)
+
+    def test_a_deliberate_press_is_not_thrown_away_as_a_drag(self):
+        # The old rule threw away a press that lasted over 350 ms, which a
+        # deliberate press on a small disc often does. The move limit is also
+        # in canvas pixels now, so a scaled display gets the same tolerance.
+        vendored = (
+            DESIGN_SYSTEM / "src" / "motion-examples" / "vendor" / "react-bits" / "infinite-menu" / "InfiniteMenu.tsx"
+        ).read_text()
+        limit = re.search(r"private readonly CLICK_TIME_LIMIT = ([0-9]+);", vendored)
+        self.assertIsNotNone(limit, "InfiniteMenu.tsx must set CLICK_TIME_LIMIT")
+        self.assertEqual(int(limit.group(1)), 500)
+        self.assertIn("window.devicePixelRatio", vendored)
+        self.assertIn("this.CLICK_MOVE_LIMIT * dpr", vendored)
+
+    def test_the_vendored_menu_carries_local_change_16(self):
+        vendored = (
+            DESIGN_SYSTEM / "src" / "motion-examples" / "vendor" / "react-bits" / "infinite-menu" / "InfiniteMenu.tsx"
+        ).read_text()
+        self.assertIn("16. The click became a hit test.", vendored)
+        self.assertIn("public hitTestVertex(x: number, y: number): number", vendored)
+        self.assertIn("public turnToVertex(vertexIndex: number): void", vendored)
+        self.assertIn("public getHitPoints(): HitPoint[]", vendored)
+        self.assertIn("public getCentredVertex(): number", vendored)
+        # A vertex behind the sphere centre faces away and is not clickable.
+        self.assertIn("if (world[2] <= 0) continue;", vendored)
+
     def test_the_vendored_menu_carries_local_changes_14_and_15(self):
         vendored = (
             DESIGN_SYSTEM / "src" / "motion-examples" / "vendor" / "react-bits" / "infinite-menu" / "InfiniteMenu.tsx"
