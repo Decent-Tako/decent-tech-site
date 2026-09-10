@@ -1,12 +1,19 @@
 // The site wrapper around the vendored React Bits Infinite Menu. It renders
-// the sphere and one real link for the active page. The upstream overlay is
-// hidden in menu.css because its button logs internal links instead of
-// navigating.
+// three things into #menu-stage: the wordmark in the top left, the list of
+// pages on the right, and the sphere behind both. The home page holds the
+// same wordmark and the same five links in its own HTML; this component
+// replaces them when it mounts, so the markup is the keyboard path and the
+// no-WebGL path when the bundle or WebGL is missing.
 //
-// Three site behaviours sit on top of the sphere. The sphere starts on the
-// gold disc (About). A click on a disc, or activation of the pill, expands a
-// circle in the disc colour over the stage and then opens the page. A wheel
-// step or an arrow key moves the sphere one disc along.
+// The wordmark is the only text on the sphere. It reads the phrase of the
+// active dot. A change of dot crossfades the phrase in about 250 ms, or swaps
+// it at once under reduced motion, and a visually hidden live region mirrors
+// it for assistive technology.
+//
+// A click on a disc, on the wordmark, or on a list entry expands a circle in
+// the disc colour from that point and then opens the page. A wheel step or an
+// arrow key moves the sphere one disc along. Pointer or focus on a list entry
+// turns the sphere to that dot.
 import {
   useCallback,
   useEffect,
@@ -25,13 +32,27 @@ import { SITE_PAGES, withBase, type SitePage } from './pages';
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 // How much of the sphere the resting view shows. At 1 one disc fills the
-// stage; at 2.4 about a dozen discs are in the frame at 1280 by 800, with
-// the five colours repeating across the sphere. Tuned from the CI shots.
-const MENU_SCALE = 2.4;
+// stage; a larger value shows more discs. With local change 10 the field of
+// view is constant, so the projected diameter of the sphere over the shorter
+// side of the viewport is about 2.857 / scale. The sphere must never sit
+// whole inside the screen, so the target ratio is above 1.
+const MENU_SCALE = 2.1;
+
+// The projected sphere diameter over the shorter viewport side that the site
+// wants. Above 1 the sphere is cut by the screen edges at every size.
+const BLEED_RATIO = 1.35;
+
+// The constant from local change 10: projected diameter over the shorter side
+// is this number divided by the scale.
+const BLEED_CONSTANT = 2.857;
 
 // How long the circle takes to cover the viewport, in milliseconds. The same
 // number is the transition duration in menu.css.
 const EXPAND_MS = 450;
+
+// How long the wordmark takes to fade from one phrase to the next. The same
+// number is the transition duration in menu.css.
+const FADE_MS = 250;
 
 // One wheel step per this many milliseconds. A trackpad sends many events per
 // gesture; the throttle turns them into single discs.
@@ -63,6 +84,11 @@ function pageForItem(item: MenuItem): SitePage {
   return SITE_PAGES.find((page) => page.path === item.link) ?? SITE_PAGES[0];
 }
 
+/** The scale that keeps the sphere wider than the shorter viewport side. */
+function scaleForViewport(): number {
+  return BLEED_CONSTANT / BLEED_RATIO;
+}
+
 export type SiteMenuProps = {
   /** The stage plate colour, read from the --stage token. */
   backgroundColor?: string;
@@ -71,15 +97,20 @@ export type SiteMenuProps = {
 };
 
 export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
-  const [active, setActive] = useState<SitePage | null>(null);
+  const [active, setActive] = useState<SitePage>(SITE_PAGES[0]);
+  // The phrase that fades out while the new one fades in, or null at rest.
+  const [leaving, setLeaving] = useState<string | null>(null);
   const [expand, setExpand] = useState<Expand | null>(null);
   const [steps, setSteps] = useState(0);
   const reduce = useReducedMotion();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const menuRef = useRef<InfiniteGridMenu | null>(null);
+  // The listeners below read the active page from a ref, so a dot change
+  // does not rebuild them.
+  const activeRef = useRef(active);
   // True from the first activation until the page leaves. A second click
   // during the expand does nothing.
-  const leavingRef = useRef(false);
+  const openingRef = useRef(false);
   // Negative infinity, not zero: the first step must never fall inside the
   // throttle window, however soon after load it comes.
   const lastStepRef = useRef(Number.NEGATIVE_INFINITY);
@@ -96,22 +127,45 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
       ?.setAttribute('aria-hidden', 'true');
   }, []);
 
+  // The vendored menu reports the active item, so the phrase change starts
+  // here, in a callback, not in an effect. `leaving` holds the phrase that
+  // fades out while the new one fades in; a timer clears it after the fade.
+  const fadeTimerRef = useRef(0);
   const handleActive = useCallback((item: MenuItem) => {
-    setActive(pageForItem(item));
+    const next = pageForItem(item);
+    const current = activeRef.current;
+    if (current === next) return;
+    activeRef.current = next;
+    setActive(next);
+    if (reduceRef.current) return;
+    setLeaving(current.phrase);
+    window.clearTimeout(fadeTimerRef.current);
+    fadeTimerRef.current = window.setTimeout(() => setLeaving(null), FADE_MS);
   }, []);
+
+  useEffect(() => () => window.clearTimeout(fadeTimerRef.current), []);
 
   const handleInit = useCallback(
     (menu: InfiniteGridMenu) => {
       menuRef.current = menu;
+      menu.setScale(scaleForViewport());
       onReady();
     },
     [onReady],
   );
 
+  // The sphere must stay cut by the screen edges at every size, so the scale
+  // is computed again after each resize.
+  useEffect(() => {
+    const onResize = () => menuRef.current?.setScale(scaleForViewport());
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   // Open a page. Under reduced motion the circle is left out.
   const open = useCallback((page: SitePage, x: number, y: number) => {
-    if (leavingRef.current) return;
-    leavingRef.current = true;
+    if (openingRef.current) return;
+    openingRef.current = true;
     if (reduceRef.current) {
       location.assign(page.path);
       return;
@@ -128,15 +182,16 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
     [open],
   );
 
-  // The pill circle starts at the centre of the pill, in stage pixels.
-  const centreOf = (element: HTMLElement) => {
+  // A circle that starts at an element outside the stage still needs stage
+  // pixels, so the element box is measured against the stage box.
+  const centreOf = useCallback((element: HTMLElement) => {
     const stage = rootRef.current?.getBoundingClientRect();
     const box = element.getBoundingClientRect();
     return {
       x: box.left + box.width / 2 - (stage?.left ?? 0),
       y: box.top + box.height / 2 - (stage?.top ?? 0),
     };
-  };
+  }, []);
 
   // One disc per call, no faster than the throttle. The stage counts the
   // steps it takes, so the Chromium check can tell a wheel that never
@@ -181,67 +236,132 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
     };
   }, [step]);
 
-  const handlePillKeyDown = (event: ReactKeyboardEvent<HTMLAnchorElement>) => {
-    if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
-      event.preventDefault();
-      step(1);
-      return;
-    }
-    if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
-      event.preventDefault();
-      step(-1);
-      return;
-    }
-    // Enter and Space open the page the same way a disc does. The browser
-    // would follow the link, so the expand takes the event first.
-    if ((event.key === 'Enter' || event.key === ' ') && active) {
+  // Turn the sphere to a page without opening it. The vendored snap eases the
+  // sphere there, so it never jumps.
+  const turnTo = useCallback((page: SitePage) => {
+    menuRef.current?.turnToItem(SITE_PAGES.indexOf(page));
+  }, []);
+
+  const handleWordmarkKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLAnchorElement>) => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        step(1);
+        return;
+      }
+      if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        step(-1);
+        return;
+      }
+      // Enter and Space open the page the same way a disc does. The browser
+      // would follow the link, so the expand takes the event first.
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        const centre = centreOf(event.currentTarget);
+        open(activeRef.current, centre.x, centre.y);
+      }
+    },
+    [step, centreOf, open],
+  );
+
+  const handleWordmarkClick = useCallback(
+    (event: ReactMouseEvent<HTMLAnchorElement>) => {
       event.preventDefault();
       const centre = centreOf(event.currentTarget);
-      open(active, centre.x, centre.y);
-    }
-  };
+      open(activeRef.current, centre.x, centre.y);
+    },
+    [centreOf, open],
+  );
 
-  const handlePillClick = (event: ReactMouseEvent<HTMLAnchorElement>) => {
-    if (!active) return;
-    event.preventDefault();
-    const centre = centreOf(event.currentTarget);
-    open(active, centre.x, centre.y);
-  };
+  const handleEntryClick = useCallback(
+    (event: ReactMouseEvent<HTMLAnchorElement>, page: SitePage) => {
+      event.preventDefault();
+      const centre = centreOf(event.currentTarget);
+      open(page, centre.x, centre.y);
+    },
+    [centreOf, open],
+  );
 
   return (
-    <div className="menu-sphere" ref={rootRef}>
-      <InfiniteMenu
-        items={items}
-        scale={MENU_SCALE}
-        backgroundColor={backgroundColor}
-        inertia={!reduce}
-        onInit={handleInit}
-        onActiveItemChange={handleActive}
-        onItemClick={handleItemClick}
-      />
-      {active ? (
+    <>
+      {/* The wordmark is the only text on the sphere. It reads the phrase of
+          the active dot and opens that page through the same expanding
+          circle as a disc, from its own centre. */}
+      <header className="site-header">
         <a
-          className="menu-overlay"
+          className="wordmark"
           href={active.path}
-          onClick={handlePillClick}
-          onKeyDown={handlePillKeyDown}
+          onClick={handleWordmarkClick}
+          onKeyDown={handleWordmarkKeyDown}
         >
-          <span
-            className="menu-overlay__swatch"
-            data-dot={active.token}
-            aria-hidden="true"
-          />
-          <span className="menu-overlay__title">{active.title}</span>
+          <span className="wordmark-phrase">
+            {/* The outgoing phrase lies over the new one and fades out, so
+                the two cross while the box keeps the new width. */}
+            {leaving === null ? null : (
+              <span className="wordmark-phrase__out" aria-hidden="true">
+                {leaving}
+              </span>
+            )}
+            <span
+              className="wordmark-phrase__in"
+              data-fading={leaving === null ? 'false' : 'true'}
+            >
+              {active.phrase}
+            </span>
+          </span>
         </a>
-      ) : null}
-      {expand ? (
-        <span
-          className="menu-expand"
-          data-dot={expand.page.token}
-          aria-hidden="true"
-          style={{ left: `${expand.x}px`, top: `${expand.y}px` }}
+        {/* Assistive technology follows the phrase here, not on the link. */}
+        <span className="visually-hidden" aria-live="polite">
+          {active.phrase}
+        </span>
+      </header>
+
+      {/* The list of pages on the right. It is the keyboard path and the
+          no-WebGL path, so it holds a real link to every page. Pointer or
+          focus turns the sphere; a click opens the page. */}
+      <nav className="menu-list" aria-label="Site pages">
+        <ul>
+          {SITE_PAGES.map((page) => (
+            <li key={page.slug}>
+              <a
+                href={page.path}
+                aria-current={page === active ? 'page' : undefined}
+                onPointerEnter={() => turnTo(page)}
+                onFocus={() => turnTo(page)}
+                onClick={(event) => handleEntryClick(event, page)}
+              >
+                <span
+                  className="menu-list__dot"
+                  data-dot={page.token}
+                  aria-hidden="true"
+                />
+                {page.phrase}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div className="menu-sphere" ref={rootRef}>
+        <InfiniteMenu
+          items={items}
+          scale={MENU_SCALE}
+          backgroundColor={backgroundColor}
+          inertia={!reduce}
+          onInit={handleInit}
+          onActiveItemChange={handleActive}
+          onItemClick={handleItemClick}
         />
-      ) : null}
-    </div>
+        {expand ? (
+          <span
+            className="menu-expand"
+            data-dot={expand.page.token}
+            aria-hidden="true"
+            style={{ left: `${expand.x}px`, top: `${expand.y}px` }}
+          />
+        ) : null}
+      </div>
+    </>
   );
 }

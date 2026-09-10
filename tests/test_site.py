@@ -24,6 +24,20 @@ PAGES = (
     ("contact", "Get in touch", "/contact/", "cream"),
 )
 
+# The wordmark phrase and the disc label of each page, as Ben wrote them on
+# 2026-09-10. design-system/src/site/pages.ts is the one source; these values
+# keep the markup and the SVG textures equal to it.
+PHRASES = {
+    "about": ("Hey, we're decent.", "hey."),
+    "portfolio": ("decent. work", "work."),
+    "blog": ("decent. read", "read."),
+    "ben": ("decent. people", "people."),
+    "contact": ("decent. contact", "contact."),
+}
+
+# The navy ink of every disc label. It passes 4.5:1 on all five disc colours.
+LABEL_INK = "#182534"
+
 
 # The React Bits scene behind each page and the extra effect on it, as
 # site/README.md and design-system/src/site/scenes.ts list them. Portfolio and
@@ -295,7 +309,9 @@ class SiteTests(unittest.TestCase):
             text = svg.read_text()
             self.assertIn('width="256"', text)
             self.assertIn('height="256"', text)
-            fills = re.findall(r'fill="(#[0-9a-fA-F]{6})"', text)
+            # One filled rect, the disc colour. The label text carries the
+            # navy ink and is checked by its own test below.
+            fills = re.findall(r'<rect[^>]*\sfill="(#[0-9a-fA-F]{6})"', text)
             self.assertEqual(len(fills), 1, f"{slug}.svg must hold one filled rect")
             self.assertEqual(fills[0].lower(), tokens[f"dot-{token}"].lower(), f"{slug}.svg fill differs from --dot-{token}")
 
@@ -377,8 +393,8 @@ class SiteTests(unittest.TestCase):
         self.assertRegex(self.css, r"\.menu-stage \{[^}]*overscroll-behavior: none")
 
     def test_home_page_is_immersive(self):
-        # The stage fills the viewport; the wordmark and the link row sit over
-        # it; there is no header band, no hero, and no footer.
+        # The stage fills the viewport; the wordmark and the list of pages sit
+        # over it; there is no header band, no hero, and no footer.
         self.assertIn('<body class="home">', self.html)
         self.assertIn('class="site-header"', self.html)
         self.assertIn('class="wordmark"', self.html)
@@ -388,8 +404,91 @@ class SiteTests(unittest.TestCase):
         self.assertRegex(self.css, r"\.home \.site-header \{[^}]*position: absolute")
         self.assertRegex(self.css, r"\.menu-stage \{[^}]*min-height: 100svh")
         self.assertRegex(self.css, r"\.menu-list \{[^}]*position: absolute")
-        self.assertRegex(self.css, r"\.menu-list \{[^}]*bottom: 0")
+        # The list sits on the right, vertically centred, not at the bottom.
+        self.assertRegex(self.css, r"\.menu-list \{[^}]*right: 0")
+        self.assertRegex(self.css, r"\.menu-list \{[^}]*top: 50%")
         self.assertEqual(len(self.parser.menu_list_links), len(PAGES))
+
+    def test_home_page_holds_one_wordmark_link_and_no_pill_or_bottom_row(self):
+        # The wordmark is the only text on the sphere: one link, the phrase of
+        # the dot the sphere starts on. The overlay pill and the bottom link
+        # row are gone, in the markup and in the styles.
+        self.assertEqual(self.html.count('class="wordmark"'), 1)
+        self.assertIn('<span class="wordmark-phrase">', self.html)
+        self.assertIn(PHRASES["about"][0], self.page_text)
+        self.assertNotIn("menu-overlay", self.html)
+        menu_css = (DESIGN_SYSTEM / "src" / "site" / "menu.css").read_text()
+        self.assertNotIn("menu-overlay", menu_css)
+        self.assertNotIn("--menu-overlay-bottom", self.css)
+        # The home wordmark is large and drops the company line.
+        self.assertRegex(
+            self.css, r"\.home \.wordmark \{[^}]*font-size: clamp\(2\.4rem, 6vw, 5\.5rem\)"
+        )
+        self.assertRegex(self.css, r"\.home \.wordmark-company \{[^}]*display: none")
+
+    def test_home_page_list_holds_the_five_phrases(self):
+        # The list on the right is the keyboard path and the no-WebGL path, so
+        # every page is a real link and every entry reads its phrase.
+        self.assertEqual(self.parser.menu_list_links, [path for _, _, path, _ in PAGES])
+        for slug, _, _, _ in PAGES:
+            phrase = PHRASES[slug][0]
+            self.assertIn(phrase, self.html, f"the list lacks the phrase {phrase!r}")
+        # The sphere starts on the gold About dot, so About is the active one.
+        self.assertEqual(self.parser.current_page_links, ["/about/"])
+
+    def test_pages_ts_carries_every_phrase_and_label(self):
+        source = (DESIGN_SYSTEM / "src" / "site" / "pages.ts").read_text()
+        # Every phrase and every label, whatever quote the file uses.
+        found_phrases = re.findall(r"phrase: ['\"](.+?)['\"],", source)
+        found_labels = re.findall(r"label: ['\"](.+?)['\"],", source)
+        self.assertEqual(found_phrases, [PHRASES[slug][0] for slug, _, _, _ in PAGES])
+        self.assertEqual(found_labels, [PHRASES[slug][1] for slug, _, _, _ in PAGES])
+
+    def test_each_disc_texture_holds_its_label(self):
+        for slug, _, _, _ in PAGES:
+            label = PHRASES[slug][1]
+            text = (SITE / "menu" / f"{slug}.svg").read_text()
+            elements = re.findall(r"<text\b[^>]*>(.*?)</text>", text, re.S)
+            self.assertEqual(len(elements), 1, f"{slug}.svg must hold one text element")
+            self.assertEqual(elements[0], label, f"{slug}.svg label differs from {label!r}")
+            # Navy ink, the serif stack, centred on the disc.
+            self.assertRegex(text, rf'<text[^>]*\sfill="{LABEL_INK}"')
+            self.assertRegex(text, r'<text[^>]*font-family="Iowan Old Style,')
+            self.assertRegex(text, r'<text[^>]*text-anchor="middle"')
+            self.assertRegex(text, r'<text[^>]*dominant-baseline="central"')
+            # The navy ink must read on the disc colour. The label is 22
+            # percent of a 256 pixel texture and the discs draw far larger
+            # than 24 pixels on screen, so the AA threshold is the large-text
+            # one, 3:1. Navy on vermilion is 3.77:1 and navy on steel blue is
+            # 4.36:1; both clear 3:1 but not 4.5:1.
+            root = re.search(r":root\s*\{([^}]+)\}", self.css)
+            token = dict((slug_, token_) for slug_, _, _, token_ in PAGES)[slug]
+            disc = css_variables(root.group(1))[f"dot-{token}"]
+            self.assertGreaterEqual(
+                contrast_ratio(LABEL_INK, disc),
+                3.0,
+                f"the {slug} label fails large-text AA on the disc colour",
+            )
+
+    def test_the_sphere_bleeds_off_the_screen(self):
+        # The projected sphere diameter over the shorter viewport side is
+        # about 2.857 / scale with local change 10. A ratio above 1 keeps the
+        # sphere cut by the screen edges at every size.
+        menu = (DESIGN_SYSTEM / "src" / "site" / "SiteMenu.tsx").read_text()
+        ratio = re.search(r"const BLEED_RATIO = ([0-9.]+);", menu)
+        self.assertIsNotNone(ratio, "SiteMenu.tsx must set BLEED_RATIO")
+        self.assertGreaterEqual(float(ratio.group(1)), 1.3)
+        self.assertLessEqual(float(ratio.group(1)), 1.4)
+        self.assertIn("setScale(scaleForViewport())", menu)
+
+    def test_the_vendored_menu_carries_local_changes_14_and_15(self):
+        vendored = (
+            DESIGN_SYSTEM / "src" / "motion-examples" / "vendor" / "react-bits" / "infinite-menu" / "InfiniteMenu.tsx"
+        ).read_text()
+        self.assertIn("14. `InfiniteGridMenu` got `turnToItem(itemIndex)`", vendored)
+        self.assertIn("15. `InfiniteGridMenu` got `setScale(scale)`", vendored)
+        self.assertIn("public turnToItem(itemIndex: number): void", vendored)
+        self.assertIn("public setScale(scale: number): void", vendored)
 
     def test_site_menu_shows_many_discs_at_rest(self):
         menu = (DESIGN_SYSTEM / "src" / "site" / "SiteMenu.tsx").read_text()

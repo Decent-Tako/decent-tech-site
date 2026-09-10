@@ -5,11 +5,12 @@
 // "unavailable", prints which WebGL branch each page took, and saves one
 // screenshot per page per viewport to site-shots/ (twelve in all). The home
 // page holds the menu only, so it expects zero [data-scene] elements. On the
-// home page, when the menu is ready, it asserts that the overlay pill links to
-// /about/ at load, then takes the home screenshot, which must show the gold
-// disc at the centre. It then asserts that one wheel step changes the link, and
-// that a click on the centre of the stage grows the .menu-expand circle and
-// opens one of the five pages.
+// home page, when the menu is ready, it asserts that the wordmark reads
+// "Hey, we're decent." at load, then takes the home screenshot, which must
+// show the gold disc at the centre. It then asserts that one wheel step
+// changes the phrase, that a pointer over the "decent. read" entry of the
+// right-hand list turns the sphere to that dot, and that a click on the
+// wordmark grows the .menu-expand circle and opens the active page.
 //
 // Usage: node scripts/check-site.mjs [url]   (default http://127.0.0.1:8080/)
 import { mkdir } from 'node:fs/promises';
@@ -20,6 +21,9 @@ import { chromium } from 'playwright';
 
 const SITE_URL = process.argv[2] ?? process.env.SITE_URL ?? 'http://127.0.0.1:8080/';
 const PAGE_PATHS = ['/about/', '/portfolio/', '/blog/', '/ben/', '/contact/'];
+// The phrase of the dot the sphere starts on, and the phrase the check hovers.
+const FIRST_PHRASE = "Hey, we're decent.";
+const HOVER_PHRASE = 'decent. read';
 const ALL_PATHS = ['/', ...PAGE_PATHS];
 const STAGE_TIMEOUT_MS = 10_000;
 const SHOTS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'site-shots');
@@ -63,17 +67,44 @@ function pathOf(href) {
   return href ? new URL(href, SITE_URL).pathname : null;
 }
 
-// The sphere starts on the gold disc, so the pill reads About with no drag.
-// This runs before the home screenshot, which must show that first state.
+// The phrase the wordmark shows now, with the leading and trailing space of
+// the markup removed. The outgoing phrase of a crossfade is aria-hidden and
+// is left out, so this is one phrase at any moment.
+function wordmarkPhrase(page) {
+  return page.locator('.wordmark .wordmark-phrase__in').innerText();
+}
+
+// Wait until the wordmark reads something other than `before`, or until it
+// reads exactly `wanted`. Returns the phrase it settled on.
+function waitForPhrase(page, { before, wanted }) {
+  return page.waitForFunction(
+    ({ before: had, wanted: want }) => {
+      const node = document.querySelector('.wordmark .wordmark-phrase__in');
+      if (node === null) return false;
+      const now = node.textContent?.trim() ?? '';
+      return want === null ? now !== had : now === want;
+    },
+    { before, wanted: wanted ?? null },
+    { timeout: 2000 },
+  );
+}
+
+// The sphere starts on the gold disc, so the wordmark reads the About phrase
+// with no drag. This runs before the home screenshot, which must show that
+// first state.
 async function checkMenu(page, viewportName, state) {
   if (state === 'ready') {
-    const overlay = page.locator('a.menu-overlay');
-    await overlay.waitFor({ state: 'visible', timeout: STAGE_TIMEOUT_MS });
-    const first = pathOf(await overlay.getAttribute('href'));
-    if (first !== '/about/') {
-      fail(`${viewportName}: at load the overlay links to "${first}", expected /about/`);
+    const wordmark = page.locator('a.wordmark');
+    await wordmark.waitFor({ state: 'visible', timeout: STAGE_TIMEOUT_MS });
+    const first = (await wordmarkPhrase(page)).trim();
+    if (first !== FIRST_PHRASE) {
+      fail(`${viewportName}: at load the wordmark reads "${first}", expected "${FIRST_PHRASE}"`);
     } else {
-      console.log(`check-site: ${viewportName} /: at load the overlay links to /about/`);
+      console.log(`check-site: ${viewportName} /: at load the wordmark reads "${first}"`);
+    }
+    const href = pathOf(await wordmark.getAttribute('href'));
+    if (href !== '/about/') {
+      fail(`${viewportName}: at load the wordmark links to "${href}", expected /about/`);
     }
   } else if (state === 'unavailable') {
     const linkCount = await page.locator('.menu-list a').count();
@@ -85,85 +116,90 @@ async function checkMenu(page, viewportName, state) {
   }
 }
 
-// One wheel step moves the sphere on to another disc, and a click then opens
-// the page behind the disc at the centre. Both run after the home screenshot:
-// the step moves the sphere off gold and the click leaves the page.
+// One wheel step moves the sphere on to another disc, and a pointer over a
+// list entry turns it to that entry's dot. Both run after the home
+// screenshot, because both move the sphere off the gold disc it starts on.
 async function checkMenuWheel(page, viewportName) {
   const stage = page.locator('#menu-stage');
-  {
-    const overlay = page.locator('a.menu-overlay');
-    const box = await stage.boundingBox();
-    if (!box) {
-      fail(`${viewportName}: #menu-stage has no bounding box`);
-      return;
-    }
-    // Read the link before the wheel. The sphere may move before the next
-    // command runs, so a value read afterwards can already be the new one.
-    const beforeWheel = await overlay.getAttribute('href');
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    // One wheel event on the stage. A dispatched event is one step; the
-    // trackpad-like stream of page.mouse.wheel is not.
-    const wheelOnce = () => stage.dispatchEvent('wheel', { deltaY: 200, deltaMode: 0 });
-    const hrefChanged = () =>
-      page.waitForFunction(
-        (before) => {
-          const link = document.querySelector('a.menu-overlay');
-          return link !== null && link.getAttribute('href') !== before;
-        },
-        beforeWheel,
-        { timeout: 2000 },
-      );
-    await wheelOnce();
+  const box = await stage.boundingBox();
+  if (!box) {
+    fail(`${viewportName}: #menu-stage has no bounding box`);
+    return;
+  }
+  // Read the phrase before the wheel. The sphere may move before the next
+  // command runs, so a value read afterwards can already be the new one.
+  const beforeWheel = (await wordmarkPhrase(page)).trim();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  // One wheel event on the stage. A dispatched event is one step; the
+  // trackpad-like stream of page.mouse.wheel is not.
+  const wheelOnce = () => stage.dispatchEvent('wheel', { deltaY: 200, deltaMode: 0 });
+  await wheelOnce();
+  try {
     try {
-      try {
-        await hrefChanged();
-      } catch {
-        // The throttle drops a step that follows another too closely. One
-        // more event, after the window, proves the wheel drives the sphere.
-        await page.waitForTimeout(400);
-        await wheelOnce();
-        await hrefChanged();
-      }
-      const next = pathOf(await overlay.getAttribute('href'));
-      if (!next || !PAGE_PATHS.includes(next)) {
-        fail(`${viewportName}: after one wheel step the overlay href "${next}" is not a page`);
-      } else {
-        console.log(`check-site: ${viewportName} /: one wheel step moves the overlay to ${next}`);
-      }
+      await waitForPhrase(page, { before: beforeWheel });
     } catch {
-      const steps = await stage.getAttribute('data-steps');
-      fail(
-        `${viewportName}: one wheel step did not change the overlay href within 2 s ` +
-          `(the stage counted ${steps ?? 'no'} step(s))`,
-      );
+      // The throttle drops a step that follows another too closely. One
+      // more event, after the window, proves the wheel drives the sphere.
+      await page.waitForTimeout(400);
+      await wheelOnce();
+      await waitForPhrase(page, { before: beforeWheel });
     }
+    const next = (await wordmarkPhrase(page)).trim();
+    console.log(`check-site: ${viewportName} /: one wheel step moves the wordmark to "${next}"`);
+  } catch {
+    const steps = await stage.getAttribute('data-steps');
+    fail(
+      `${viewportName}: one wheel step did not change the wordmark phrase within 2 s ` +
+        `(the stage counted ${steps ?? 'no'} step(s))`,
+    );
+  }
+
+  await checkHoverTurnsTheSphere(page, viewportName);
+}
+
+
+// A pointer over an entry of the right-hand list turns the sphere to that
+// dot, so the wordmark takes that entry's phrase.
+async function checkHoverTurnsTheSphere(page, viewportName) {
+  const entry = page.locator('.menu-list a', { hasText: HOVER_PHRASE }).first();
+  try {
+    await entry.hover({ timeout: 2000 });
+    await waitForPhrase(page, { before: null, wanted: HOVER_PHRASE });
+    console.log(`check-site: ${viewportName} /: a pointer over "${HOVER_PHRASE}" turns the sphere there`);
+  } catch {
+    const now = (await wordmarkPhrase(page).catch(() => '')).trim();
+    fail(
+      `${viewportName}: a pointer over the "${HOVER_PHRASE}" entry did not make the ` +
+        `wordmark read it within 2 s (it reads "${now}")`,
+    );
   }
 }
 
-// A click on the centre of the stage grows a circle in the disc colour and
-// then opens the page behind that disc.
+// A click on the wordmark grows a circle in the disc colour and then opens
+// the active page. This runs after the home screenshot, because it leaves the
+// home page.
 async function checkMenuClick(page, viewportName) {
-  const box = await page.locator('#menu-stage').boundingBox();
-  if (!box) {
-    fail(`${viewportName}: #menu-stage has no bounding box for the click`);
-    return;
-  }
+  const wordmark = page.locator('a.wordmark');
   const expandSeen = page
     .waitForSelector('.menu-expand', { state: 'attached', timeout: 2000 })
     .then(() => true)
     .catch(() => false);
-  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await wordmark.click();
   if (!(await expandSeen)) {
-    fail(`${viewportName}: no .menu-expand element appeared after the click`);
+    fail(`${viewportName}: no .menu-expand element appeared after the click on the wordmark`);
   }
+  // The sphere may still be easing on to a dot, so the page it opens is the
+  // active one at the moment of the click. Any of the five is a pass.
   try {
-    await page.waitForURL(
-      (url) => PAGE_PATHS.includes(url.pathname),
-      { timeout: STAGE_TIMEOUT_MS },
-    );
-    console.log(`check-site: ${viewportName} /: the click opened ${new URL(page.url()).pathname}`);
+    await page.waitForURL((url) => PAGE_PATHS.includes(url.pathname), {
+      timeout: STAGE_TIMEOUT_MS,
+    });
+    console.log(`check-site: ${viewportName} /: the wordmark opened ${new URL(page.url()).pathname}`);
   } catch {
-    fail(`${viewportName}: the click did not open one of ${PAGE_PATHS.join(', ')}`);
+    fail(
+      `${viewportName}: the click on the wordmark did not open one of ${PAGE_PATHS.join(', ')} ` +
+        `(the page is at ${new URL(page.url()).pathname})`,
+    );
   }
 }
 

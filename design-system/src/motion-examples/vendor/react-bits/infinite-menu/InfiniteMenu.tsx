@@ -40,6 +40,18 @@
  *    pixels and 350 ms. `InfiniteMenu` got the prop `onItemClick(item,
  *    vertexIndex, screenPoint)`, where `screenPoint` is the centre of the
  *    nearest vertex in canvas pixels.
+ * 14. `InfiniteGridMenu` got `turnToItem(itemIndex)` and the field
+ *    `turnTargetVertex`. `turnToItem()` picks, among the vertices that carry
+ *    that item, the one nearest the current front, and keeps its index.
+ *    While an index is held, `onControlUpdate()` builds the snap target from
+ *    that vertex instead of the nearest one, so the existing snap eases the
+ *    sphere there and it turns instead of jumping. The index clears once
+ *    that vertex is the nearest, and a drag, a `step()`, or a `reset()`
+ *    drops it. The page calls `turnToItem()` when the pointer or the
+ *    keyboard moves along its own link list.
+ * 15. `InfiniteGridMenu` got `setScale(scale)`, because the page computes the
+ *    scale from the viewport and applies it again on every resize. Upstream
+ *    takes `scale` in the constructor only.
  * Everything else is unchanged.
  */
 import { type CSSProperties, type FC, useRef, useState, useEffect, type MutableRefObject } from 'react';
@@ -839,6 +851,7 @@ export class InfiniteGridMenu {
 
   public reset(): void {
     this.control.reset();
+    this.turnTargetVertex = null;
     this.faceVertex(0);
     this.camera.position[2] = 3 * this.scaleFactor;
     this.smoothRotationVelocity = 0;
@@ -867,6 +880,9 @@ export class InfiniteGridMenu {
   // axis. The nearest vertex is then the neighbour along that axis, and the
   // snap in `update()` settles it.
   public step(direction: 1 | -1): void {
+    // A step is the site's own turn, so it takes over from a pending
+    // `turnToItem()` instead of fighting it.
+    this.turnTargetVertex = null;
     const spacing = this.vertexSpacingAngle();
     if (spacing === 0) return;
     const count = Math.max(1, this.items.length);
@@ -901,6 +917,51 @@ export class InfiniteGridMenu {
       vec3.create(),
       this.getVertexWorldPosition(this.findNearestVertexIndex())
     );
+  }
+
+  // Local change 14. Turn the sphere to the given item. Many vertices carry
+  // the same item, so the target is the one of them that is nearest the
+  // front now. Only the snap target moves; the snap in `update()` eases the
+  // sphere on to it, so the sphere never jumps.
+  public turnToItem(itemIndex: number): void {
+    const count = Math.max(1, this.items.length);
+    const wanted = ((itemIndex % count) + count) % count;
+    const front = this.control.snapDirection;
+    let best = -1;
+    let bestDot = -Infinity;
+    for (let i = 0; i < this.instancePositions.length; ++i) {
+      if (i % count !== wanted) continue;
+      const world = vec3.normalize(vec3.create(), this.getVertexWorldPosition(i));
+      const d = vec3.dot(world, front);
+      if (d > bestDot) {
+        bestDot = d;
+        best = i;
+      }
+    }
+    if (best < 0) return;
+    // An earlier drag leaves a pointer rotation that would fight the snap.
+    quat.identity(this.control.pointerRotation);
+    // The index, not the direction. `onControlUpdate()` rebuilds the snap
+    // target from the sphere's current orientation on every frame, so a
+    // direction set here would be gone by the next one. The index survives,
+    // and `onControlUpdate()` follows it until the vertex is the nearest.
+    this.turnTargetVertex = best;
+  }
+
+  // Local change 14. The vertex `turnToItem()` is easing on to, or null when
+  // the sphere is free to settle on whichever vertex is nearest the front.
+  private turnTargetVertex: number | null = null;
+
+  // Local change 15. Set the scale after construction. The camera distance
+  // and the frame height both follow it, so a new value takes effect on the
+  // next frame.
+  public setScale(scale: number): void {
+    if (!(scale > 0) || scale === this.scaleFactor) return;
+    this.scaleFactor = scale;
+    this.camera.position[2] = 3 * scale;
+    this.updateCameraMatrix();
+    this.updateProjectionMatrix();
+    if (this.paused) this.render();
   }
 
   // The angle between the active vertex and its nearest neighbour. One step
@@ -1215,11 +1276,21 @@ export class InfiniteGridMenu {
 
     if (!this.control.isPointerDown) {
       const nearestVertexIndex = this.findNearestVertexIndex();
-      const itemIndex = nearestVertexIndex % Math.max(1, this.items.length);
-      this.onActiveItemChange(itemIndex, nearestVertexIndex);
-      const snapDirection = vec3.normalize(vec3.create(), this.getVertexWorldPosition(nearestVertexIndex));
+      // Local change 14. While `turnToItem()` is easing the sphere on to a
+      // vertex, the snap follows that vertex, not the nearest one. The turn
+      // ends once the wanted vertex is the nearest, so the sphere settles
+      // there and the wheel and the drag take over again.
+      if (this.turnTargetVertex !== null && this.turnTargetVertex === nearestVertexIndex) {
+        this.turnTargetVertex = null;
+      }
+      const snapVertexIndex = this.turnTargetVertex ?? nearestVertexIndex;
+      const itemIndex = snapVertexIndex % Math.max(1, this.items.length);
+      this.onActiveItemChange(itemIndex, snapVertexIndex);
+      const snapDirection = vec3.normalize(vec3.create(), this.getVertexWorldPosition(snapVertexIndex));
       this.control.snapTargetDirection = snapDirection;
     } else {
+      // A drag is the reader's own turn; it drops a pending `turnToItem()`.
+      this.turnTargetVertex = null;
       cameraTargetZ += this.control.rotationVelocity * 80 + 2.5;
       damping = 7 / timeScale;
     }
