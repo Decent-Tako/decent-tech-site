@@ -883,6 +883,291 @@ h3 {
   display: none;
 }
 
+/* ---------------------------------------------------------------------------
+   Sections as dots
+
+   On About the three services fold into three discs in the page's field
+   colour. A press grows a circle out of the disc and the section's plate fades
+   in over it. The markup is whole without the script: with no bundle the
+   grid is the three articles it always was, and every rule below needs the
+   `[data-sections]` host or the `.section-dot__disc` the scene adds.
+   --------------------------------------------------------------------------- */
+
+/* The host holds no content. It names the grid it folds. */
+.section-dots-host {
+  display: none;
+}
+
+.service-grid {
+  position: relative;
+}
+
+/* A folded section is the disc and the panel it opens, stacked. */
+.service-grid:has(.section-dot__disc) {
+  align-items: start;
+}
+
+/* The disc carries the short word, in the same serif and with the same dot
+   rule as the running heads. It paints in the page's field colour with the
+   navy word on it: navy clears 3:1 on all five fields at this size. */
+.section-dot__disc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(6.5rem, 14vw, 8.5rem);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--field);
+  color: var(--running-ink);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  transition: transform 200ms ease-out;
+}
+
+.section-dot__disc:hover {
+  transform: scale(1.04);
+}
+
+.section-dot__disc:focus-visible {
+  outline: 3px solid var(--plate-accent);
+  outline-offset: 4px;
+}
+
+/* The panel is the section's plate. It fades in over the circle that grew out
+   of the disc, and it is `hidden` while the section is closed. */
+.section-dot__panel {
+  position: relative;
+  z-index: 2;
+  grid-column: 1 / -1;
+  margin-top: clamp(1rem, 3vw, 1.6rem);
+  padding: clamp(1.2rem, 4vw, 2.4rem);
+  background: var(--plate);
+  color: var(--plate-ink);
+  animation: section-dot-plate 260ms ease-out both;
+}
+
+@keyframes section-dot-plate {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* The close control: a small disc with an x, in the tab order. It sits in the
+   corner of the plate it closes. */
+.section-dot__close {
+  position: absolute;
+  top: clamp(0.6rem, 2vw, 1rem);
+  right: clamp(0.6rem, 2vw, 1rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--field);
+  color: var(--running-ink);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.section-dot__close:focus-visible {
+  outline: 3px solid var(--plate-accent);
+  outline-offset: 3px;
+}
+
+/* The circle that grows out of the disc, in the page's field colour. It is
+   the same motion as the home sphere: a circle from the point the reader
+   pressed, out over the plate the section opens. */
+.section-dot__circle {
+  position: absolute;
+  z-index: 1;
+  width: 2rem;
+  height: 2rem;
+  margin: -1rem 0 0 -1rem;
+  border-radius: 50%;
+  background: var(--field);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0);
+}
+
+.section-dot__circle[data-state="grow"] {
+  opacity: 1;
+  animation: section-dot-grow 420ms ease-in-out forwards;
+}
+
+@keyframes section-dot-grow {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(60);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll to the next dot
+
+   Below the plate on every page, the next dot in the cycle rises into view as
+   a disc in its colour with its label. It is a real link in the HTML, so the
+   loop works with no script at all.
+   --------------------------------------------------------------------------- */
+
+/* The scene host holds no content. It names the link it drives. */
+.next-dot__host {
+  display: none;
+}
+
+.next-dot {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  width: min(100%, 44rem);
+  margin: clamp(4rem, 12vw, 8rem) auto 0;
+}
+
+.next-dot__link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  text-decoration: none;
+  /* The rise: the disc comes up into view as the reader reaches the bottom.
+     The scene sets data-risen; with no script the disc simply stands. */
+  transform: translateY(2.5rem);
+  opacity: 0;
+  transition:
+    transform 420ms ease-out,
+    opacity 420ms ease-out;
+}
+
+/* With no bundle nothing sets data-risen, so the disc must stand on its own.
+   The rule above hides it only where the scene is there to reveal it. */
+.next-dot__link:not([data-risen]),
+.next-dot__link[data-risen="true"] {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.next-dot__link:focus-visible {
+  outline: 3px solid var(--running-ink);
+  outline-offset: 6px;
+}
+
+/* The disc paints in the colour of the dot it opens, with the navy label on
+   it, and the label keeps the serif and the dot rule of the running heads. */
+.next-dot__disc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(7rem, 18vw, 11rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  color: var(--brand-navy);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: clamp(1.3rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.next-dot__link[data-dot="gold"] .next-dot__disc {
+  background: var(--dot-gold);
+}
+
+.next-dot__link[data-dot="vermilion"] .next-dot__disc {
+  background: var(--dot-vermilion);
+}
+
+.next-dot__link[data-dot="terracotta"] .next-dot__disc {
+  background: var(--dot-terracotta);
+}
+
+.next-dot__link[data-dot="steel"] .next-dot__disc {
+  background: var(--dot-steel);
+}
+
+.next-dot__link[data-dot="cream"] .next-dot__disc {
+  background: var(--dot-cream);
+}
+
+/* The phrase under the disc is navy on the field, at the running-head size, so
+   the large-text threshold of 3:1 applies and navy clears it everywhere. */
+.next-dot__phrase {
+  color: var(--running-ink);
+  font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* ---------------------------------------------------------------------------
+   The wordmark morphs between pages
+
+   The cross-document view transition already shares the wordmark element. The
+   word that changes crossfades over about 350 ms while the letters that do not
+   change hold still, so "decent. work" becomes "decent. read" in place.
+   --------------------------------------------------------------------------- */
+
+/* `decent` and the full stop are the part that never changes, so they keep the
+   shared name of the whole wordmark and simply hold their place. */
+.wordmark-phrase {
+  view-transition-name: wordmark-word;
+}
+
+::view-transition-group(wordmark-word) {
+  animation-duration: 350ms;
+  animation-timing-function: ease-out;
+}
+
+/* The changed word crossfades: the old one out, the new one in, over the same
+   350 ms, so the unchanged letters read as still. */
+::view-transition-old(wordmark-word) {
+  animation: wordmark-morph-out 350ms ease-out both;
+}
+
+::view-transition-new(wordmark-word) {
+  animation: wordmark-morph-in 350ms ease-out both;
+}
+
+@keyframes wordmark-morph-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes wordmark-morph-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Idle life
+
+   After 20 seconds with no pointer, wheel, key, or touch, every scene and the
+   home sphere slow to about a third of their motion. The first input brings
+   them back. The flag sits on the stage or the scene host, so the site check
+   can read it.
+   --------------------------------------------------------------------------- */
+
+/* The slow-down is a CSS animation rate on anything the scene animates, and a
+   token the scenes read for their own loops. */
+[data-idle="true"] {
+  --idle-rate: 0.33;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -904,5 +1189,36 @@ h3 {
 
   .scene > * {
     transition-duration: 0s;
+  }
+
+  /* The section plate appears at once: no circle, no fade. */
+  .section-dot__circle {
+    display: none;
+  }
+
+  .section-dot__panel {
+    animation: none;
+  }
+
+  .section-dot__disc {
+    transition: none;
+  }
+
+  .section-dot__disc:hover {
+    transform: none;
+  }
+
+  /* The next dot is a plain link. It never rises, and the scene reads the
+     same query, so a scroll past it never opens the page on its own. */
+  .next-dot__link {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
+
+  /* The wordmark swaps at once, as the phrase already does on the home page. */
+  ::view-transition-old(wordmark-word),
+  ::view-transition-new(wordmark-word) {
+    animation-duration: 0s;
   }
 }
