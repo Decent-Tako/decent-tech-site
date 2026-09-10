@@ -625,8 +625,14 @@ class SiteTests(unittest.TestCase):
         self.assertIn("public turnToVertex(vertexIndex: number): void", vendored)
         self.assertIn("public getHitPoints(): HitPoint[]", vendored)
         self.assertIn("public getCentredVertex(): number", vendored)
-        # A vertex behind the sphere centre faces away and is not clickable.
-        self.assertIn("if (world[2] <= 0) continue;", vendored)
+        # animate() moves each disc a sphere radius along its own axis, so the
+        # discs the camera sees are the ones whose world z is negative. That
+        # is also why snapDirection is (0, 0, -1): the vertex at the centre of
+        # the view is the one most aligned with it, and it must be one of the
+        # discs the hit test can reach.
+        self.assertIn("if (world[2] >= 0) continue;", vendored)
+        self.assertIn("if (this.getVertexWorldPosition(i)[2] >= 0) continue;", vendored)
+        self.assertIn("public snapDirection = vec3.fromValues(0, 0, -1);", vendored)
 
     def test_the_vendored_menu_carries_local_changes_14_and_15(self):
         vendored = (

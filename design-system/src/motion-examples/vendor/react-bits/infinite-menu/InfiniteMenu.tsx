@@ -67,9 +67,11 @@
  *    takes `scale` in the constructor only.
  * 16. The click became a hit test. `hitTestVertex(x, y)` takes canvas pixels
  *    and returns the front-facing vertex whose projected disc holds the
- *    point, or -1. It skips vertices whose world z is at or below the sphere
- *    centre, because those face away, and where discs overlap it takes the
- *    one nearest the camera, which is the one drawn on top. The projected
+ *    point, or -1. `animate()` moves each disc a sphere radius along its own
+ *    axis, so the discs the camera sees are the ones whose world z is
+ *    negative; that is also why `snapDirection` is (0, 0, -1). The test skips
+ *    the rest, and where discs overlap it takes the one nearest the camera,
+ *    which is the one drawn on top. The projected
  *    radius comes from `getVertexScreenDisc()`, which projects the centre and
  *    a second point one world disc radius to the side of it along the
  *    camera's right axis; the disc always faces the camera, so its outline is
@@ -1499,14 +1501,18 @@ export class InfiniteGridMenu {
     let bestZ = -Infinity;
     for (let i = 0; i < this.DISC_INSTANCE_COUNT; ++i) {
       const world = this.getVertexWorldPosition(i);
-      // The camera looks down -z from +z, so a vertex with a world z at or
-      // below the sphere centre is on the far side and is not clickable.
-      if (world[2] <= 0) continue;
+      // `animate()` moves each disc a sphere radius along its own axis, so
+      // the discs the camera sees are the ones whose world z is negative.
+      // The same sign is why `snapDirection` is (0, 0, -1): the vertex at the
+      // centre of the view is the one most aligned with it.
+      if (world[2] >= 0) continue;
       const disc = this.getVertexScreenDisc(i);
       if (disc.r <= 0) continue;
       if (Math.hypot(x - disc.x, y - disc.y) > disc.r) continue;
-      if (world[2] > bestZ) {
-        bestZ = world[2];
+      // The nearest to the camera is the one drawn on top. With the sign
+      // above that is the most negative z.
+      if (-world[2] > bestZ) {
+        bestZ = -world[2];
         best = i;
       }
     }
@@ -1518,7 +1524,7 @@ export class InfiniteGridMenu {
   public getHitPoints(): HitPoint[] {
     const points: HitPoint[] = [];
     for (let i = 0; i < this.DISC_INSTANCE_COUNT; ++i) {
-      if (this.getVertexWorldPosition(i)[2] <= 0) continue;
+      if (this.getVertexWorldPosition(i)[2] >= 0) continue;
       const disc = this.getVertexScreenDisc(i);
       if (disc.r <= 0) continue;
       points.push({ x: disc.x, y: disc.y, r: disc.r, vertex: i });
