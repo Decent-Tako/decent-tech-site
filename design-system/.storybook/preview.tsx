@@ -87,6 +87,11 @@ const preview: Preview = {
             'Splash cursor',
             'Infinite menu',
           ],
+          // React Bits. Sections in this order. Stories inside a section
+          // follow file discovery, which Storybook sorts by path, so the
+          // kebab-case folders give alphabetical order without an entry here.
+          'React Bits',
+          ['Overview', 'Runtime', 'Animations', 'Backgrounds', 'Components', 'Text animations'],
           'UI primitives',
           'Styled systems',
           'Icon resources',

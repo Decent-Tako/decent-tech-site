@@ -13,6 +13,7 @@ the Decent brand kit, when it arrives, is in [REBRAND.md](REBRAND.md).
 | Typography | `@tailwindcss/typography` reading surfaces with 800-word test walls |
 | Pages | Four page compositions: Hero, Article, Feature scroll, Navigation |
 | Motion examples | 115 components: 79 rebuilt from motion.dev examples, 30 vendored from Motion Primitives, plus Apple Intelligence, App Store, Globe, and three earlier Primitives. Every one has typed controls, Replay or Pause, a `play` test, and attribution |
+| React Bits | Vendored React Bits components, one folder per component, self-registering catalogue. Start at **React Bits / Overview**; import one with `src/react-bits/IMPORT.md` |
 | UI primitives | Base UI gallery |
 | Styled systems | Mantine and Radix Themes galleries |
 | Icon resources | Lucide, Phosphor, Tabler, Heroicons comparison |
@@ -56,7 +57,18 @@ folder records the upstream URL, version, and licence.
 
 ## Rules
 
-The rubric script refuses any Motion example story that opts out of tests or
-docs, has no `argTypes`, has no `play` function, does not call
-`assertFaceNotFallback`, or lacks per-file `a11y: { test: 'error' }`. CI runs
-it before the tests. Do not merge on red.
+The rubric script refuses any Motion example or React Bits story that opts
+out of tests or docs, has no `argTypes`, has no `play` function, does not
+call `assertFaceNotFallback`, or lacks per-file `a11y: { test: 'error' }`.
+Every `source.ts` under `src/react-bits/` must export `REACT_BITS_SOURCE`.
+CI runs it before the tests. Do not merge on red.
+
+## React Bits
+
+`src/react-bits/` holds the React Bits catalogue: `frame/` is the shared
+shell, `vendor/` holds upstream copies with provenance, and each section
+folder holds one folder per component. `scripts/vendor-react-bits.mjs
+<Section>/<Name>` copies the upstream files and scaffolds the story folder.
+The runtime policy is in `src/react-bits/vendor/README.md`: install what the
+upstream component needs, exact pin, one `runtime` row per package. The
+recipe is `src/react-bits/IMPORT.md`.

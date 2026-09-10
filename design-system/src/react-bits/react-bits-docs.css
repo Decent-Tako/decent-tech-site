@@ -1,0 +1,57 @@
+.rb-docs,
+.rb-docs p,
+.rb-docs h2,
+.rb-docs table {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.rb-docs__summary {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.rb-docs__section {
+  margin: 0 0 2rem;
+}
+
+.rb-docs__heading {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.rb-docs__count {
+  font-weight: 400;
+  color: var(--charcoal);
+}
+
+.rb-docs__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.rb-docs__table th,
+.rb-docs__table td {
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line);
+}
+
+.rb-docs__table th {
+  font-weight: 700;
+  background: var(--soft);
+}
+
+.rb-docs__table a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+.rb-docs__table tr[data-status='planned'] td {
+  color: var(--charcoal);
+}

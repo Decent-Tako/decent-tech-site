@@ -1,0 +1,13 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+import { CatalogueTable } from './CatalogueTable';
+
+<Meta title="React Bits/Overview" />
+
+# React Bits
+
+Every component from https://reactbits.dev, vendored as-is from the pinned upstream commit with its provenance, wrapped in `ReactBitsFrame`, and given typed controls, a `play` test, Pause and Replay, brand tokens, and Brand Sans. Ben decided on 2026-09-10 to import the whole catalogue for learning and experimentation. The licence is MIT plus Commons Clause: the components must not be sold, sublicensed, or redistributed on their own. The full text is in `src/react-bits/vendor/LICENSE.md`.
+
+A component registers itself. The table below is built from every `source.ts` under `src/react-bits/` through `import.meta.glob`. A name without a `source.ts` is planned. To import one, follow `src/react-bits/IMPORT.md`. Runtime packages are on **React Bits / Runtime**.
+
+<CatalogueTable />
