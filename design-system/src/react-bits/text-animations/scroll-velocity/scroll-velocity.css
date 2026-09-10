@@ -1,0 +1,22 @@
+.rb-frame .parallax {
+  padding: 0.5rem 0;
+}
+
+.rb-frame .scroller {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  filter: none;
+}
+
+.rb-frame .scroller span {
+  padding-right: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .rb-frame .scroller {
+    font-size: 3.5rem;
+    line-height: 1.1;
+  }
+}

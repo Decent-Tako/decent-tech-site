@@ -1,0 +1,21 @@
+.scroll-reveal__scroller {
+  height: 22rem;
+  overflow: auto;
+}
+
+.scroll-reveal__spacer {
+  height: 16rem;
+}
+
+.rb-frame .scroll-reveal {
+  margin: 1rem 1.25rem;
+}
+
+.rb-frame .scroll-reveal-text {
+  margin: 0;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--ink);
+}

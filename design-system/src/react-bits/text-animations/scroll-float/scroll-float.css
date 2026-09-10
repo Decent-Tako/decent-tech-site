@@ -1,0 +1,20 @@
+.scroll-float__scroller {
+  height: 22rem;
+  overflow: auto;
+}
+
+.scroll-float__spacer {
+  height: 16rem;
+}
+
+.rb-frame .scroll-float-text {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: clamp(2rem, 8vw, 4.5rem);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.rb-frame .scroll-float {
+  margin: 0;
+  text-align: center;
+}
