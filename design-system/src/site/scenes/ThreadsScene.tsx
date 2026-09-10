@@ -1,4 +1,5 @@
-// Blog page background. Brand default: terracotta lines.
+// Blog page background, the ink threads. Blog is the inside of the
+// terracotta dot, so the field is terracotta and the threads are navy ink.
 //
 // The pointer does nothing here: Ben asked for no cursor features on
 // 2026-09-10. The scene keeps its own motion.
@@ -10,7 +11,7 @@ export default function ThreadsScene({ host, dataset, onReady }: SceneProps) {
   const { paused } = useSceneState(host);
   return (
     <Threads
-      color={rgb(dataset.color, rgb('#d97757', [1, 1, 1]))}
+      color={rgb(dataset.color, rgb('#182534', [1, 1, 1]))}
       amplitude={number(dataset.amplitude, 2)}
       distance={number(dataset.distance, 0.4)}
       enableMouseInteraction={false}

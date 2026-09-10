@@ -387,6 +387,14 @@ a:focus-visible {
   --wordmark-dot: var(--brand-cream);
 }
 
+/* Iridescence paints an opaque canvas, so the steel field would be hidden
+   behind the gold aurora. The canvas is drawn part transparent over the flat
+   steel field instead, so the page reads as the aurora in gold and cream on
+   steel that the colour system asks for. */
+.page--ben {
+  --scene-veil: 0.62;
+}
+
 /* Get in touch: the field is cream, so the type sits straight on the field
    with no plate. */
 .page--contact {
@@ -407,9 +415,12 @@ a:focus-visible {
    the active dot; the list of pages sits over it on the right. No header
    band, no page padding, no footer. The stage tokens are the same in both
    colour schemes. */
+/* The home page is the navy stage the five dots turn on. Its wordmark is
+   cream on navy, so the full stop takes gold, the contrasting brand colour. */
 .home {
   background: var(--stage);
   color: var(--stage-ink);
+  --wordmark-dot: var(--brand-gold);
 }
 
 .home main {
