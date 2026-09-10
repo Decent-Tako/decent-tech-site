@@ -481,6 +481,20 @@ class SiteTests(unittest.TestCase):
         self.assertLessEqual(float(ratio.group(1)), 1.4)
         self.assertIn("setScale(scaleForViewport())", menu)
 
+    def test_a_wheel_step_walks_the_pages_in_order(self):
+        # Ben asked for the wheel to move through the five pages in the order
+        # of SITE_PAGES, wrapping at the ends. The vendored step() walks the
+        # vertex order of the sphere, which is arbitrary, so the site turns to
+        # the next page by index instead.
+        menu = (DESIGN_SYSTEM / "src" / "site" / "SiteMenu.tsx").read_text()
+        self.assertIn("const from = SITE_PAGES.indexOf(activeRef.current);", menu)
+        self.assertIn("const next = (((from + direction) % count) + count) % count;", menu)
+        self.assertIn("menuRef.current?.turnToItem(next);", menu)
+        self.assertNotIn("menuRef.current?.step(", menu)
+        # The throttle and the step counter stay.
+        self.assertIn("STEP_THROTTLE_MS", menu)
+        self.assertIn("'data-steps'", menu)
+
     def test_the_vendored_menu_carries_local_changes_14_and_15(self):
         vendored = (
             DESIGN_SYSTEM / "src" / "motion-examples" / "vendor" / "react-bits" / "infinite-menu" / "InfiniteMenu.tsx"

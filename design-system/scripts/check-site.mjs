@@ -21,8 +21,10 @@ import { chromium } from 'playwright';
 
 const SITE_URL = process.argv[2] ?? process.env.SITE_URL ?? 'http://127.0.0.1:8080/';
 const PAGE_PATHS = ['/about/', '/portfolio/', '/blog/', '/ben/', '/contact/'];
-// The phrase of the dot the sphere starts on, and the phrase the check hovers.
+// The phrase of the dot the sphere starts on, the phrase one wheel step
+// along from it, and the phrase the check hovers.
 const FIRST_PHRASE = "Hey, we're decent.";
+const SECOND_PHRASE = 'decent. work';
 const HOVER_PHRASE = 'decent. read';
 const ALL_PATHS = ['/', ...PAGE_PATHS];
 const STAGE_TIMEOUT_MS = 10_000;
@@ -145,7 +147,16 @@ async function checkMenuWheel(page, viewportName) {
       await waitForPhrase(page, { before: beforeWheel });
     }
     const next = (await wordmarkPhrase(page)).trim();
-    console.log(`check-site: ${viewportName} /: one wheel step moves the wordmark to "${next}"`);
+    // A step walks the five pages in order, so one step from the About dot
+    // the sphere starts on always reaches Portfolio.
+    if (next !== SECOND_PHRASE) {
+      fail(
+        `${viewportName}: one wheel step from load moves the wordmark to "${next}", ` +
+          `expected "${SECOND_PHRASE}"`,
+      );
+    } else {
+      console.log(`check-site: ${viewportName} /: one wheel step moves the wordmark to "${next}"`);
+    }
   } catch {
     const steps = await stage.getAttribute('data-steps');
     fail(
