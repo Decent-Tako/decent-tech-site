@@ -1,0 +1,10 @@
+.rb-frame .focus-container {
+  margin: 1.25rem auto;
+  padding: 1.5rem 1rem;
+}
+
+.rb-frame .focus-word {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+  color: var(--ink);
+}
