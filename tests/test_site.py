@@ -29,7 +29,7 @@ PAGES = (
 # site/README.md and design-system/src/site/scenes.ts list them.
 SCENES = {
     "about": ("liquid-ether", "split-text"),
-    "portfolio": ("galaxy", None),
+    "portfolio": ("galaxy", "splash-cursor"),
     "blog": ("threads", "scrambled-text"),
     "ben": ("iridescence", "ribbons"),
     "contact": ("plasma", "shiny-text"),
@@ -339,10 +339,20 @@ class SiteTests(unittest.TestCase):
             self.assertIn('src="/assets/site.js"', html, f"{path} must load the bundle")
             self.assertIn(' plate"', html, f"{path} copy must sit on a plate")
 
-    def test_home_page_keeps_the_menu_and_adds_only_the_cursor_scene(self):
+    def test_home_page_holds_the_menu_and_no_scene_or_effect(self):
         self.assertIn('id="menu-stage"', self.html)
-        self.assertEqual(self.parser.scenes, ["splash-cursor"])
+        self.assertEqual(self.parser.scenes, [])
         self.assertEqual(self.parser.effects, [])
+        self.assertNotIn("menu-stage-frame", self.html)
+        self.assertNotIn("scene--cursor", self.html)
+
+    def test_ben_page_names_ben_davies(self):
+        page = SITE / "ben" / "index.html"
+        html = page.read_text()
+        self.assertIn("Ben Davies", " ".join(parse(page).text))
+        # Every "Ben <Surname>" on the page is the one correct name.
+        surnames = set(re.findall(r"Ben [A-Z][a-z]+", html))
+        self.assertEqual(surnames, {"Ben Davies"})
 
     def test_scene_registry_names_every_scene_the_pages_use(self):
         registry = (DESIGN_SYSTEM / "src" / "site" / "scenes.ts").read_text()

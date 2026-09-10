@@ -9,9 +9,9 @@ The copy sits on a plate in front; the scene runs full-bleed behind it.
 
 | Page | Background scene (`data-scene`) | Extra (`data-effect`) | Dominant colour |
 | --- | --- | --- | --- |
-| Home `/` | Infinite Menu on `#menu-stage`, Splash Cursor over the stage (`splash-cursor`) | | navy `#182534`, gold splats `#ffcb73` |
+| Home `/` | Infinite Menu on `#menu-stage` | | navy `#182534` |
 | About `/about/` | Liquid Ether (`liquid-ether`) | Split Text on the h1 (`split-text`) | navy and steel blue `#5b8fa3` |
-| Portfolio `/portfolio/` | Galaxy (`galaxy`) | | vermilion `#e34234` |
+| Portfolio `/portfolio/` | Galaxy (`galaxy`) | Splash Cursor over the page (`splash-cursor`) | vermilion `#e34234`, gold splats `#ffcb73` |
 | Blog `/blog/` | Threads (`threads`) | Scrambled Text on the h1 (`scrambled-text`) | terracotta `#d97757` on charcoal `#2c2c2c` |
 | About Ben `/ben/` | Iridescence (`iridescence`) | Ribbons cursor over the page (`ribbons`) | steel blue `#5b8fa3` |
 | Get in touch `/contact/` | Plasma (`plasma`) | Shiny Text on the email link (`shiny-text`) | gold `#ffcb73` on navy |

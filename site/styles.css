@@ -323,15 +323,6 @@ footer {
 }
 
 /* Home page: the sphere on a fixed dark plate, then the link list. */
-.menu-stage-frame {
-  position: relative;
-}
-
-.menu-stage-frame .scene--cursor {
-  left: 0;
-  right: 0;
-}
-
 .menu {
   padding-block: 0 clamp(2.5rem, 6vw, 4.5rem);
 }
