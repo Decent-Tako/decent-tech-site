@@ -36,10 +36,11 @@
  *    The existing snap then settles it. `InfiniteMenu` does not call `step()`;
  *    the page that holds the menu does, from a wheel or a key.
  * 13. `InfiniteGridMenu` got `setItemClick()` and the canvas got a pointer
- *    pair that reports a click: a `pointerdown` and a `pointerup` within 8
- *    pixels and 350 ms. `InfiniteMenu` got the prop `onItemClick(item,
- *    vertexIndex, screenPoint)`, where `screenPoint` is the centre of the
- *    nearest vertex in canvas pixels.
+ *    pair that reports a click: a `pointerdown` and a `pointerup` that stay
+ *    close together and end soon enough. `InfiniteMenu` got the prop
+ *    `onItemClick(item, vertexIndex, screenPoint)`, where `screenPoint` is
+ *    the centre of a vertex in canvas pixels. Local change 16 later made the
+ *    click a hit test and widened both limits.
  * 14. `InfiniteGridMenu` got `turnToItem(itemIndex)` and the field
  *    `turnTargetVertex`. `turnToItem()` picks, among the vertices that carry
  *    that item, the one nearest the current front, and keeps its index.
@@ -64,6 +65,34 @@
  * 15. `InfiniteGridMenu` got `setScale(scale)`, because the page computes the
  *    scale from the viewport and applies it again on every resize. Upstream
  *    takes `scale` in the constructor only.
+ * 16. The click became a hit test. `hitTestVertex(x, y)` takes canvas pixels
+ *    and returns the front-facing vertex whose projected disc holds the
+ *    point, or -1. It skips vertices whose world z is at or below the sphere
+ *    centre, because those face away, and where discs overlap it takes the
+ *    one nearest the camera, which is the one drawn on top. The projected
+ *    radius comes from `getVertexScreenDisc()`, which projects the centre and
+ *    a second point one world disc radius to the side of it along the
+ *    camera's right axis; the disc always faces the camera, so its outline is
+ *    a circle of that radius. `discWorldRadius()` repeats the two constants
+ *    `animate()` scales the discs by, and the disc geometry has radius 1, so
+ *    the scale factor is the radius. `getHitPoints()` returns every
+ *    front-facing disc as `{x, y, r, vertex}`, which the page publishes so a
+ *    check can click a named disc. `toCanvasPoint()` maps a client point into
+ *    that space.
+ *
+ *    `ItemClickCallback` and the `onItemClick` prop gained a fourth argument,
+ *    `hit`, true only when the pointer was on the disc named by
+ *    `vertexIndex`; on a miss the vertex is the nearest one instead. A press
+ *    the drag rule threw away reports index -1 and a null item, so the page
+ *    can tell a drag from a miss. The move limit is now counted in canvas
+ *    pixels scaled by `devicePixelRatio`, and the time limit went from 350 ms
+ *    to 500 ms, because a deliberate press on a small disc took longer than
+ *    350 ms and was thrown away as a drag.
+ *
+ *    `turnToVertex(vertexIndex)` turns the sphere to one named vertex.
+ *    `turnToItem()` is now that call with the vertex chosen for it. A click
+ *    needs the exact disc under the pointer, and several discs carry the same
+ *    item, so naming the item alone is not enough.
  * Everything else is unchanged.
  */
 import { type CSSProperties, type FC, useRef, useState, useEffect, type MutableRefObject } from 'react';
@@ -736,8 +765,13 @@ type ActiveItemCallback = (index: number, vertexIndex: number) => void;
 type ItemClickCallback = (
   index: number,
   vertexIndex: number,
-  screenPoint: { x: number; y: number }
+  screenPoint: { x: number; y: number },
+  hit: boolean
 ) => void;
+
+// Local change 16. One front-facing disc as it appears on the canvas: the
+// centre and the radius in canvas pixels, with the vertex it belongs to.
+export type HitPoint = { x: number; y: number; r: number; vertex: number };
 type MovementChangeCallback = (isMoving: boolean) => void;
 type InitCallback = (instance: InfiniteGridMenu) => void;
 
@@ -840,8 +874,11 @@ export class InfiniteGridMenu {
 
   // A click is a pointer pair that stays inside this many pixels for less
   // than this many milliseconds. A longer or a wider pair is a drag.
+  // Local change 16 counts the move in canvas pixels scaled by the device
+  // pixel ratio, and raised the time from 350 ms: a deliberate press on a
+  // small disc took longer than that and was thrown away as a drag.
   private readonly CLICK_MOVE_LIMIT = 8;
-  private readonly CLICK_TIME_LIMIT = 350;
+  private readonly CLICK_TIME_LIMIT = 500;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -966,13 +1003,22 @@ export class InfiniteGridMenu {
       }
     }
     if (best < 0) return;
+    this.turnToVertex(best);
+  }
+
+  // Local change 16. Turn the sphere to one named vertex, not to any vertex
+  // that carries an item. A click picks the exact disc under the pointer, and
+  // several discs carry the same item, so the click must be able to say which
+  // one. `turnToItem()` is this with the vertex chosen for it.
+  public turnToVertex(vertexIndex: number): void {
+    if (vertexIndex < 0 || vertexIndex >= this.instancePositions.length) return;
     // An earlier drag leaves a pointer rotation that would fight the snap.
     quat.identity(this.control.pointerRotation);
     // The index, not the direction. `onControlUpdate()` rebuilds the snap
     // target from the sphere's current orientation on every frame, so a
     // direction set here would be gone by the next one. The index survives,
     // and `onControlUpdate()` follows it until the vertex is the nearest.
-    this.turnTargetVertex = best;
+    this.turnTargetVertex = vertexIndex;
   }
 
   // Local change 14. The vertex `turnToItem()` is easing on to, or null when
@@ -1363,8 +1409,10 @@ export class InfiniteGridMenu {
     return vec3.transformQuat(vec3.create(), nearestVertexPos, this.control.orientation);
   }
 
-  // Local change 13. A `pointerdown` and a `pointerup` that stay together are
-  // a click on the disc that is nearest the centre at that moment.
+  // Local change 13, widened by local change 16. A `pointerdown` and a
+  // `pointerup` that stay together are a click. Local change 16 turns the
+  // click into a hit test, so the callback says which disc was under the
+  // pointer, if any, instead of always naming the centred one.
   private initClickListeners(): void {
     this.canvas.addEventListener('pointerdown', (e: PointerEvent) => {
       this.pointerDownAt = { x: e.clientX, y: e.clientY, time: performance.now() };
@@ -1376,19 +1424,99 @@ export class InfiniteGridMenu {
       const down = this.pointerDownAt;
       this.pointerDownAt = null;
       if (!down || !this.onItemClick) return;
-      const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+      // Local change 16. The move limit is in canvas pixels, so a device with
+      // a scale factor above 1 gets the same tolerance in the pixels the hit
+      // test uses. The time limit is 500 ms: a deliberate press on a small
+      // disc took longer than the old 350 ms and read as a drag.
+      const dpr = window.devicePixelRatio || 1;
+      const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y) * dpr;
       const elapsed = performance.now() - down.time;
-      if (moved > this.CLICK_MOVE_LIMIT || elapsed > this.CLICK_TIME_LIMIT) return;
-      const vertexIndex = this.findNearestVertexIndex();
+      if (moved > this.CLICK_MOVE_LIMIT * dpr || elapsed > this.CLICK_TIME_LIMIT) {
+        this.onItemClick(-1, -1, { x: 0, y: 0 }, false);
+        return;
+      }
+      const local = this.toCanvasPoint(e.clientX, e.clientY);
+      const hitIndex = this.hitTestVertex(local.x, local.y);
+      const vertexIndex = hitIndex >= 0 ? hitIndex : this.findNearestVertexIndex();
       const itemIndex = vertexIndex % Math.max(1, this.items.length);
-      this.onItemClick(itemIndex, vertexIndex, this.getVertexScreenPoint(vertexIndex));
+      this.onItemClick(itemIndex, vertexIndex, this.getVertexScreenPoint(vertexIndex), hitIndex >= 0);
     });
   }
 
-  // The centre of a vertex in canvas pixels, from the same matrices the
-  // shader uses.
-  private getVertexScreenPoint(index: number): { x: number; y: number } {
+  // Local change 16. A client point in the canvas pixel space the projection
+  // helpers below work in.
+  public toCanvasPoint(clientX: number, clientY: number): { x: number; y: number } {
+    const box = this.canvas.getBoundingClientRect();
+    return { x: clientX - box.left, y: clientY - box.top };
+  }
+
+  // Local change 16. The index of the front-facing disc whose projected
+  // circle holds the point, or -1. Where discs overlap the nearest to the
+  // camera wins, which is the one drawn on top.
+  public hitTestVertex(x: number, y: number): number {
+    let best = -1;
+    let bestZ = -Infinity;
+    for (let i = 0; i < this.DISC_INSTANCE_COUNT; ++i) {
+      const world = this.getVertexWorldPosition(i);
+      // The camera looks down -z from +z, so a vertex with a world z at or
+      // below the sphere centre is on the far side and is not clickable.
+      if (world[2] <= 0) continue;
+      const disc = this.getVertexScreenDisc(i);
+      if (disc.r <= 0) continue;
+      if (Math.hypot(x - disc.x, y - disc.y) > disc.r) continue;
+      if (world[2] > bestZ) {
+        bestZ = world[2];
+        best = i;
+      }
+    }
+    return best;
+  }
+
+  // Local change 16. Every front-facing disc as it appears on the canvas.
+  // The page publishes these so a check can click a named disc.
+  public getHitPoints(): HitPoint[] {
+    const points: HitPoint[] = [];
+    for (let i = 0; i < this.DISC_INSTANCE_COUNT; ++i) {
+      if (this.getVertexWorldPosition(i)[2] <= 0) continue;
+      const disc = this.getVertexScreenDisc(i);
+      if (disc.r <= 0) continue;
+      points.push({ x: disc.x, y: disc.y, r: disc.r, vertex: i });
+    }
+    return points;
+  }
+
+  // Local change 16. The centre and the radius of a disc in canvas pixels.
+  // The radius comes from projecting a second point one world disc radius off
+  // the centre, across the view axes, so the perspective divide is applied to
+  // it in the same way as to the centre. The disc always faces the camera, so
+  // its outline is a circle of that radius whatever the vertex depth.
+  private getVertexScreenDisc(index: number): { x: number; y: number; r: number } {
     const world = this.getVertexWorldPosition(index);
+    const centre = this.projectWorldPoint(world);
+    const radius = this.discWorldRadius(world);
+    // The camera's right axis in world space, from the view matrix. A point
+    // that far to the side of the centre sits on the rim of the disc.
+    const view = this.camera.matrices.view;
+    const right = vec3.fromValues(view[0], view[4], view[8]);
+    const rim = vec3.scaleAndAdd(vec3.create(), world, right, radius);
+    const edge = this.projectWorldPoint(rim);
+    return { x: centre.x, y: centre.y, r: Math.hypot(edge.x - centre.x, edge.y - centre.y) };
+  }
+
+  // Local change 16. The world radius of the disc at a vertex. `animate()`
+  // scales each disc by this factor, and the disc geometry has radius 1, so
+  // the factor is the radius. The two constants are the ones `animate()`
+  // uses; they stay in step because both read the same numbers.
+  private discWorldRadius(world: vec3): number {
+    const DISC_SCALE = 0.25;
+    const SCALE_INTENSITY = 0.6;
+    const s = (Math.abs(world[2]) / this.SPHERE_RADIUS) * SCALE_INTENSITY + (1 - SCALE_INTENSITY);
+    return s * DISC_SCALE;
+  }
+
+  // Local change 16. A world point in canvas pixels. `getVertexScreenPoint()`
+  // is this applied to a vertex centre.
+  private projectWorldPoint(world: vec3): { x: number; y: number } {
     const clip = vec3.transformMat4(vec3.create(), world, this.camera.matrices.view);
     const point = [clip[0], clip[1], clip[2], 1];
     const p = this.camera.matrices.projection;
@@ -1402,6 +1530,12 @@ export class InfiniteGridMenu {
       x: ((x / w) * 0.5 + 0.5) * width,
       y: (0.5 - (y / w) * 0.5) * height
     };
+  }
+
+  // The centre of a vertex in canvas pixels, from the same matrices the
+  // shader uses.
+  private getVertexScreenPoint(index: number): { x: number; y: number } {
+    return this.projectWorldPoint(this.getVertexWorldPosition(index));
   }
 }
 
@@ -1422,7 +1556,12 @@ interface InfiniteMenuProps {
   inertia?: boolean;
   onInit?: (menu: InfiniteGridMenu) => void;
   onActiveItemChange?: (item: MenuItem, vertexIndex: number) => void;
-  onItemClick?: (item: MenuItem, vertexIndex: number, screenPoint: { x: number; y: number }) => void;
+  onItemClick?: (
+    item: MenuItem | null,
+    vertexIndex: number,
+    screenPoint: { x: number; y: number },
+    hit: boolean
+  ) => void;
 }
 
 const InfiniteMenu: FC<InfiniteMenuProps> = ({
@@ -1473,9 +1612,12 @@ const InfiniteMenu: FC<InfiniteMenuProps> = ({
         setIsMoving,
         sk => {
           sk.setInertia(inertiaRef.current);
-          sk.setItemClick((index, vertexIndex, screenPoint) => {
+          sk.setItemClick((index, vertexIndex, screenPoint, hit) => {
             const list = items.length ? items : defaultItems;
-            onItemClickRef.current?.(list[index % list.length], vertexIndex, screenPoint);
+            // Local change 16. A press the drag rule threw away reports index
+            // -1 and no item, so the page can tell a drag from a miss.
+            const item = index < 0 ? null : list[index % list.length];
+            onItemClickRef.current?.(item, vertexIndex, screenPoint, hit);
           });
           sk.run();
           onInitRef.current?.(sk);
