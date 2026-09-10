@@ -1,5 +1,5 @@
 import { MotionConfig } from 'motion/react';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode, Ref } from 'react';
 
 import './pointer.css';
 
@@ -16,6 +16,8 @@ export function PointerFrame({
   stageClassName,
   stageTestId,
   stageStyle,
+  stageRef,
+  stageData,
   children,
 }: {
   title: string;
@@ -30,6 +32,8 @@ export function PointerFrame({
   stageClassName?: string;
   stageTestId?: string;
   stageStyle?: CSSProperties;
+  stageRef?: Ref<HTMLDivElement>;
+  stageData?: Record<`data-${string}`, string | undefined>;
   children: ReactNode;
 }) {
   return (
@@ -79,6 +83,8 @@ export function PointerFrame({
           }
           data-testid={stageTestId}
           style={stageStyle}
+          ref={stageRef}
+          {...stageData}
         >
           {children}
         </div>
