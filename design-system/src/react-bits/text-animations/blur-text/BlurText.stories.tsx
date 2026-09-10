@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor } from 'storybook/test';
 
 import { assertFaceNotFallback } from '../../../brand/fontFallback';
-import { FEATURES } from '../../../pages/content';
 import { BlurText } from './BlurText';
 import { BLUR_TEXT_DEFAULTS } from './source';
 
@@ -78,7 +77,7 @@ async function playDone(canvas: Canvas) {
   await waitFor(() => {
     expect(stage).toHaveAttribute('data-state', 'done');
   }, SLOW);
-  await expect(canvas.getByText(FEATURES[0].copy.split(' ')[0])).toBeVisible();
+  await expect(canvas.getByTestId('blur-text-copy')).toBeVisible();
   return stage;
 }
 

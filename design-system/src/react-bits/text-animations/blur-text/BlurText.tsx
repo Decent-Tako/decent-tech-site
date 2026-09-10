@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { ReactBitsAttribution, ReactBitsRuntimeLine } from '../../frame/Attribution';
 import { ReactBitsFrame } from '../../frame/ReactBitsFrame';
@@ -35,6 +35,10 @@ export function BlurText({
   const [state, setState] = useState<'pending' | 'done'>('pending');
   const reduce = useReduce(reducedMotion);
   const timing = reduce ? { delay: 0, stepDuration: 0 } : { delay, stepDuration };
+
+  useEffect(() => {
+    if (reduce) setState('done');
+  }, [reduce]);
 
   return (
     <ReactBitsFrame
@@ -81,7 +85,7 @@ export function BlurText({
         threshold={threshold}
         rootMargin={rootMargin}
         stepDuration={timing.stepDuration}
-        paused={paused}
+        paused={paused || reduce}
         onAnimationComplete={() => setState('done')}
       />
     </ReactBitsFrame>

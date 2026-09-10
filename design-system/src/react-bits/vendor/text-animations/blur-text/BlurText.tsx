@@ -13,6 +13,7 @@
  *    after the in-view trigger.
  * 3. `React.FC` became a plain function so the file type-checks without a
  *    React namespace import.
+ * 4. The paragraph carries data-testid="blur-text-copy".
  */
 import { motion, type Transition } from 'motion/react';
 import { useEffect, useRef, useState, useMemo } from 'react';
@@ -66,6 +67,10 @@ const BlurText = ({
   const ref = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
+    if (paused) setInView(true);
+  }, [paused]);
+
+  useEffect(() => {
     if (!ref.current) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -106,7 +111,12 @@ const BlurText = ({
   const times = Array.from({ length: stepCount }, (_, i) => (stepCount === 1 ? 0 : i / (stepCount - 1)));
 
   return (
-    <p ref={ref} className={className} style={{ display: 'flex', flexWrap: 'wrap' }}>
+    <p
+      ref={ref}
+      className={className}
+      data-testid="blur-text-copy"
+      style={{ display: 'flex', flexWrap: 'wrap' }}
+    >
       {elements.map((segment, index) => {
         const animateKeyframes = buildKeyframes(fromSnapshot, toSnapshots);
 
