@@ -21,11 +21,14 @@ import { chromium } from 'playwright';
 
 const SITE_URL = process.argv[2] ?? process.env.SITE_URL ?? 'http://127.0.0.1:8080/';
 const PAGE_PATHS = ['/about/', '/portfolio/', '/blog/', '/ben/', '/contact/'];
-// The phrase of the dot the sphere starts on, the phrase one wheel step
-// along from it, and the phrase the check hovers.
+// The phrase of the dot the sphere starts on, the phrases one and two wheel
+// steps along from it, and the phrase the check hovers. A step walks the five
+// pages in order, so the first two steps from load are fixed. The hover goes
+// to an entry the two steps did not reach, so it proves the turn on its own.
 const FIRST_PHRASE = "Hey, we're decent.";
 const SECOND_PHRASE = 'decent. work';
-const HOVER_PHRASE = 'decent. read';
+const THIRD_PHRASE = 'decent. read';
+const HOVER_PHRASE = 'decent. contact';
 const ALL_PATHS = ['/', ...PAGE_PATHS];
 const STAGE_TIMEOUT_MS = 10_000;
 const SHOTS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'site-shots');
@@ -165,9 +168,30 @@ async function checkMenuWheel(page, viewportName) {
     );
   }
 
+  await checkSecondWheelStep(page, viewportName, stage, wheelOnce);
   await checkHoverTurnsTheSphere(page, viewportName);
 }
 
+
+// A second wheel step walks one more page along the order, so two steps from
+// the About dot the sphere starts on always reach Blog. The wait is longer
+// than the throttle, so the second event is a step of its own and not one the
+// throttle folds into the first.
+async function checkSecondWheelStep(page, viewportName, stage, wheelOnce) {
+  await page.waitForTimeout(400);
+  await wheelOnce();
+  try {
+    await waitForPhrase(page, { before: null, wanted: THIRD_PHRASE });
+    console.log(`check-site: ${viewportName} /: two wheel steps move the wordmark to "${THIRD_PHRASE}"`);
+  } catch {
+    const now = (await wordmarkPhrase(page).catch(() => '')).trim();
+    const steps = await stage.getAttribute('data-steps');
+    fail(
+      `${viewportName}: two wheel steps from load move the wordmark to "${now}", ` +
+        `expected "${THIRD_PHRASE}" (the stage counted ${steps ?? 'no'} step(s))`,
+    );
+  }
+}
 
 // A pointer over an entry of the right-hand list turns the sphere to that
 // dot, so the wordmark takes that entry's phrase.

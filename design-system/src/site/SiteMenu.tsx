@@ -54,9 +54,16 @@ const EXPAND_MS = 450;
 // number is the transition duration in menu.css.
 const FADE_MS = 250;
 
-// One wheel step per this many milliseconds. A trackpad sends many events per
-// gesture; the throttle turns them into single discs.
-const STEP_THROTTLE_MS = 300;
+// One step per this many milliseconds. A trackpad sends many events per
+// gesture; the throttle turns them into single discs. A reader who keeps
+// scrolling still moves on before the glide of the last step has finished,
+// and the new target simply takes over the glide.
+const STEP_THROTTLE_MS = 250;
+
+// A wheel event below this many units is the tail of a trackpad gesture, or
+// the drift of a free-spinning wheel, not a new turn. Ignoring it keeps one
+// gesture to one disc.
+const WHEEL_DELTA_FLOOR = 4;
 
 type Expand = { page: SitePage; x: number; y: number };
 
@@ -226,8 +233,13 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
     const sphere = rootRef.current;
     if (!sphere) return;
     const onWheel = (event: WheelEvent) => {
+      // The page still must not scroll or bounce, whether or not the event
+      // goes on to turn the sphere.
       event.preventDefault();
-      if (event.deltaY === 0) return;
+      // A trackpad gesture is a stream of small events. The floor drops the
+      // tail of one, and the throttle in `step()` folds the rest into the
+      // single disc the reader asked for.
+      if (Math.abs(event.deltaY) < WHEEL_DELTA_FLOOR) return;
       step(event.deltaY > 0 ? 1 : -1);
     };
     // Both the stage and the sphere inside it. A wheel over the sphere
