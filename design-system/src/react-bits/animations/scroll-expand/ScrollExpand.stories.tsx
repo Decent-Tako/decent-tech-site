@@ -85,7 +85,10 @@ async function playBrand(canvas: Canvas) {
 async function playScroll(canvas: Canvas) {
   const stage = canvas.getByTestId('scroll-expand-stage');
   const scroller = canvas.getByTestId('scroll-expand-scroller');
-  await expect(canvas.getByText('Tools')).toBeVisible();
+  await expect(scroller).toBeVisible();
+  await expect(
+    canvas.getByAltText('Academy community standing together outdoors'),
+  ).toBeVisible();
   scroller.scrollTop = Math.max(80, scroller.scrollHeight * 0.45);
   scroller.dispatchEvent(new Event('scroll'));
   await waitFor(() => {
@@ -138,7 +141,7 @@ export const ReducedMotion: Story = {
     await waitFor(() => {
       expect(Number(stage.dataset.progress)).toBeGreaterThan(0.9);
     }, SLOW);
-    await expect(canvas.getByText('Tools')).toBeVisible();
+    await expect(canvas.getByText(/Tracker and plan/)).toBeVisible();
     await playPause(canvas, stage);
   },
 };

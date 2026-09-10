@@ -10,6 +10,7 @@
  * Local changes:
  * 1. paused freezes the current clip. onProgress reports 0 to 1 onto the stage.
  * 2. data-progress and data-testid on the scroller so the play can scroll it.
+ * 3. tabIndex 0 and an accessible name so the scroller can take keyboard focus.
  */
 import { useCallback, useEffect, useRef } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
@@ -274,6 +275,8 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
       style={style}
       data-testid="scroll-expand-scroller"
       data-progress="0"
+      tabIndex={useWindowScroll ? undefined : 0}
+      aria-label={title || 'Scroll expand'}
       {...rest}
     >
       <div ref={trackRef} className="scroll-expand__track">
