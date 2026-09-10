@@ -1,0 +1,27 @@
+.scrambled-text__stage {
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  cursor: crosshair;
+}
+
+.scrambled-text__box {
+  max-width: 40rem;
+}
+
+/* The upstream stylesheet sets a 7vw margin, monospace, and white. Brand
+   type on the paper stage instead. */
+.scrambled-text__box .text-block.scrambled-text__copy {
+  margin: 0;
+  max-width: none;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.scrambled-text__box .text-block.scrambled-text__copy p {
+  margin: 0;
+}

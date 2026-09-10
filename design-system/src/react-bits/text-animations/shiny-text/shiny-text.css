@@ -1,0 +1,21 @@
+.shiny-text__stage {
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.shiny-text__copy {
+  margin: 0;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+}
+
+/* The upstream stylesheet sets its own grey and a CSS keyframe shine. The
+   inline gradient from the component wins on background, and the
+   animation is turned off so the frame loop is the only mover. */
+.shiny-text__copy .shiny-text {
+  animation: none;
+}
