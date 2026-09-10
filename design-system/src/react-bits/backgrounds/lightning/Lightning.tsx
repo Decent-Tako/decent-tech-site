@@ -86,7 +86,7 @@ export function Lightning({
           key={run}
           hue={hue}
           xOffset={xOffset}
-          speed={motionSpeed}
+          speed={speed}
           intensity={intensity}
           size={size}
           paused={paused || reduce}

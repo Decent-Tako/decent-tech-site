@@ -10,6 +10,7 @@
  * Local changes:
  * 1. preserveDrawingBuffer: true so play can sample the canvas after pause.
  * 2. paused, onReady, and onError props so the story can hold time and prove paint.
+ * 3. Advance time for 12 frames before Pause holds, so a still frame has paint.
  */
 import React, { useRef, useEffect } from 'react';
 import './Lightning.css';
@@ -209,11 +210,12 @@ const Lightning: React.FC<LightningProps> = ({
     let elapsed = 0;
     let lastT = 0;
     let notifiedReady = false;
+    let readyFrames = 0;
     const render = (t: number) => {
       resizeCanvas();
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.uniform2f(iResolutionLocation, canvas.width, canvas.height);
-      if (!pausedRef.current) {
+      if (!pausedRef.current || readyFrames < 12) {
         if (lastT) elapsed += t - lastT;
       }
       lastT = t;
@@ -225,7 +227,8 @@ const Lightning: React.FC<LightningProps> = ({
       gl.uniform1f(uIntensityLocation, current.intensity);
       gl.uniform1f(uSizeLocation, current.size);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
-      if (!notifiedReady) {
+      readyFrames += 1;
+      if (!notifiedReady && readyFrames >= 12) {
         notifiedReady = true;
         readyRef.current.onReady?.();
       }

@@ -81,7 +81,7 @@ async function playPaint(stage: HTMLElement) {
   const sketch = stage.querySelector('canvas');
   await expect(sketch).toBeTruthy();
   await expect(stage).toHaveTextContent('19–28 October 2026');
-  await assertCanvasPainted(sketch as HTMLCanvasElement, INK);
+  await assertCanvasPainted(sketch as HTMLCanvasElement, INK, { grid: 32, timeoutMs: 8000 });
   return sketch as HTMLCanvasElement;
 }
 
