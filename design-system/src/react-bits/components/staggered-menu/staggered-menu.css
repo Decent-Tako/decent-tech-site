@@ -1,0 +1,65 @@
+.rb-frame [data-testid='staggered-menu-stage'] {
+  min-height: 32rem;
+}
+
+.rb-frame .staggered-menu-wrapper {
+  min-height: 32rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .sm-toggle,
+.rb-frame .sm-toggle-line,
+.rb-frame .sm-panel-item,
+.rb-frame .sm-panel-itemLabel,
+.rb-frame .sm-socials-title,
+.rb-frame .sm-socials-link {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .sm-logo-img {
+  height: 2rem;
+  width: auto;
+  max-width: 7rem;
+  object-fit: cover;
+  border-radius: 0.15rem;
+}
+
+.rb-frame .sm-panel-item {
+  font-size: 1.75rem;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  padding-right: 2.25rem;
+}
+
+.rb-frame .sm-panel-list[data-numbering] .sm-panel-item::after {
+  right: 0;
+  top: 0.35em;
+  font-size: 0.75rem;
+}
+
+.rb-frame .sm-panel-item:hover,
+.rb-frame .sm-panel-item:focus-visible {
+  color: var(--accent-blue);
+}
+
+.rb-frame .sm-socials-title {
+  color: var(--accent-blue);
+}
+
+.rb-frame .sm-socials-link {
+  color: var(--ink);
+}
+
+.rb-frame .sm-socials-link:hover,
+.rb-frame .sm-socials-link:focus-visible {
+  color: var(--accent-blue);
+}
+
+.rb-frame .staggered-menu-panel {
+  background: var(--paper);
+}
+
+.rb-frame .sm-toggle:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: 4px;
+}
