@@ -75,8 +75,11 @@ page opens at once with no circle.
 A pointer over a list entry, or keyboard focus on it, turns the sphere to
 that dot through `turnToItem` (local change 14): the existing snap eases the
 sphere there, so it never jumps. Leaving the entry does nothing; the sphere
-stays. The wheel turns the sphere one disc per step, and the arrow keys do
-the same while the wordmark has focus. The home page itself does not scroll.
+stays. The wheel turns the sphere one page per step, and the arrow keys do
+the same while the wordmark has focus. A step walks the five pages in the
+order of the table above and wraps at the ends, so a forward step from About
+reaches Portfolio and a step back from About reaches Get in touch. The home
+page itself does not scroll.
 
 The list is the keyboard path and the no-WebGL path. It holds a real link to
 every page, so it works with no bundle and with no WebGL.

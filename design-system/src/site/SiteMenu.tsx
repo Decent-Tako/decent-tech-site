@@ -12,8 +12,8 @@
 //
 // A click on a disc, on the wordmark, or on a list entry expands a circle in
 // the disc colour from that point and then opens the page. A wheel step or an
-// arrow key moves the sphere one disc along. Pointer or focus on a list entry
-// turns the sphere to that dot.
+// arrow key moves the sphere one page along the order of SITE_PAGES, wrapping
+// at the ends. Pointer or focus on a list entry turns the sphere to that dot.
 import {
   useCallback,
   useEffect,
@@ -196,12 +196,20 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
   // One disc per call, no faster than the throttle. The stage counts the
   // steps it takes, so the Chromium check can tell a wheel that never
   // arrived from a sphere that did not move.
+  // A step walks the five pages in the order of SITE_PAGES and wraps at the
+  // ends, so the wheel and the arrow keys always visit About, Portfolio,
+  // Blog, About Ben, Get in touch, and back. The vendored `step()` walks the
+  // vertex order of the sphere instead, which is arbitrary, so the site uses
+  // `turnToItem()` for both. The sphere still eases; it never jumps.
   const step = useCallback((direction: 1 | -1) => {
     const now = performance.now();
     if (now - lastStepRef.current < STEP_THROTTLE_MS) return;
     lastStepRef.current = now;
-    menuRef.current?.step(direction);
-    setSteps((count) => count + 1);
+    const count = SITE_PAGES.length;
+    const from = SITE_PAGES.indexOf(activeRef.current);
+    const next = (((from + direction) % count) + count) % count;
+    menuRef.current?.turnToItem(next);
+    setSteps((total) => total + 1);
   }, []);
 
   // The stage carries the count, so the Chromium check can tell a wheel that
