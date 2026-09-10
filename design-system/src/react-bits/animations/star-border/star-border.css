@@ -1,0 +1,19 @@
+.star-border-stage {
+  display: grid;
+  place-items: center;
+  min-height: 16rem;
+  padding: 2rem 1rem;
+}
+
+.rb-frame .star-border-container,
+.rb-frame .star-border-container .inner-content {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+}
+
+.rb-frame .star-border-copy {
+  margin: 0.75rem 0 0;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-align: center;
+}
