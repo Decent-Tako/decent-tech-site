@@ -73,6 +73,7 @@ export type SiteMenuProps = {
 export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
   const [active, setActive] = useState<SitePage | null>(null);
   const [expand, setExpand] = useState<Expand | null>(null);
+  const [steps, setSteps] = useState(0);
   const reduce = useReducedMotion();
   const rootRef = useRef<HTMLDivElement | null>(null);
   const menuRef = useRef<InfiniteGridMenu | null>(null);
@@ -135,13 +136,22 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
     };
   };
 
-  // One disc per call, no faster than the throttle.
+  // One disc per call, no faster than the throttle. The stage counts the
+  // steps it takes, so the Chromium check can tell a wheel that never
+  // arrived from a sphere that did not move.
   const step = useCallback((direction: 1 | -1) => {
     const now = performance.now();
     if (now - lastStepRef.current < STEP_THROTTLE_MS) return;
     lastStepRef.current = now;
     menuRef.current?.step(direction);
+    setSteps((count) => count + 1);
   }, []);
+
+  // The stage carries the count, so the Chromium check can tell a wheel that
+  // never arrived from a sphere that did not move.
+  useEffect(() => {
+    rootRef.current?.parentElement?.setAttribute('data-steps', String(steps));
+  }, [steps]);
 
   // The home page itself does not scroll, so the wheel drives the sphere.
   // The listener is not passive; it stops the page from bouncing.

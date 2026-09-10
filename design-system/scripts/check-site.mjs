@@ -104,7 +104,11 @@ async function checkMenu(page, viewportName, state) {
         console.log(`check-site: ${viewportName} /: one wheel step moves the overlay to ${next}`);
       }
     } catch {
-      fail(`${viewportName}: one wheel step did not change the overlay href within 2 s`);
+      const steps = await stage.getAttribute('data-steps');
+      fail(
+        `${viewportName}: one wheel step did not change the overlay href within 2 s ` +
+          `(the stage counted ${steps ?? 'no'} step(s))`,
+      );
     }
   } else if (state === 'unavailable') {
     const linkCount = await page.locator('.menu-list a').count();

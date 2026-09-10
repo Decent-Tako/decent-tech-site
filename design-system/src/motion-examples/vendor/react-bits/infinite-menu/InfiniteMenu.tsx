@@ -875,13 +875,23 @@ export class InfiniteGridMenu {
     // One spacing lands on a neighbour on most of the sphere. Where the
     // neighbours do not line up with the axis, or where the neighbour carries
     // the same item as the vertex before it, a longer turn finds the next
-    // one. The loop stops at the first vertex with a different item.
-    for (let multiple = 1; multiple <= 12; ++multiple) {
-      const turn = quat.setAxisAngle(quat.create(), [0, 1, 0], spacing * multiple * direction);
-      quat.multiply(this.control.orientation, turn, start);
-      quat.normalize(this.control.orientation, this.control.orientation);
-      const now = this.findNearestVertexIndex();
-      if (now !== before && now % count !== before % count) break;
+    // one. The loop stops at the first vertex with a different item. The up
+    // axis is the first choice; the side axis is the second, for the few
+    // vertices that lie on the up axis and hardly move about it.
+    const axes: vec3[] = [
+      [0, 1, 0],
+      [1, 0, 0]
+    ];
+    let landed = false;
+    for (const axis of axes) {
+      for (let multiple = 1; multiple <= 12 && !landed; ++multiple) {
+        const turn = quat.setAxisAngle(quat.create(), axis, spacing * multiple * direction);
+        quat.multiply(this.control.orientation, turn, start);
+        quat.normalize(this.control.orientation, this.control.orientation);
+        const now = this.findNearestVertexIndex();
+        if (now !== before && now % count !== before % count) landed = true;
+      }
+      if (landed) break;
     }
     // The step lands on the new vertex, not part way to it, so the snap
     // settles it there instead of pulling the sphere back. The pointer
