@@ -42,10 +42,8 @@ export function ASCIIText({
   const [paused, setPaused] = useState(false);
   const [run, setRun] = useState(0);
   const [webgl, setWebgl] = useState<WebglState>(() => probeWebgl());
-  const [ready, setReady] = useState(false);
   const stageRef = useRef<HTMLDivElement>(null);
   const reduce = useReduce(reducedMotion);
-  const freeze = paused || (reduce && ready);
 
   return (
     <ReactBitsFrame
@@ -72,7 +70,6 @@ export function ASCIIText({
       onReplay={() => {
         setRun((value) => value + 1);
         setPaused(false);
-        setReady(false);
         setWebgl(probeWebgl());
       }}
       reducedMotion={reducedMotion}
@@ -98,9 +95,8 @@ export function ASCIIText({
           textColor={textColor}
           planeBaseHeight={planeBaseHeight}
           enableWaves={reduce ? false : enableWaves}
-          paused={freeze}
+          paused={paused}
           onReady={() => {
-            setReady(true);
             setWebgl('ready');
           }}
           onFrame={(info) => {
