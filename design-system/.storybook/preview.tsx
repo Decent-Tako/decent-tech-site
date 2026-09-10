@@ -84,6 +84,7 @@ const preview: Preview = {
             'Keepers',
             'Runtime additions',
             'Item',
+            'Splash cursor',
           ],
           'UI primitives',
           'Styled systems',
