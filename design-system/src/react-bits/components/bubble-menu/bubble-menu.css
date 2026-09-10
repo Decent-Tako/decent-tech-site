@@ -1,0 +1,21 @@
+.rb-frame [data-testid='bubble-menu-stage'] {
+  min-height: 32rem;
+  background: var(--soft);
+}
+
+.rb-frame .bubble-menu .logo-content {
+  width: auto;
+  min-width: 10rem;
+}
+
+.rb-frame .bubble-menu .wordmark {
+  font-size: 1rem;
+}
+
+.rb-frame .pill-label {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .bubble-menu-items .pill-link {
+  --pill-min-h: 6rem;
+}
