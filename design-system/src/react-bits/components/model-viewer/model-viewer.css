@@ -1,0 +1,10 @@
+.rb-frame [data-testid='model-viewer-stage'] {
+  min-height: 26rem;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+}
+
+.rb-frame [data-testid='model-viewer-stage'] canvas {
+  display: block;
+}
