@@ -6,9 +6,10 @@
 // screenshot per page per viewport to site-shots/ (twelve in all). The home
 // page holds the menu only, so it expects zero [data-scene] elements. On the
 // home page, when the menu is ready, it asserts that the overlay pill links to
-// /about/ at load, that one wheel step changes the link, and that a click on
-// the centre of the stage grows the .menu-expand circle and opens one of the
-// five pages. The home screenshot is taken before that click.
+// /about/ at load, then takes the home screenshot, which must show the gold
+// disc at the centre. It then asserts that one wheel step changes the link, and
+// that a click on the centre of the stage grows the .menu-expand circle and
+// opens one of the five pages.
 //
 // Usage: node scripts/check-site.mjs [url]   (default http://127.0.0.1:8080/)
 import { mkdir } from 'node:fs/promises';
@@ -63,9 +64,8 @@ function pathOf(href) {
 }
 
 // The sphere starts on the gold disc, so the pill reads About with no drag.
-// One wheel step then moves the sphere on to another disc.
+// This runs before the home screenshot, which must show that first state.
 async function checkMenu(page, viewportName, state) {
-  const stage = page.locator('#menu-stage');
   if (state === 'ready') {
     const overlay = page.locator('a.menu-overlay');
     await overlay.waitFor({ state: 'visible', timeout: STAGE_TIMEOUT_MS });
@@ -75,7 +75,23 @@ async function checkMenu(page, viewportName, state) {
     } else {
       console.log(`check-site: ${viewportName} /: at load the overlay links to /about/`);
     }
+  } else if (state === 'unavailable') {
+    const linkCount = await page.locator('.menu-list a').count();
+    if (linkCount !== PAGE_PATHS.length) {
+      fail(`${viewportName}: the link list holds ${linkCount} links, expected ${PAGE_PATHS.length}`);
+    } else {
+      console.log(`check-site: ${viewportName} /: the link list is the navigation (${linkCount} links)`);
+    }
+  }
+}
 
+// One wheel step moves the sphere on to another disc, and a click then opens
+// the page behind the disc at the centre. Both run after the home screenshot:
+// the step moves the sphere off gold and the click leaves the page.
+async function checkMenuWheel(page, viewportName) {
+  const stage = page.locator('#menu-stage');
+  {
+    const overlay = page.locator('a.menu-overlay');
     const box = await stage.boundingBox();
     if (!box) {
       fail(`${viewportName}: #menu-stage has no bounding box`);
@@ -121,19 +137,11 @@ async function checkMenu(page, viewportName, state) {
           `(the stage counted ${steps ?? 'no'} step(s))`,
       );
     }
-  } else if (state === 'unavailable') {
-    const linkCount = await page.locator('.menu-list a').count();
-    if (linkCount !== PAGE_PATHS.length) {
-      fail(`${viewportName}: the link list holds ${linkCount} links, expected ${PAGE_PATHS.length}`);
-    } else {
-      console.log(`check-site: ${viewportName} /: the link list is the navigation (${linkCount} links)`);
-    }
   }
 }
 
 // A click on the centre of the stage grows a circle in the disc colour and
-// then opens the page behind that disc. This runs after the home screenshot,
-// because it leaves the home page.
+// then opens the page behind that disc.
 async function checkMenuClick(page, viewportName) {
   const box = await page.locator('#menu-stage').boundingBox();
   if (!box) {
@@ -269,8 +277,10 @@ async function checkPage(browser, viewport, pagePath) {
   await page.screenshot({ path: shot, fullPage: false, timeout: 60_000 });
   console.log(`check-site: ${label}: screenshot ${shot}`);
 
-  // The click leaves the home page, so it comes after the screenshot.
+  // The wheel step moves the sphere off gold and the click leaves the page,
+  // so both come after the screenshot.
   if (pagePath === '/' && menuState === 'ready') {
+    await checkMenuWheel(page, viewport.name);
     await checkMenuClick(page, viewport.name);
   }
 
