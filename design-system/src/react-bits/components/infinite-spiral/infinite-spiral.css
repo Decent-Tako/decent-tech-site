@@ -1,0 +1,8 @@
+.rb-frame [data-testid='infinite-spiral-stage'] {
+  height: 28rem;
+  min-height: 28rem;
+}
+
+.rb-frame .infinite-spiral__item {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
