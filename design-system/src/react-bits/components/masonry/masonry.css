@@ -1,0 +1,14 @@
+.rb-frame [data-testid='masonry-stage'] {
+  min-height: 28rem;
+  height: 28rem;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.rb-frame .list {
+  min-height: 28rem;
+}
+
+.rb-frame .item-wrapper {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
