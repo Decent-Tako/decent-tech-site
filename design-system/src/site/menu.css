@@ -30,7 +30,8 @@
 }
 
 /* The page transition. A circle in the colour of the disc grows from the
-   disc, or from the pill, until it covers the stage; then the page opens.
+   disc, from the wordmark, or from a list entry, until it covers the stage;
+   then the page opens.
    The element is decorative and takes no pointer. Under reduced motion the
    site opens the page at once and this element never renders. */
 .menu-expand {

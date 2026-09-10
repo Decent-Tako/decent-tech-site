@@ -29,21 +29,57 @@ colours: cream `#f2f1e8`, navy `#182534`, vermilion `#e34234`, gold
 
 ## Home layout
 
-The home page is immersive. The stage fills the viewport edge to edge; the
-wordmark sits over it top left in cream, and the five-link row sits over it
-at the bottom. There is no header band and no footer. The sphere shows many
-coloured discs at rest: `SiteMenu.tsx` passes `scale` to the vendored menu,
-whose frame height follows the scale (local change 10 in its header). The
-other five pages keep the header, the plate, and the footer.
+The home page is immersive: a wordmark and a sphere. The stage fills the
+viewport edge to edge. The wordmark sits over it top left in cream, large, in
+the serif stack, and it is the only text on the sphere; the "Technology
+Group" line is left out here. The five pages sit over the stage on the right
+as a vertical list, vertically centred, and on a phone at the bottom right.
+There is no header band, no bottom link row, and no footer. The other five
+pages keep the header, the plate, and the footer.
+
+The sphere is never wholly inside the screen. `SiteMenu.tsx` computes the
+scale from the viewport instead of a fixed number, so the projected diameter
+stays about 1.35 times the shorter viewport side, and applies it again on
+every resize through `setScale` (local change 15). The discs are cut at the
+top and the bottom in landscape and at the left and the right in portrait.
+
+Each disc carries its own label as text in `site/menu/<slug>.svg`: navy
+`#182534` on the disc colour, the serif stack, centred.
+
+## Phrases
+
+Ben wrote these on 2026-09-10. `design-system/src/site/pages.ts` is the one
+source, as the `phrase` and `label` fields.
+
+| Dot | Page | Phrase | Disc label |
+| --- | --- | --- | --- |
+| gold | About `/about/` | Hey, we're decent. | hey. |
+| vermilion | Portfolio `/portfolio/` | decent. work | work. |
+| terracotta | Blog `/blog/` | decent. read | read. |
+| steel | About Ben `/ben/` | decent. people | people. |
+| cream | Get in touch `/contact/` | decent. contact | contact. |
 
 ## Home behaviour
 
-The sphere starts on the gold disc, so the pill reads About at load. A click
-or a tap on a disc grows a circle in the disc colour over the stage and then
-opens that page; the pill does the same on a click, on Enter, and on Space.
-Under `prefers-reduced-motion: reduce` the page opens at once with no circle.
-The wheel turns the sphere one disc per step, and the arrow keys do the same
-while the pill has focus. The home page itself does not scroll.
+The sphere starts on the gold disc, so the wordmark reads "Hey, we're
+decent." at load. A change of dot crossfades the wordmark to the new phrase
+in about 250 ms; under `prefers-reduced-motion: reduce` it swaps at once. A
+visually hidden live region mirrors the phrase for assistive technology.
+
+A click or a tap on a disc grows a circle in the disc colour over the stage
+and then opens that page. The wordmark does the same on a click, on Enter,
+and on Space, from its own centre, and it opens the active page. A click on a
+list entry opens that entry's page the same way. Under reduced motion the
+page opens at once with no circle.
+
+A pointer over a list entry, or keyboard focus on it, turns the sphere to
+that dot through `turnToItem` (local change 14): the existing snap eases the
+sphere there, so it never jumps. Leaving the entry does nothing; the sphere
+stays. The wheel turns the sphere one disc per step, and the arrow keys do
+the same while the wordmark has focus. The home page itself does not scroll.
+
+The list is the keyboard path and the no-WebGL path. It holds a real link to
+every page, so it works with no bundle and with no WebGL.
 
 ## Behaviour
 
