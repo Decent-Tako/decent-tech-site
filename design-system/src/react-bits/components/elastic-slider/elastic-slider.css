@@ -1,0 +1,40 @@
+.rb-frame [data-testid='elastic-slider-stage'] {
+  min-height: 14rem;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+}
+
+.rb-frame .elastic-slider__goal {
+  margin: 0 0 0.5rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.rb-frame .slider-container {
+  width: min(100%, 20rem);
+}
+
+.rb-frame .slider-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--ink);
+}
+
+.rb-frame .slider-track {
+  background-color: var(--soft);
+}
+
+.rb-frame .slider-range {
+  background-color: var(--accent-blue);
+}
+
+.rb-frame .value-indicator {
+  position: static;
+  transform: none;
+  margin: 0.5rem 0 0;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+}

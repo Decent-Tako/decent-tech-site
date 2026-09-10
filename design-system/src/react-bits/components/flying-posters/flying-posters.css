@@ -1,0 +1,13 @@
+.rb-frame [data-testid='flying-posters-stage'] {
+  min-height: 32rem;
+}
+
+.rb-frame .posters-container {
+  height: 30rem;
+}
+
+.rb-frame .posters-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

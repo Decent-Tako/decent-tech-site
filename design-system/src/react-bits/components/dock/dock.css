@@ -1,0 +1,32 @@
+.rb-frame [data-testid='dock-stage'] {
+  min-height: 18rem;
+}
+
+.rb-frame .dock-outer {
+  width: 100%;
+  height: 16rem;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.rb-frame .dock-panel,
+.rb-frame .dock-item {
+  background-color: var(--charcoal);
+  border-color: var(--quiet);
+}
+
+.rb-frame .dock-label {
+  background-color: var(--charcoal);
+  border-color: var(--paper);
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+}
+
+.rb-frame .dock-story__glyph {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--paper);
+  line-height: 1;
+}

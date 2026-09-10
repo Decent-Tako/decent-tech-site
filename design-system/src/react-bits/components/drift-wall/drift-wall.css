@@ -1,0 +1,19 @@
+.rb-frame [data-testid='drift-wall-stage'] {
+  min-height: 32rem;
+}
+
+.rb-frame .drift-wall {
+  height: 30rem;
+}
+
+.rb-frame .drift-wall__inner img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.rb-frame .drift-wall__tile {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--paper);
+}

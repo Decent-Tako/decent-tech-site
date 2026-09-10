@@ -27,9 +27,12 @@
     "@mantine/hooks": "9.6.0",
     "@phosphor-icons/react": "2.1.10",
     "@radix-ui/themes": "3.3.0",
+    "@react-three/drei": "10.7.8",
+    "@react-three/fiber": "9.7.0",
     "@tabler/icons-react": "3.46.0",
     "@tailwindcss/typography": "0.5.20",
     "@tailwindcss/vite": "4.3.3",
+    "@use-gesture/react": "10.3.1",
     "@visx/annotation": "4.0.0",
     "@visx/axis": "4.0.0",
     "@visx/event": "4.0.0",
@@ -53,7 +56,9 @@
     "gl-matrix": "3.4.3",
     "gsap": "3.15.0",
     "lucide-react": "1.43.0",
+    "maath": "0.10.8",
     "motion": "13.2.0",
+    "ogl": "1.0.11",
     "react": "^19.2.8",
     "react-day-picker": "10.0.1",
     "react-dom": "^19.2.8",
@@ -62,7 +67,8 @@
     "recharts": "3.10.1",
     "shadcn": "4.21.0",
     "tailwind-merge": "3.6.0",
-    "tailwindcss": "4.3.3"
+    "tailwindcss": "4.3.3",
+    "three": "0.180.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
