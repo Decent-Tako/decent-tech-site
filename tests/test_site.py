@@ -26,12 +26,14 @@ PAGES = (
 
 
 # The React Bits scene behind each page and the extra effect on it, as
-# site/README.md and design-system/src/site/scenes.ts list them.
+# site/README.md and design-system/src/site/scenes.ts list them. Portfolio and
+# About Ben carry no effect: the cursor effects are off by Ben's request of
+# 2026-09-10. They stay in the registry and in Storybook.
 SCENES = {
     "about": ("liquid-ether", "split-text"),
-    "portfolio": ("galaxy", "splash-cursor"),
+    "portfolio": ("galaxy", None),
     "blog": ("threads", "scrambled-text"),
-    "ben": ("iridescence", "ribbons"),
+    "ben": ("iridescence", None),
     "contact": ("plasma", "shiny-text"),
 }
 SCENE_NAMES = (
@@ -351,6 +353,28 @@ class SiteTests(unittest.TestCase):
         self.assertEqual(self.parser.effects, [])
         self.assertNotIn("menu-stage-frame", self.html)
         self.assertNotIn("scene--cursor", self.html)
+
+    def test_no_page_mounts_a_cursor_effect(self):
+        # Ben asked on 2026-09-10 for no cursor features. The two cursor
+        # scenes stay in the registry, but no page mounts them.
+        for slug in ("portfolio", "ben"):
+            parser = parse(SITE / slug / "index.html")
+            self.assertEqual(parser.effects, [], f"/{slug}/ must hold no data-effect")
+        for slug, _, path, _ in PAGES:
+            html = (SITE / slug / "index.html").read_text()
+            for name in ("splash-cursor", "ribbons"):
+                self.assertNotIn(
+                    f'data-effect="{name}"', html, f"{path} must not mount {name}"
+                )
+
+    def test_readme_says_the_cursor_effects_are_off(self):
+        text = (SITE / "README.md").read_text()
+        self.assertIn("Cursor effects off by Ben's request 2026-09-10", text)
+
+    def test_the_stage_does_not_scroll_with_the_wheel(self):
+        # The wheel turns the sphere, so the stage keeps the viewport height
+        # and stops the scroll chain.
+        self.assertRegex(self.css, r"\.menu-stage \{[^}]*overscroll-behavior: none")
 
     def test_home_page_is_immersive(self):
         # The stage fills the viewport; the wordmark and the link row sit over
