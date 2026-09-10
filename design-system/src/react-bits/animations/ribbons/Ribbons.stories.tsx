@@ -149,8 +149,10 @@ export const Default: Story = {
   },
 };
 
-export const FadeWobble: Story = {
-  args: { ...RIBBONS_DEFAULTS, enableFade: true, enableShaderEffect: true, baseThickness: 12 },
+// Opaque ribbons, so the pixel sample stays reliable; enableFade thins the
+// tail to near the stage colour and is left to the controls.
+export const ThickWobble: Story = {
+  args: { ...RIBBONS_DEFAULTS, enableShaderEffect: true, baseThickness: 48, effectAmplitude: 6 },
   play: async ({ canvas }) => {
     await playBrand(canvas);
     const { stage, ready } = await playReady(canvas);
