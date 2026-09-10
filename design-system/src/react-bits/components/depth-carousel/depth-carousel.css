@@ -1,0 +1,21 @@
+.rb-frame [data-testid='depth-carousel-stage'] {
+  min-height: 32rem;
+}
+
+.rb-frame .depth-carousel {
+  min-height: 28rem;
+}
+
+.rb-frame .depth-carousel__arrow,
+.rb-frame .depth-carousel__dot {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .depth-carousel__card {
+  background: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.rb-frame .depth-carousel:focus-visible {
+  outline-color: var(--accent-yellow);
+}

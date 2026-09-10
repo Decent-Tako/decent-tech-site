@@ -1,0 +1,14 @@
+.rb-frame [data-testid='circular-gallery-stage'] {
+  min-height: 28rem;
+}
+
+.rb-frame .circular-gallery {
+  width: 100%;
+  height: 26rem;
+}
+
+.rb-frame .circular-gallery canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

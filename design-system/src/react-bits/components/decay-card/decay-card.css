@@ -1,0 +1,20 @@
+.rb-frame [data-testid='decay-card-stage'] {
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  min-height: 32rem;
+  padding: 3rem 1rem;
+}
+
+.rb-frame .card-text {
+  margin: 0;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+  color: var(--paper);
+  text-shadow: 0 1px 8px #212121;
+}
+
+.rb-frame .card-text::first-line {
+  font-size: 3.5rem;
+  font-weight: 700;
+}
