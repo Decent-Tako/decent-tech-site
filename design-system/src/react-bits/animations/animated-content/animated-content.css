@@ -1,0 +1,51 @@
+.animated-content__card {
+  display: grid;
+  gap: 0.5rem;
+  width: min(100%, 32rem);
+  margin: 1.25rem auto;
+  padding: 1rem;
+  background: var(--soft);
+  border: 1px solid var(--line);
+}
+
+.animated-content__photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 8 / 5;
+  object-fit: cover;
+}
+
+.rb-frame .animated-content__kicker,
+.rb-frame .animated-content__title,
+.rb-frame .animated-content__copy,
+.rb-frame .animated-content__goal {
+  margin: 0;
+  color: var(--ink);
+}
+
+.rb-frame .animated-content__kicker {
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-blue);
+}
+
+.rb-frame .animated-content__title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.rb-frame .animated-content__copy {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.rb-frame .animated-content__goal {
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--accent-yellow);
+  padding: 0.25rem 0.5rem;
+  justify-self: start;
+}
