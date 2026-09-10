@@ -1,0 +1,30 @@
+.swarm-cursor-stage {
+  height: 24rem;
+  cursor: crosshair;
+}
+
+.swarm-cursor-stage .swarm-cursor {
+  position: absolute;
+  inset: 0;
+}
+
+.rb-frame .swarm-cursor-copy {
+  position: relative;
+  z-index: 2;
+  margin: 1rem;
+  max-width: 24rem;
+  padding: 0.75rem 1rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  pointer-events: none;
+}
+
+.rb-frame .swarm-cursor-copy p {
+  margin: 0 0 0.35rem;
+}
+
+.rb-frame .swarm-cursor-copy p:last-child {
+  margin-bottom: 0;
+}
