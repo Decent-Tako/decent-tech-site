@@ -85,6 +85,7 @@ const preview: Preview = {
             'Runtime additions',
             'Item',
             'Splash cursor',
+            'Infinite menu',
           ],
           'UI primitives',
           'Styled systems',

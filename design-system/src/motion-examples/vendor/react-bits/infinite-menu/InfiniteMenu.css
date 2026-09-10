@@ -1,0 +1,135 @@
+/*
+ * Vendored from React Bits.
+ * Source: https://github.com/DavidHDev/react-bits/blob/main/src/ts-default/Components/InfiniteMenu/InfiniteMenu.css
+ * Page: https://reactbits.dev/components/infinite-menu
+ * Commit: 625f25025fed1c28e2de7d3ac5f12ee83542844d
+ * Date: 2026-09-10
+ * Licence: MIT + Commons Clause (see ../LICENSE.md).
+ *
+ * Local changes:
+ * 1. This header.
+ * 2. `#infinite-grid-menu-canvas` became `.infinite-grid-menu-canvas`.
+ * 3. Every rule is scoped under `.rb-infinite-menu`.
+ * 4. Hard-coded colours became custom properties with the React Bits values
+ *    as fallbacks: `--infinite-menu-accent` (#5227ff) and
+ *    `--infinite-menu-icon` (#fff).
+ * Everything else is unchanged.
+ */
+
+/* Note: this CSS is only an example, you can overlay whatever you want using the activeItem logic */
+
+.rb-infinite-menu .infinite-grid-menu-canvas {
+  cursor: grab;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  outline: none;
+}
+
+.rb-infinite-menu .infinite-grid-menu-canvas:active {
+  cursor: grabbing;
+}
+
+.rb-infinite-menu .action-button {
+  position: absolute;
+  left: 50%;
+  z-index: 10;
+  width: 60px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  background: var(--infinite-menu-accent, #5227ff);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 5px solid var(--infinite-menu-background, #000);
+}
+
+.rb-infinite-menu .face-title {
+  user-select: none;
+  position: absolute;
+  font-weight: 900;
+  font-size: 3rem;
+  left: 1.6em;
+  top: 50%;
+}
+
+.rb-infinite-menu .action-button-icon {
+  user-select: none;
+  position: relative;
+  color: var(--infinite-menu-icon, #fff);
+  top: 2px;
+  font-size: 26px;
+}
+
+.rb-infinite-menu .face-title {
+  position: absolute;
+  top: 50%;
+  transform: translate(20%, -50%);
+}
+
+.rb-infinite-menu .face-title.active {
+  opacity: 1;
+  transform: translate(20%, -50%);
+  pointer-events: auto;
+  transition: 0.5s ease;
+}
+
+.rb-infinite-menu .face-title.inactive {
+  pointer-events: none;
+  opacity: 0;
+  transition: 0.1s ease;
+}
+
+.rb-infinite-menu .face-description {
+  user-select: none;
+  position: absolute;
+  max-width: 10ch;
+  top: 50%;
+  font-size: 1.2rem;
+  right: 1%;
+  transform: translate(0, -50%);
+}
+
+.rb-infinite-menu .face-description.active {
+  opacity: 1;
+  transform: translate(-90%, -50%);
+  pointer-events: auto;
+  transition: 0.5s ease;
+}
+
+.rb-infinite-menu .face-description.inactive {
+  pointer-events: none;
+  transform: translate(-60%, -50%);
+  opacity: 0;
+  transition: 0.1s ease;
+}
+
+.rb-infinite-menu .action-button {
+  position: absolute;
+  left: 50%;
+}
+
+.rb-infinite-menu .action-button.active {
+  bottom: 3.8em;
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+  transition: 0.5s ease;
+}
+
+.rb-infinite-menu .action-button.inactive {
+  bottom: -80px;
+  transform: translateX(-50%) scale(0);
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.1s ease;
+}
+
+@media (max-width: 1500px) {
+  .rb-infinite-menu .face-title,
+  .rb-infinite-menu .face-description {
+    display: none;
+  }
+}
