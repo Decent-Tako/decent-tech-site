@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent, waitFor } from 'storybook/test';
 
 import { assertFaceNotFallback } from '../../../brand/fontFallback';
-import { HERO } from '../../../pages/content';
 import { CountUp } from './CountUp';
 import { COUNT_UP_DEFAULTS } from './source';
 
@@ -77,7 +76,7 @@ async function playDone(canvas: Canvas) {
   await waitFor(() => {
     expect(stage).toHaveAttribute('data-state', 'done');
   }, SLOW);
-  await expect(canvas.getByText(HERO.facts[0].label, { exact: false })).toBeVisible();
+  await expect(canvas.getByTestId('count-up-value')).toBeVisible();
   return stage;
 }
 
