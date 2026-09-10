@@ -1,0 +1,90 @@
+.rb-frame [data-testid='stepper-stage'] {
+  min-height: 32rem;
+  background: var(--soft);
+}
+
+.rb-frame .outer-container {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  --border-primary: var(--line);
+}
+
+.rb-frame .step-circle-container {
+  background: var(--paper);
+  border-color: var(--line);
+}
+
+.rb-frame .step-default,
+.rb-frame .back-button,
+.rb-frame .next-button,
+.rb-frame .step-number {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .back-button {
+  color: var(--charcoal);
+  background: transparent;
+  border: none;
+}
+
+.rb-frame .back-button:hover,
+.rb-frame .back-button:focus-visible {
+  color: var(--ink);
+}
+
+.rb-frame .next-button {
+  background: var(--accent-blue);
+  color: var(--paper);
+  border: none;
+}
+
+.rb-frame .next-button:hover,
+.rb-frame .next-button:focus-visible {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.rb-frame .next-button:focus-visible,
+.rb-frame .back-button:focus-visible,
+.rb-frame .step-indicator:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+.rb-frame .step-connector {
+  background-color: var(--line);
+}
+
+.stepper__photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 8 / 5;
+  object-fit: cover;
+  margin-bottom: 0.75rem;
+}
+
+.rb-frame .stepper__kicker,
+.rb-frame .stepper__title,
+.rb-frame .stepper__copy {
+  margin: 0 0 0.35rem;
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .stepper__kicker {
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+}
+
+.rb-frame .stepper__title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.rb-frame .stepper__copy {
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
