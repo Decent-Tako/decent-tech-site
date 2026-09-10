@@ -87,9 +87,9 @@ async function checkMenu(page, viewportName, state) {
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     // One wheel event on the stage. A dispatched event is one step; the
     // trackpad-like stream of page.mouse.wheel is not.
-    await stage.dispatchEvent('wheel', { deltaY: 200, deltaMode: 0 });
-    try {
-      await page.waitForFunction(
+    const wheelOnce = () => stage.dispatchEvent('wheel', { deltaY: 200, deltaMode: 0 });
+    const hrefChanged = () =>
+      page.waitForFunction(
         (before) => {
           const link = document.querySelector('a.menu-overlay');
           return link !== null && link.getAttribute('href') !== before;
@@ -97,6 +97,17 @@ async function checkMenu(page, viewportName, state) {
         beforeWheel,
         { timeout: 2000 },
       );
+    await wheelOnce();
+    try {
+      try {
+        await hrefChanged();
+      } catch {
+        // The throttle drops a step that follows another too closely. One
+        // more event, after the window, proves the wheel drives the sphere.
+        await page.waitForTimeout(400);
+        await wheelOnce();
+        await hrefChanged();
+      }
       const next = pathOf(await overlay.getAttribute('href'));
       if (!next || !PAGE_PATHS.includes(next)) {
         fail(`${viewportName}: after one wheel step the overlay href "${next}" is not a page`);

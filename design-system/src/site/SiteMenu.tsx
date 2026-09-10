@@ -80,7 +80,9 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
   // True from the first activation until the page leaves. A second click
   // during the expand does nothing.
   const leavingRef = useRef(false);
-  const lastStepRef = useRef(0);
+  // Negative infinity, not zero: the first step must never fall inside the
+  // throttle window, however soon after load it comes.
+  const lastStepRef = useRef(Number.NEGATIVE_INFINITY);
   const reduceRef = useRef(reduce);
 
   useEffect(() => {
@@ -158,15 +160,25 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
   // The listener sits on the stage, the element the site owns, not on the
   // sphere inside it. A wheel anywhere over the stage turns the sphere.
   useEffect(() => {
-    const stage = rootRef.current?.parentElement ?? rootRef.current;
-    if (!stage) return;
+    const sphere = rootRef.current;
+    if (!sphere) return;
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
       if (event.deltaY === 0) return;
       step(event.deltaY > 0 ? 1 : -1);
     };
-    stage.addEventListener('wheel', onWheel, { passive: false });
-    return () => stage.removeEventListener('wheel', onWheel);
+    // Both the stage and the sphere inside it. A wheel over the sphere
+    // bubbles to the stage, but an event sent straight to the stage never
+    // reaches the sphere, and one sent to the sphere is not the stage's.
+    const hosts = [sphere.parentElement, sphere].filter(
+      (host): host is HTMLElement => host !== null,
+    );
+    for (const host of hosts) {
+      host.addEventListener('wheel', onWheel, { passive: false });
+    }
+    return () => {
+      for (const host of hosts) host.removeEventListener('wheel', onWheel);
+    };
   }, [step]);
 
   const handlePillKeyDown = (event: ReactKeyboardEvent<HTMLAnchorElement>) => {
