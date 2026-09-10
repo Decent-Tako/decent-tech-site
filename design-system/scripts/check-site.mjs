@@ -703,7 +703,34 @@ async function checkContactForm(page, label, viewport) {
   console.log(`check-site: ${label}: the pointer pulls the form (transform ${await formTransform(page)})`);
 
   // 2. A pointer on the form stops the chase at once.
-  await wrapper.hover();
+  //
+  // The pointer goes to the middle of the form by coordinate, not through
+  // `hover()`. `hover()` waits for the element to hold still first, and this
+  // form is moving by design: it only stops once the pointer has arrived, so
+  // waiting for it to stop before moving the pointer never ends.
+  // The form drifts while the pointer travels, so the pointer chases it: it
+  // aims at the middle, reads where the form is now, and aims again. The form
+  // holds the moment the pointer is inside it plus the hold margin, so a few
+  // rounds are enough.
+  let onTheForm = false;
+  for (let round = 0; round < 6 && !onTheForm; round += 1) {
+    const box = await wrapper.boundingBox();
+    if (!box) {
+      fail(`${label}: the form has no bounding box for the hover`);
+      return;
+    }
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.waitForTimeout(100);
+    const now = await wrapper.boundingBox();
+    onTheForm =
+      now !== null &&
+      Math.abs(now.x - box.x) < 4 &&
+      Math.abs(now.y - box.y) < 4;
+  }
+  if (!onTheForm) {
+    fail(`${label}: the pointer did not catch the form within six rounds`);
+    return;
+  }
   await page.waitForTimeout(200);
   const held = await formTransform(page);
   await page.waitForTimeout(400);
