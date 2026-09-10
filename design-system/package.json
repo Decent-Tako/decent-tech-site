@@ -10,6 +10,8 @@
     "storybook": "storybook dev --host 127.0.0.1 --port 6012 --exact-port --no-open",
     "storybook:build": "storybook build --output-dir storybook-static",
     "build:site": "vite build --config vite.site.config.ts",
+    "dev:site": "node scripts/dev-site.mjs",
+    "preview:site": "npm run build:site && node scripts/build-site-preview.mjs --base / --out dist-site-preview && node scripts/serve-site.mjs --root dist-site-preview",
     "storybook:test": "node scripts/check-rubric.mjs && vitest run --project=storybook",
     "rubric": "node scripts/check-rubric.mjs"
   },
