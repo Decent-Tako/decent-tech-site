@@ -88,12 +88,15 @@ LIST_SCRIM = "#182534"
 # effect: the cursor effects are off by Ben's request of 2026-09-10. They stay
 # in the registry and in Storybook. Get in touch carries two: the shine on the
 # email link, and the magnet that moves the contact form.
+# The scene of each page, and the effects it mounts in document order. Every
+# page ends with `next-dot`, the disc of the next page in the cycle, and About
+# also folds its three services with `section-dots`.
 SCENES = {
-    "about": ("liquid-ether", ("split-text",)),
-    "portfolio": ("galaxy", ()),
-    "blog": ("threads", ("scrambled-text",)),
-    "ben": ("iridescence", ()),
-    "contact": ("plasma", ("shiny-text", "magnetic-form")),
+    "about": ("liquid-ether", ("split-text", "section-dots", "next-dot")),
+    "portfolio": ("galaxy", ("next-dot",)),
+    "blog": ("threads", ("scrambled-text", "next-dot")),
+    "ben": ("iridescence", ("next-dot",)),
+    "contact": ("plasma", ("shiny-text", "magnetic-form", "next-dot")),
 }
 SCENE_NAMES = (
     "liquid-ether",
@@ -107,6 +110,8 @@ SCENE_NAMES = (
     "scrambled-text",
     "shiny-text",
     "magnetic-form",
+    "section-dots",
+    "next-dot",
 )
 
 
@@ -605,12 +610,16 @@ class SiteTests(unittest.TestCase):
     def test_no_page_mounts_a_cursor_effect(self):
         # Ben asked on 2026-09-10 for no cursor features. The two cursor
         # scenes stay in the registry, but no page mounts them.
-        for slug in ("portfolio", "ben"):
+        cursors = ("splash-cursor", "ribbons")
+        for slug, _, path, _ in PAGES:
             parser = parse(SITE / slug / "index.html")
-            self.assertEqual(parser.effects, [], f"/{slug}/ must hold no data-effect")
+            for effect in parser.effects:
+                self.assertNotIn(
+                    effect, cursors, f"{path} must mount no cursor effect"
+                )
         for slug, _, path, _ in PAGES:
             html = (SITE / slug / "index.html").read_text()
-            for name in ("splash-cursor", "ribbons"):
+            for name in cursors:
                 self.assertNotIn(
                     f'data-effect="{name}"', html, f"{path} must not mount {name}"
                 )
@@ -1396,6 +1405,139 @@ class SitePreviewBuildTests(unittest.TestCase):
         self.assertIn(f"<loc>{base}</loc>", sitemap)
         self.assertIn(f"<loc>{base}about/</loc>", sitemap)
         self.assertNotIn("https://decent.tech/", sitemap)
+
+
+class PlayfulBitsTests(unittest.TestCase):
+    """Sections as dots, the next dot, and the wordmark morph."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.css = (SITE / "styles.css").read_text()
+        cls.pages = {slug: (SITE / slug / "index.html").read_text() for slug, *_ in PAGES}
+
+    # 1. About holds three section discs with labels and no inline handlers.
+
+    def test_about_holds_three_section_discs_with_labels(self):
+        about = self.pages["about"]
+        sections = re.findall(r'data-section-dot="([^"]+)"', about)
+        self.assertEqual(
+            len(sections), 3, f"About holds {len(sections)} section discs, expected 3"
+        )
+        for label in sections:
+            # Every disc label follows the dot rule: it ends in a full stop,
+            # and the stop is a contrasting colour, never an inline style.
+            self.assertTrue(
+                label.endswith("."), f'the section label "{label}" has no full stop'
+            )
+        # The scene folds the sections; the host names the grid it folds.
+        self.assertIn('data-effect="section-dots"', about)
+        self.assertIn('data-target=".service-grid"', about)
+
+    def test_section_discs_carry_no_inline_handlers(self):
+        about = self.pages["about"]
+        # The discs are built by the scene as real buttons. Nothing in the
+        # markup may carry an on* attribute or an inline style.
+        block = about[about.index("service-grid") : about.index("</section>", about.index("service-grid"))]
+        self.assertNotRegex(block, r"\son[a-z]+\s*=")
+        self.assertNotRegex(block, r"\sstyle\s*=")
+
+    def test_section_disc_labels_use_the_serif_and_the_dot_rule(self):
+        # The running heads set the serif stack; the section discs take the
+        # same one, and their full stop takes the wordmark-dot colour.
+        disc = self.css[self.css.index(".section-dot__disc {") :][:600]
+        self.assertIn("Iowan Old Style", disc)
+        self.assertIn("var(--running-ink)", disc)
+        self.assertIn("var(--field)", disc)
+
+    def test_the_close_control_is_a_disc_the_keyboard_reaches(self):
+        close = self.css[self.css.index(".section-dot__close {") :][:600]
+        self.assertIn("border-radius: 50%", close)
+        self.assertIn(".section-dot__close:focus-visible", self.css)
+
+    # 2. Every page holds the next-dot link at the bottom, pointing at the
+    #    next page in the cycle: About, Portfolio, Blog, About Ben, Get in
+    #    touch, and back to About.
+
+    def test_every_page_holds_the_next_dot_link_in_cycle_order(self):
+        slugs = [slug for slug, *_ in PAGES]
+        for index, (slug, _title, _path, _token) in enumerate(PAGES):
+            with self.subTest(page=slug):
+                html = self.pages[slug]
+                nxt = PAGES[(index + 1) % len(PAGES)]
+                next_slug, _next_title, next_path, next_token = nxt
+                link = re.search(
+                    r'<a class="next-dot__link" href="([^"]+)" data-dot="([^"]+)"', html
+                )
+                self.assertIsNotNone(link, f"{slug} holds no next-dot link")
+                self.assertEqual(
+                    link.group(1),
+                    next_path,
+                    f"{slug} points at {link.group(1)}, expected {next_path}"
+                    f" ({next_slug} is next in the cycle)",
+                )
+                self.assertEqual(link.group(2), next_token)
+                # The label of the next dot, with its full stop in its span.
+                _phrase, label = PHRASES[next_slug]
+                self.assertIn(wordmark_markup(label), html)
+        self.assertEqual(slugs, ["about", "portfolio", "blog", "ben", "contact"])
+
+    def test_the_next_dot_sits_below_the_plate(self):
+        for slug, *_ in PAGES:
+            with self.subTest(page=slug):
+                html = self.pages[slug]
+                # The copy column closes before the next dot opens, and the
+                # navigation list follows it.
+                body = html.index('class="page-body"')
+                dot = html.index('class="next-dot"')
+                nav = html.index('class="menu-list"')
+                self.assertLess(body, dot, f"{slug}: the next dot is above the plate")
+                self.assertLess(dot, nav, f"{slug}: the next dot is below the list")
+
+    def test_the_next_dot_is_a_plain_link_with_no_script(self):
+        # With no bundle nothing sets data-risen, so the disc must stand.
+        self.assertIn('.next-dot__link:not([data-risen])', self.css)
+        for slug, *_ in PAGES:
+            with self.subTest(page=slug):
+                block = self.pages[slug]
+                start = block.index('class="next-dot"')
+                block = block[start : block.index("</div>", block.index("</a>", start))]
+                self.assertNotRegex(block, r"\son[a-z]+\s*=")
+                self.assertNotRegex(block, r"\sstyle\s*=")
+
+    # 3. The stylesheet carries the morph names.
+
+    def test_the_stylesheet_carries_the_wordmark_morph_names(self):
+        self.assertIn("view-transition-name: wordmark-word", self.css)
+        self.assertIn("::view-transition-group(wordmark-word)", self.css)
+        self.assertIn("::view-transition-old(wordmark-word)", self.css)
+        self.assertIn("::view-transition-new(wordmark-word)", self.css)
+        self.assertIn("@keyframes wordmark-morph-out", self.css)
+        self.assertIn("@keyframes wordmark-morph-in", self.css)
+        # About 350 ms, as the issue asks.
+        group = self.css[self.css.index("::view-transition-group(wordmark-word)") :][:200]
+        self.assertIn("animation-duration: 350ms", group)
+
+    def test_the_section_and_next_dot_motion_is_off_under_reduced_motion(self):
+        reduced = self.css[self.css.rindex("@media (prefers-reduced-motion: reduce)") :]
+        # The plate appears at once: no circle, no fade.
+        self.assertIn(".section-dot__circle", reduced)
+        self.assertIn(".section-dot__panel", reduced)
+        # The next dot is a plain link with no rise.
+        self.assertIn(".next-dot__link", reduced)
+        # The wordmark swaps at once.
+        self.assertIn("::view-transition-old(wordmark-word)", reduced)
+
+    def test_the_idle_flag_and_its_rate_are_in_the_stylesheet(self):
+        self.assertIn('[data-idle="true"]', self.css)
+        self.assertIn("--idle-rate", self.css)
+
+    def test_the_idle_watcher_waits_twenty_seconds(self):
+        support = (DESIGN_SYSTEM / "src" / "site" / "sceneSupport.ts").read_text()
+        self.assertIn("IDLE_AFTER_MS = 20_000", support)
+        self.assertIn("IDLE_RATE = 1 / 3", support)
+        # Every input the issue names wakes the page.
+        for event in ("pointermove", "wheel", "keydown", "touchstart"):
+            self.assertIn(f"'{event}'", support)
 
 
 if __name__ == "__main__":

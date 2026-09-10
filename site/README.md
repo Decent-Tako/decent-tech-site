@@ -75,11 +75,11 @@ children and the entry reads backwards, "work . decent".
 | Page | Background scene (`data-scene`) | Extra (`data-effect`) |
 | --- | --- | --- |
 | Home `/` | Infinite Menu on `#menu-stage`, filling the viewport | |
-| About `/about/` | Liquid Ether (`liquid-ether`), the molten field | Split Text on the h1 (`split-text`) |
-| Portfolio `/portfolio/` | Galaxy (`galaxy`), the starfield | |
-| Blog `/blog/` | Threads (`threads`), the ink threads | Scrambled Text on the h1 (`scrambled-text`) |
-| About Ben `/ben/` | Iridescence (`iridescence`), the aurora | |
-| Get in touch `/contact/` | Plasma (`plasma`), the light | Shiny Text on the email link (`shiny-text`) and the magnet on the contact form (`magnetic-form`) |
+| About `/about/` | Liquid Ether (`liquid-ether`), the molten field | Split Text on the h1 (`split-text`), the section discs (`section-dots`), the next dot (`next-dot`) |
+| Portfolio `/portfolio/` | Galaxy (`galaxy`), the starfield | the next dot (`next-dot`) |
+| Blog `/blog/` | Threads (`threads`), the ink threads | Scrambled Text on the h1 (`scrambled-text`), the next dot (`next-dot`) |
+| About Ben `/ben/` | Iridescence (`iridescence`), the aurora | the next dot (`next-dot`) |
+| Get in touch `/contact/` | Plasma (`plasma`), the light | Shiny Text on the email link (`shiny-text`), the magnet on the contact form (`magnetic-form`), the next dot (`next-dot`) |
 
 Galaxy draws on a transparent canvas, so the vermilion field shows through;
 its stars take a hue shift to the gold angle with a part saturation, which
@@ -239,6 +239,84 @@ The first Tab into the page also freezes it, so a keyboard reader never sees
 it move. Once the reader has typed, the form stays still for the rest of the
 visit and eases back to its resting place in 300 ms.
 
+## Sections as dots
+
+On About the three services fold into three discs in the page's field colour,
+each labelled with a short word. A press grows a circle out of the disc, in
+the same motion the home sphere uses, and the section's plate fades in over
+it. A close control, a small disc with an x, shrinks it back; Escape does the
+same from anywhere on the page. There is no route change and no scroll jump.
+
+The labels take the serif and the dot rule of the running heads: the short
+word in navy on the field, with the full stop in a `wordmark-dot` span.
+
+| Disc | Section |
+| --- | --- |
+| strategy. | Technology strategy |
+| build. | Software delivery |
+| run. | Infrastructure and operations |
+
+The markup is whole without the script. The HTML holds the three articles with
+their headings and their copy, so a reader with no bundle reads all three at
+once; the `section-dots` scene only folds them. Its host is an empty element
+next to the grid that names the grid with `data-target`, for the same reason
+the magnetic form uses one: a React root replaces the children of the element
+it mounts into.
+
+Each disc is a real `button`, so Enter, Space, and the tab order work with
+nothing added. The heading names the section for assistive technology through
+`aria-label`, and the short word stays the visible label.
+
+Under reduced motion the plate appears at once: no circle, no fade.
+
+The same component is ready for Portfolio, Blog, and About Ben when their
+content arrives. Those pages are unchanged for now.
+
+## Scroll to the next dot
+
+At the bottom of every page, below the plate, the next dot in the cycle rises
+into view as a disc in its colour with its label. The cycle is About,
+Portfolio, Blog, About Ben, Get in touch, and back to About, so the whole site
+is one loop that echoes the sphere.
+
+A press opens that page through the view transition. So does a scroll of the
+disc's own height past the bottom of the document: the `next-dot` scene reads
+the scroll and clicks the link, so both paths take exactly the same route.
+
+The disc is a real link in the HTML, so a reader with no bundle still reaches
+the next page, and a keyboard reader simply tabs to it. Under reduced motion
+the disc is a plain link with no rise, and a scroll past it never opens the
+page on its own.
+
+## The wordmark morphs between pages
+
+The cross-document view transition already shares the wordmark element. The
+phrase inside it carries its own name, `wordmark-word`, so `decent.` and its
+full stop hold still while the word that changes crossfades over about 350 ms:
+"decent. work" becomes "decent. read" in place.
+
+Where the browser has no view transitions, the destination page fades the new
+word in as it did before. Under reduced motion the word swaps at once.
+
+## Idle life
+
+After 20 seconds with no pointer, wheel, key, or touch, every scene and the
+home sphere slow to about a third of their motion. The first input of any of
+those kinds brings them back at once.
+
+One watcher runs per page, started by the site entry, and it sets
+`data-idle="true"` on the stage and on every scene host, so the site check can
+read the flag and CSS can slow what it animates through the `--idle-rate`
+token.
+
+Each scene takes the rate through the speed prop it already had.
+`Threads` gained a `speed` prop (local change 4) and the Infinite Menu gained
+`setRate()` and a `rate` prop (local change 17), because neither had one. Both
+accumulate the scaled step instead of scaling the timestamp, so a change of
+rate changes the speed and never jumps the motion.
+
+Reduced motion never idles: nothing is moving to slow down.
+
 ## Behaviour
 
 - WebGL 2 is probed once. Without it a scene mounts nothing and its element
@@ -263,3 +341,10 @@ each page, checks that each wordmark reads its phrase, and saves twelve
 screenshots to the `site-shots` artifact. It then runs both continuity paths
 per viewport, one home click with cross-document view transitions on and one
 with them off, and both must land on the page with its field element present.
+
+The check also presses one section disc on About and asserts that its plate is
+visible and that the page did not navigate, then presses Escape and asserts
+that the section closed; scrolls to the bottom of Blog past the next dot and
+asserts that About Ben opened; and waits 21 seconds on the home page with no
+input, asserts `data-idle`, then moves the pointer and asserts that it
+cleared. The About screenshot is taken with one section open.
