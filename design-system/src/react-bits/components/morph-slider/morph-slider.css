@@ -1,0 +1,17 @@
+.rb-frame [data-testid='morph-slider-stage'] {
+  min-height: 24rem;
+  background: var(--ink);
+}
+
+.rb-frame .morph-slider-caption-text,
+.rb-frame .morph-slider-btn {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.rb-frame .morph-slider-caption-text {
+  color: var(--paper);
+}
+
+.rb-frame .morph-slider-btn {
+  color: var(--paper);
+}

@@ -1,0 +1,12 @@
+.rb-frame [data-testid='option-wheel-stage'] {
+  min-height: 22rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+.rb-frame .option-wheel__item {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+}

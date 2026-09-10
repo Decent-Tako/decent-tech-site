@@ -1,0 +1,34 @@
+.rb-frame [data-testid='magic-bento-stage'] {
+  min-height: 28rem;
+  background: var(--ink);
+}
+
+.magic-bento-stage {
+  --purple-primary: rgba(0, 53, 177, 1);
+  --purple-glow: rgba(0, 53, 177, 0.2);
+  --purple-border: rgba(0, 53, 177, 0.8);
+  --border-color: var(--charcoal);
+  --background-dark: var(--ink);
+  width: 100%;
+}
+
+.rb-frame .magic-bento-card,
+.rb-frame .magic-bento-card__title,
+.rb-frame .magic-bento-card__description,
+.rb-frame .magic-bento-card__label {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  color: var(--paper);
+}
+
+.rb-frame .magic-bento-card__title {
+  font-weight: 700;
+}
+
+.rb-frame .magic-bento-card--border-glow::after {
+  background: radial-gradient(
+    var(--glow-radius) circle at var(--glow-x) var(--glow-y),
+    rgba(0, 53, 177, calc(var(--glow-intensity) * 0.8)) 0%,
+    rgba(0, 53, 177, calc(var(--glow-intensity) * 0.4)) 30%,
+    transparent 60%
+  );
+}

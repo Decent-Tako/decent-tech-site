@@ -1,0 +1,25 @@
+.rb-frame [data-testid='pill-nav-stage'] {
+  min-height: 10rem;
+  position: relative;
+  background: var(--soft);
+}
+
+.pill-nav-stage {
+  position: relative;
+  min-height: 6rem;
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+}
+
+.rb-frame .pill-nav-container {
+  position: relative;
+  top: 0;
+}
+
+.rb-frame .pill-label,
+.rb-frame .pill-label-hover,
+.rb-frame .mobile-menu-link {
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-weight: 700;
+}
