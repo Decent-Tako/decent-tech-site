@@ -1,0 +1,25 @@
+.rb-frame [data-testid='stack-stage'] {
+  min-height: 28rem;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+}
+
+.stack-stage {
+  width: 16rem;
+  height: 20rem;
+}
+
+.rb-frame .stack-container {
+  width: 14rem;
+  height: 18rem;
+}
+
+.rb-frame .card {
+  border: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.rb-frame .card-image {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
