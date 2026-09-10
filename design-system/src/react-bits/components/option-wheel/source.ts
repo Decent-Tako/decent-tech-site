@@ -32,7 +32,7 @@ export const OPTION_WHEEL_DEFAULTS = {
   tilt: 6,
   blur: 2,
   fade: 0.25,
-  minOpacity: 0.05,
+  minOpacity: 0.75,
   smoothing: 200,
   inset: 80,
   loop: false,

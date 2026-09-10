@@ -64,7 +64,7 @@ const meta = {
     },
     minOpacity: {
       control: { type: 'range', min: 0, max: 1, step: 0.05 },
-      description: 'Floor opacity. Upstream default 0.05.',
+      description: 'Floor opacity. Brand default 0.75 so faded labels meet contrast. Upstream default 0.05.',
     },
     smoothing: {
       control: { type: 'range', min: 1, max: 600, step: 10 },
@@ -116,8 +116,10 @@ async function playSelect(canvas: Canvas) {
   await userEvent.click(canvas.getByRole('option', { name: 'Learn' }));
   await waitFor(() => {
     expect(stage).toHaveAttribute('data-active', '1');
+    const option = canvas.getByRole('option', { name: 'Learn' });
+    expect(option).toHaveAttribute('aria-selected', 'true');
+    expect(Number.parseFloat(option.style.opacity)).toBeGreaterThan(0.9);
   }, SLOW);
-  await expect(canvas.getByRole('option', { name: 'Learn' })).toHaveAttribute('aria-selected', 'true');
   return stage;
 }
 

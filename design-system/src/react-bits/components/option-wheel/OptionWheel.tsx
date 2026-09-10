@@ -78,7 +78,7 @@ export function OptionWheel({
         />
       }
       extraRuntime={<ReactBitsRuntimeLine source={REACT_BITS_SOURCE} />}
-      fixedNote="items and onChange are not controls. Labels are FEATURES titles from src/pages/content.ts. textColor is quiet and activeColor is paper. soundUrl stays empty so the story does not fetch audio."
+      fixedNote="items and onChange are not controls. Labels are FEATURES titles from src/pages/content.ts. textColor is quiet and activeColor is paper. minOpacity is 0.75 so faded labels meet contrast. Upstream default 0.05. soundUrl stays empty so the story does not fetch audio."
       pauseLabel={paused ? 'Resume' : 'Pause'}
       onPause={() => setPaused((value) => !value)}
       replay
@@ -110,8 +110,8 @@ export function OptionWheel({
         curve={curve}
         tilt={reduce ? 0 : tilt}
         blur={reduce ? 0 : blur}
-        fade={fade}
-        minOpacity={minOpacity}
+        fade={reduce ? 0 : fade}
+        minOpacity={reduce ? 1 : minOpacity}
         smoothing={reduce ? 1 : smoothing}
         inset={inset}
         loop={loop}
