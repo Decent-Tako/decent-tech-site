@@ -18,4 +18,6 @@
 
 .rb-frame .line-sidebar__index {
   font-weight: 400;
+  opacity: 1;
+  color: var(--quiet);
 }
