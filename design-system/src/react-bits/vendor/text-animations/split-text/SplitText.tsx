@@ -8,7 +8,12 @@
  * selling, sublicensing, or redistributing the components themselves.
  *
  * Local changes:
- * (none)
+ * 1. This header.
+ * 2. `aria` prop, passed to the gsap SplitText `aria` option. Upstream leaves
+ *    the gsap default `auto`, which writes `aria-label` on the split element;
+ *    axe forbids that on a `p` or `span` with no role, so a caller can pass
+ *    `none`.
+ * Everything else is unchanged.
  */
 import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
@@ -32,6 +37,7 @@ export interface SplitTextProps {
   tag?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span';
   textAlign?: React.CSSProperties['textAlign'];
   onLetterAnimationComplete?: () => void;
+  aria?: 'auto' | 'hidden' | 'none';
 }
 
 const SplitText: React.FC<SplitTextProps> = ({
@@ -47,7 +53,8 @@ const SplitText: React.FC<SplitTextProps> = ({
   rootMargin = '-100px',
   textAlign = 'center',
   tag = 'p',
-  onLetterAnimationComplete
+  onLetterAnimationComplete,
+  aria = 'auto'
 }) => {
   const ref = useRef<HTMLParagraphElement>(null);
   const animationCompletedRef = useRef(false);
@@ -112,6 +119,7 @@ const SplitText: React.FC<SplitTextProps> = ({
         wordsClass: 'split-word',
         charsClass: 'split-char',
         reduceWhiteSpace: false,
+        aria,
         onSplit: (self: GSAPSplitText) => {
           assignTargets(self);
           return gsap.fromTo(
@@ -161,7 +169,8 @@ const SplitText: React.FC<SplitTextProps> = ({
         JSON.stringify(to),
         threshold,
         rootMargin,
-        fontsLoaded
+        fontsLoaded,
+        aria
       ],
       scope: ref
     }

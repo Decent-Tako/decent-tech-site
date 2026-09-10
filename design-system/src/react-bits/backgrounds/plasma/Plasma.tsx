@@ -75,7 +75,7 @@ export function Plasma({
         />
       }
       extraRuntime={<ReactBitsRuntimeLine source={REACT_BITS_SOURCE} />}
-      fixedNote="WebGL 2 only, as upstream. With it missing the frame shows the fallback paragraph and nothing mounts. Reduced motion mounts the sketch paused, so it paints one static frame; the upstream file also reads the operating system setting once at mount and stays still when that is on. The canvas draws every frame, so the play function samples its pixels without preserveDrawingBuffer."
+      fixedNote="WebGL 2 only, as upstream. With it missing the frame shows the fallback paragraph and nothing mounts. Reduced motion mounts the sketch paused, so it paints one static frame; the upstream file also reads the operating system setting once at mount and stays still when that is on. The canvas draws every frame while running, so the play function samples its pixels without preserveDrawingBuffer; the reduced-motion story asserts the ready state instead, because the buffer clears after the one still frame shows."
       pauseLabel={paused ? 'Resume' : 'Pause'}
       onPause={() => setPaused((value) => !value)}
       replay

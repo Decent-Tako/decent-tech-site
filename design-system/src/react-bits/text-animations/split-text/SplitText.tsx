@@ -81,7 +81,7 @@ export function SplitText({
         />
       }
       extraRuntime={<ReactBitsRuntimeLine source={REACT_BITS_SOURCE} />}
-      fixedNote="The text is the Academy article title from src/pages/content.ts. The from and to keyframes stay upstream and the wrapper owns the completion callback, which writes data-state onto the stage. className is not a control."
+      fixedNote="The text is the Academy article title from src/pages/content.ts. The from and to keyframes stay upstream and the wrapper owns the completion callback, which writes data-state onto the stage. className is not a control. The split runs with aria none (local change 2): the gsap default writes aria-label on the paragraph, which axe forbids on an element with no role."
       pauseLabel={paused ? 'Resume' : 'Pause'}
       onPause={() => setPaused((value) => !value)}
       replay
@@ -114,6 +114,7 @@ export function SplitText({
           textAlign={textAlign}
           tag={tag}
           onLetterAnimationComplete={() => setState('done')}
+          aria="none"
         />
       </div>
     </ReactBitsFrame>

@@ -15,6 +15,10 @@
  *    both roots set it through a callback ref.
  * 3. `paused` prop. Pointer moves are ignored while `paused` is true, so no
  *    new scramble starts.
+ * 4. `aria` prop, passed to the gsap SplitText `aria` option. Upstream leaves
+ *    the gsap default `auto`, which writes `aria-label` on the split element;
+ *    axe forbids that on a `p` or `span` with no role, so a caller can pass
+ *    `none`.
  * Everything else is unchanged.
  */
 import React, { useEffect, useRef } from 'react';
@@ -36,6 +40,7 @@ export interface ScrambledTextProps {
   children: React.ReactNode;
   inline?: boolean;
   paused?: boolean;
+  aria?: 'auto' | 'hidden' | 'none';
 }
 
 const ScrambledText: React.FC<ScrambledTextProps> = ({
@@ -47,7 +52,8 @@ const ScrambledText: React.FC<ScrambledTextProps> = ({
   style = {},
   children,
   inline = false,
-  paused = false
+  paused = false,
+  aria = 'auto'
 }) => {
   const rootRef = useRef<HTMLElement | null>(null);
   const pausedRef = useRef(paused);
@@ -62,7 +68,8 @@ const ScrambledText: React.FC<ScrambledTextProps> = ({
 
     const split = SplitText.create(rootRef.current.firstElementChild, {
       type: 'chars',
-      charsClass: 'char'
+      charsClass: 'char',
+      aria
     });
     charsRef.current = split.chars as HTMLElement[];
 
@@ -103,7 +110,7 @@ const ScrambledText: React.FC<ScrambledTextProps> = ({
       el.removeEventListener('pointermove', handleMove);
       split.revert();
     };
-  }, [radius, duration, speed, scrambleChars, inline]);
+  }, [radius, duration, speed, scrambleChars, inline, aria]);
 
   if (inline) {
     return (

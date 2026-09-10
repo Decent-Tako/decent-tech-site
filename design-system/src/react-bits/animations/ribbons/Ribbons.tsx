@@ -78,7 +78,7 @@ export function Ribbons({
         />
       }
       extraRuntime={<ReactBitsRuntimeLine source={REACT_BITS_SOURCE} />}
-      fixedNote="Pointer listeners live on the upstream container. With WebGL missing the frame shows the fallback paragraph and nothing mounts. Reduced motion mounts the sketch paused, so it draws the ribbons at rest. The canvas draws every frame, so the play function samples its pixels without preserveDrawingBuffer."
+      fixedNote="Pointer listeners live on the upstream container. With WebGL missing the frame shows the fallback paragraph and nothing mounts. Reduced motion mounts the sketch paused, so it draws the ribbons at rest. The canvas draws every frame while running, so the play function samples its pixels on a 32 by 32 grid without preserveDrawingBuffer; the reduced-motion story asserts the ready state instead, because the buffer clears after the one still frame shows."
       pauseLabel={paused ? 'Resume' : 'Pause'}
       onPause={() => setPaused((value) => !value)}
       replay

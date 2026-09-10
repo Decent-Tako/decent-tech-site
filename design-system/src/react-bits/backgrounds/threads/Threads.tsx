@@ -58,7 +58,7 @@ export function Threads({
         />
       }
       extraRuntime={<ReactBitsRuntimeLine source={REACT_BITS_SOURCE} />}
-      fixedNote="The colour is an RGB triple in 0..1, as upstream. With WebGL missing the frame shows the fallback paragraph and nothing mounts. Reduced motion mounts the sketch paused, so it draws one still frame. The canvas draws every frame, so the play function samples its pixels without preserveDrawingBuffer."
+      fixedNote="The colour is an RGB triple in 0..1, as upstream. With WebGL missing the frame shows the fallback paragraph and nothing mounts. Reduced motion mounts the sketch paused, so it draws one still frame. The canvas draws every frame while running, so the play function samples its pixels without preserveDrawingBuffer; the reduced-motion story asserts the ready state instead, because the buffer clears after the one still frame shows."
       pauseLabel={paused ? 'Resume' : 'Pause'}
       onPause={() => setPaused((value) => !value)}
       replay

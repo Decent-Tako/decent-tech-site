@@ -122,7 +122,9 @@ export const ReducedMotion: Story = {
     await playBrand(canvas);
     const { stage, ready } = await playReady(canvas);
     await expect(stage).toHaveAttribute('data-reduced', 'true');
-    if (ready) await playPoint(stage);
+    // The paused sketch drew one frame and stopped; the buffer clears once
+    // that frame shows, so the ready state is the proof here.
+    if (ready) await expect(stage.querySelector('canvas')).not.toBeNull();
     await playPause(canvas, stage);
   },
 };

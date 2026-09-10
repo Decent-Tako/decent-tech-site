@@ -115,14 +115,18 @@ async function playDrag(stage: HTMLElement) {
     throw new Error('The Ribbons container or canvas is missing.');
   }
   const rect = surface.getBoundingClientRect();
-  for (let step = 0; step < 6; step += 1) {
+  // A slow sweep across the stage, so the springs follow and the ribbons
+  // stretch out; then a fine grid, because a 30 px ribbon can slip between
+  // eight samples per axis.
+  for (let step = 0; step < 24; step += 1) {
+    const t = step / 23;
     fireEvent.mouseMove(surface, {
-      clientX: rect.left + 80 + step * 60,
-      clientY: rect.top + 80 + step * 30,
+      clientX: rect.left + rect.width * (0.1 + 0.8 * t),
+      clientY: rect.top + rect.height * (0.5 + 0.35 * Math.sin(t * Math.PI * 2)),
     });
-    await new Promise((resolve) => requestAnimationFrame(resolve));
+    await new Promise((resolve) => setTimeout(resolve, 40));
   }
-  await assertCanvasPainted(sketch, STAGE_INK);
+  await assertCanvasPainted(sketch, STAGE_INK, { grid: 32 });
 }
 
 async function playPause(canvas: Canvas, stage: HTMLElement) {
@@ -161,7 +165,9 @@ export const ReducedMotion: Story = {
     await playBrand(canvas);
     const { stage, ready } = await playReady(canvas);
     await expect(stage).toHaveAttribute('data-reduced', 'true');
-    if (ready) await playDrag(stage);
+    // The paused sketch drew one frame and stopped; the buffer clears once
+    // that frame shows, so the ready state is the proof here.
+    if (ready) await expect(stage.querySelector('canvas')).not.toBeNull();
     await playPause(canvas, stage);
   },
 };

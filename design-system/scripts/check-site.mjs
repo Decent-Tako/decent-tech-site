@@ -140,10 +140,15 @@ async function checkPage(browser, viewport, pagePath) {
     console.log(`check-site: ${label}: effect "${name}" branch "${state}"`);
   }
 
-  // Let the first frames draw before the screenshot.
+  // Let the first frames draw, then ask for reduced motion. Every scene
+  // follows the query and pauses on its current frame, so the screenshot
+  // does not wait behind a software renderer. This also proves the query is
+  // followed after mount.
   await page.waitForTimeout(800);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(300);
   const shot = path.join(SHOTS_DIR, `${slugOf(pagePath)}-${viewport.name}.png`);
-  await page.screenshot({ path: shot, fullPage: false });
+  await page.screenshot({ path: shot, fullPage: false, timeout: 60_000 });
   console.log(`check-site: ${label}: screenshot ${shot}`);
 
   if (consoleErrors.length) {

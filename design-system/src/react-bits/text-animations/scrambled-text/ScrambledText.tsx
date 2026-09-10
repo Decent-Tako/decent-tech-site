@@ -58,7 +58,7 @@ export function ScrambledText({
         />
       }
       extraRuntime={<ReactBitsRuntimeLine source={REACT_BITS_SOURCE} />}
-      fixedNote="The text is the Academy article title from src/pages/content.ts; className and style are not controls. Reduced motion mounts the component paused, so the letters stay as they are. The play function reads the block text, which the tweens rewrite letter by letter."
+      fixedNote="The text is the Academy article title from src/pages/content.ts; className and style are not controls. Reduced motion mounts the component paused, so the letters stay as they are. The play function reads the block text, which the tweens rewrite letter by letter. The split runs with aria none (local change 4): the gsap default writes aria-label on the paragraph, which axe forbids on an element with no role."
       pauseLabel={paused ? 'Resume' : 'Pause'}
       onPause={() => setPaused((value) => !value)}
       replay
@@ -81,6 +81,7 @@ export function ScrambledText({
           scrambleChars={scrambleChars}
           className="scrambled-text__copy"
           paused={paused || reduce}
+          aria="none"
         >
           {ARTICLE.title}
         </UpstreamScrambledText>
