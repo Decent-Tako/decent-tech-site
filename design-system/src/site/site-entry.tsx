@@ -1,5 +1,5 @@
 // Site entry: mounts the Infinite Menu into #menu-stage on the home page.
-// Built by vite.site.config.ts into dist-site/assets/menu.js and menu.css.
+// Built by vite.site.config.ts into dist-site/assets/site.js and site.css.
 // The link list in the page stays the keyboard path and the no-WebGL path.
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

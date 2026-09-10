@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import InfiniteMenu, {
   type MenuItem,
 } from '../motion-examples/vendor/react-bits/infinite-menu/InfiniteMenu';
-import { SITE_PAGES, type SitePage } from './pages';
+import { SITE_PAGES, withBase, type SitePage } from './pages';
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
@@ -25,7 +25,7 @@ function useReducedMotion(): boolean {
 }
 
 const items: MenuItem[] = SITE_PAGES.map((page) => ({
-  image: `/menu/${page.slug}.svg`,
+  image: withBase(`/menu/${page.slug}.svg`),
   link: page.path,
   title: page.title,
   description: '',

@@ -1,13 +1,19 @@
 from html.parser import HTMLParser
 from pathlib import Path
+import filecmp
 import json
 import re
+import shutil
 import struct
+import subprocess
+import tempfile
 import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
+DESIGN_SYSTEM = ROOT / "design-system"
+PREVIEW_SCRIPT = DESIGN_SYSTEM / "scripts" / "build-site-preview.mjs"
 
 # The five pages behind the five dots, in dot order: slug, title, path, token.
 PAGES = (
@@ -125,16 +131,16 @@ class SiteTests(unittest.TestCase):
         self.assertIn("Decent Technology Group", self.page_text)
         self.assertIn("decent.", self.page_text)
 
-    def test_home_page_loads_the_menu_bundle(self):
+    def test_home_page_loads_the_site_bundle(self):
         module_scripts = [
-            script for script in self.parser.scripts if script["src"] == "/assets/menu.js"
+            script for script in self.parser.scripts if script["src"] == "/assets/site.js"
         ]
         self.assertEqual(len(module_scripts), 1)
         self.assertEqual(module_scripts[0]["type"], "module")
         stylesheets = [
             item.get("href") for item in self.parser.link_tags if item.get("rel") == "stylesheet"
         ]
-        self.assertIn("/assets/menu.css", stylesheets)
+        self.assertIn("/assets/site.css", stylesheets)
         self.assertIn("/styles.css", stylesheets)
 
     def test_home_page_holds_the_menu_stage_and_the_link_list(self):
@@ -374,6 +380,97 @@ class SiteTests(unittest.TestCase):
         self.assertIn("npm run build:site", dockerfile)
         self.assertIn("dist-site/assets", dockerfile)
         self.assertIn("/usr/share/nginx/html/assets/", dockerfile)
+
+    def test_site_bundle_config_names_the_site_entry_and_outputs(self):
+        config = (DESIGN_SYSTEM / "vite.site.config.ts").read_text()
+        self.assertIn("src/site/site-entry.tsx", config)
+        self.assertIn("'assets/site.js'", config)
+        self.assertIn("'assets/site.css'", config)
+        self.assertIn("'assets/site-[name].js'", config)
+        self.assertIn("SITE_BASE_PATH", config)
+        self.assertTrue((DESIGN_SYSTEM / "src" / "site" / "site-entry.tsx").is_file())
+
+    def test_pages_workflow_publishes_the_site_preview(self):
+        workflow = (ROOT / ".github" / "workflows" / "pages.yml").read_text()
+        self.assertIn("site/**", workflow)
+        self.assertIn("SITE_BASE_PATH: /decent-tech-site/site-preview/", workflow)
+        self.assertIn(
+            "node scripts/build-site-preview.mjs --base /decent-tech-site/site-preview/"
+            " --out storybook-static/site-preview",
+            workflow,
+        )
+
+
+class SitePreviewBuildTests(unittest.TestCase):
+    """build-site-preview.mjs with base / must reproduce site/ byte for byte."""
+
+    def setUp(self):
+        if shutil.which("node") is None:
+            self.skipTest("node is not installed; build-site-preview.mjs cannot run")
+        self.temp = Path(tempfile.mkdtemp(prefix="site-preview-"))
+        self.addCleanup(shutil.rmtree, self.temp, ignore_errors=True)
+        # An empty bundle folder stands in for dist-site/assets so the check
+        # does not need `npm run build:site`.
+        self.assets = self.temp / "assets"
+        self.assets.mkdir()
+
+    def run_preview(self, base):
+        out = self.temp / "out"
+        result = subprocess.run(
+            [
+                "node",
+                str(PREVIEW_SCRIPT),
+                "--base",
+                base,
+                "--out",
+                str(out),
+                "--assets",
+                str(self.assets),
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return out
+
+    def test_base_root_output_equals_the_checked_in_site(self):
+        out = self.run_preview("/")
+        site_files = sorted(path.relative_to(SITE) for path in SITE.rglob("*") if path.is_file())
+        out_files = sorted(
+            path.relative_to(out)
+            for path in out.rglob("*")
+            if path.is_file() and path.relative_to(out).parts[0] != "assets"
+        )
+        self.assertEqual(site_files, out_files)
+        for relative in site_files:
+            self.assertTrue(
+                filecmp.cmp(SITE / relative, out / relative, shallow=False),
+                f"{relative} differs from site/",
+            )
+        self.assertTrue((out / "assets").is_dir())
+
+    def test_subpath_base_rewrites_site_absolute_references(self):
+        base = "/decent-tech-site/site-preview/"
+        out = self.run_preview(base)
+        home = (out / "index.html").read_text()
+        self.assertIn(f'href="{base}styles.css"', home)
+        self.assertIn(f'src="{base}assets/site.js"', home)
+        self.assertIn(f'href="{base}about/"', home)
+        self.assertIn(f'content="{base}og.png"', home)
+        self.assertNotRegex(home, r'(href|src)="/(?!decent-tech-site/)')
+        self.assertNotRegex(home, r'(href|src|content)="https://decent\.tech/')
+        # The JSON-LD describes the organisation, not the preview; it keeps
+        # the production origin.
+        self.assertIn('"url":"https://decent.tech"', home)
+        about = (out / "about" / "index.html").read_text()
+        self.assertIn(f'<link rel="canonical" href="{base}about/">', about)
+        self.assertIn('href="#main-content"', about)
+        self.assertIn("mailto:", (out / "contact" / "index.html").read_text())
+        sitemap = (out / "sitemap.xml").read_text()
+        self.assertIn(f"<loc>{base}</loc>", sitemap)
+        self.assertIn(f"<loc>{base}about/</loc>", sitemap)
+        self.assertNotIn("https://decent.tech/", sitemap)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-# Stage 1: build the site bundle (the Infinite Menu) from design-system/.
+# Stage 1: build the site bundle (assets/site.js and site.css) from design-system/.
 FROM node:20-alpine AS build
 
 WORKDIR /app
