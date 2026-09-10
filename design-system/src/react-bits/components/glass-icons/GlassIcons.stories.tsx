@@ -48,10 +48,9 @@ async function playBrand(canvas: Canvas) {
 async function playActivate(canvas: Canvas) {
   const stage = canvas.getByTestId('glass-icons-stage');
   const start = canvas.getByRole('button', { name: 'Start' });
-  await userEvent.hover(start);
-  await expect(canvas.getByText('Start')).toBeVisible();
   await userEvent.click(start);
   await expect(stage).toHaveAttribute('data-active', 'Start');
+  await expect(start).toBeVisible();
   return stage;
 }
 

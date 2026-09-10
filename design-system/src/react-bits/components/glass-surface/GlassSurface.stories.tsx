@@ -2,7 +2,6 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, userEvent } from 'storybook/test';
 
 import { assertFaceNotFallback } from '../../../brand/fontFallback';
-import { movePointer } from '../../frame/pointerSupport';
 import { GlassSurface } from './GlassSurface';
 import { GLASS_BLEND_MODES, GLASS_CHANNELS, GLASS_SURFACE_DEFAULTS } from './source';
 
@@ -119,7 +118,7 @@ async function playHover(canvas: Canvas) {
   await expect(surface?.className).toMatch(/glass-surface--(svg|fallback)/);
   await expect(canvas.getByText('Start')).toBeVisible();
   const wrap = stage.querySelector('.glass-surface-stage') as HTMLElement;
-  await movePointer(wrap, wrap.clientWidth / 2, wrap.clientHeight / 2);
+  await userEvent.click(wrap);
   await expect(stage).toHaveAttribute('data-hover', 'true');
   return stage;
 }

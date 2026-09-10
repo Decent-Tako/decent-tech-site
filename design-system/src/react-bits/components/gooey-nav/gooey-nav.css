@@ -30,4 +30,9 @@
 .rb-frame .gooey-nav-container .effect.text {
   font-family: 'Brand Sans', Arial, sans-serif;
   font-weight: 700;
+  color: var(--paper);
+}
+
+.rb-frame .gooey-nav-container li.active {
+  color: var(--ink);
 }

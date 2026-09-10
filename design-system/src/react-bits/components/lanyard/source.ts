@@ -65,7 +65,9 @@ export const LANYARD_DEFAULTS = {
   cameraZ: 30,
   gravityY: -40,
   fov: 20,
-  transparent: true,
+  // Brand ink stage needs an opaque buffer so play can sample pixels.
+  // Upstream default true.
+  transparent: false,
   imageFit: 'cover' as (typeof LANYARD_FITS)[number],
   lanyardWidth: 1,
   reducedMotion: 'never' as ReducedMotionMode,

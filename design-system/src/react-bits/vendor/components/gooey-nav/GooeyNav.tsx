@@ -8,7 +8,8 @@
  * selling, sublicensing, or redistributing the components themselves.
  *
  * Local changes:
- * (none)
+ * 1. The filter and text effect spans are aria-hidden. They duplicate the
+ *    active label and fail colour contrast against the stage.
  */
 import React, { useRef, useEffect, useState } from 'react';
 import './GooeyNav.css';
@@ -192,8 +193,8 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
           ))}
         </ul>
       </nav>
-      <span className="effect filter" ref={filterRef} />
-      <span className="effect text" ref={textRef} />
+      <span className="effect filter" ref={filterRef} aria-hidden="true" />
+      <span className="effect text" ref={textRef} aria-hidden="true" />
     </div>
   );
 };

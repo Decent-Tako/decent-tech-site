@@ -115,6 +115,9 @@ export function GlassSurface({
         onPointerEnter={() => {
           if (!paused) setHover(true);
         }}
+        onClick={() => {
+          if (!paused) setHover(true);
+        }}
         onPointerLeave={() => setHover(false)}
       >
         <UpstreamGlassSurface

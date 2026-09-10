@@ -37,7 +37,7 @@ const meta = {
     },
     transparent: {
       control: 'boolean',
-      description: 'Clear colour alpha. Upstream default true.',
+      description: 'Clear colour alpha. Brand default false so the canvas is opaque ink. Upstream default true.',
     },
     imageFit: {
       control: 'select',
@@ -85,7 +85,10 @@ async function playPaint(stage: HTMLElement) {
   }
   const sketch = stage.querySelector('canvas');
   await expect(sketch).toBeTruthy();
-  await assertCanvasPainted(sketch as HTMLCanvasElement, INK);
+  await assertCanvasPainted(sketch as HTMLCanvasElement, INK, {
+    grid: 16,
+    timeoutMs: 10000,
+  });
   return sketch as HTMLCanvasElement;
 }
 

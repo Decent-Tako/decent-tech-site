@@ -33,6 +33,7 @@ import * as THREE from 'three';
 
 const CARD_GLB = new URL('./card.glb', import.meta.url).href;
 const LANYARD_PNG = new URL('./lanyard.png', import.meta.url).href;
+useGLTF.preload?.(CARD_GLB);
 
 import './Lanyard.css';
 
@@ -90,11 +91,9 @@ export default function Lanyard({
       <Canvas
         camera={{ position, fov }}
         dpr={[1, isMobile ? 1.5 : 2]}
-        frameloop={paused ? 'never' : 'always'}
         gl={{ alpha: transparent, preserveDrawingBuffer: true }}
         onCreated={({ gl }) => {
-          gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1);
-          onReady?.();
+          gl.setClearColor(new THREE.Color('#212121'), transparent ? 0 : 1);
         }}
       >
         <ambientLight intensity={Math.PI} />
@@ -106,6 +105,7 @@ export default function Lanyard({
             imageFit={imageFit}
             lanyardImage={lanyardImage}
             lanyardWidth={lanyardWidth}
+            onReady={onReady}
           />
         </Physics>
         <Environment blur={0.75}>
@@ -152,6 +152,7 @@ interface BandProps {
   imageFit?: 'cover' | 'contain';
   lanyardImage?: string | null;
   lanyardWidth?: number;
+  onReady?: () => void;
 }
 
 type LanyardRigidBody = RapierRigidBody & {
@@ -166,7 +167,8 @@ function Band({
   backImage = null,
   imageFit = 'cover',
   lanyardImage = null,
-  lanyardWidth = 1
+  lanyardWidth = 1,
+  onReady
 }: BandProps) {
   const band = useRef<THREE.Mesh<InstanceType<typeof MeshLineGeometry>, InstanceType<typeof MeshLineMaterial>>>(null!);
   const fixed = useRef<RapierRigidBody>(null!);
@@ -198,6 +200,10 @@ function Band({
 
   const { nodes, materials } = useGLTF(CARD_GLB) as any;
   const texture = useTexture(lanyardImage || LANYARD_PNG);
+
+  useEffect(() => {
+    if (nodes) onReady?.();
+  }, [nodes, onReady]);
   // useTexture must be called unconditionally; use a blank pixel when an image
   // isn't supplied for a given face, then skip compositing it below.
   const frontTex = useTexture(frontImage || BLANK_PIXEL);
@@ -255,6 +261,7 @@ function Band({
   );
   const [dragged, drag] = useState<false | THREE.Vector3>(false);
   const [hovered, hover] = useState(false);
+  const readyRef = useRef(false);
 
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
@@ -274,6 +281,10 @@ function Band({
   }, [hovered, dragged]);
 
   useFrame((state, delta) => {
+    if (!readyRef.current) {
+      readyRef.current = true;
+      onReady?.();
+    }
     if (dragged && typeof dragged !== 'boolean') {
       vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
       dir.copy(vec).sub(state.camera.position).normalize();
