@@ -534,11 +534,14 @@ async function checkContactForm(page, label, viewport) {
       timeout: 2000,
     })
     .catch(() => fail(`${label}: the form did not return to its resting place within 2 s`));
+  // One more frame, so the read is of the frame the compositor now shows.
+  await page.waitForTimeout(100);
   const frozen = await formTransform(page);
   await page.mouse.move(8, 8);
   await page.waitForTimeout(600);
-  if ((await formTransform(page)) !== frozen) {
-    fail(`${label}: the form moved after the reader had typed`);
+  const after = await formTransform(page);
+  if (after !== frozen) {
+    fail(`${label}: the form moved after the reader had typed: "${frozen}" then "${after}"`);
   } else {
     console.log(`check-site: ${label}: the form stays still once the reader has typed`);
   }

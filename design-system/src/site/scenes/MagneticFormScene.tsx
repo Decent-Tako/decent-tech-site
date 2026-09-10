@@ -123,12 +123,20 @@ function runMagnet(host: HTMLElement, wrapper: HTMLElement, follow: number): () 
         shown.x = 0;
         shown.y = 0;
         write();
-        window.setTimeout(() => {
+        // The ease ends on transitionend. A timer can fire while the
+        // compositor still shows a frame of the ease, and the site check then
+        // reads a matrix that is not the resting place. The timer below is
+        // only the fallback for a browser that sends no event, and it waits
+        // longer than the ease.
+        const settle = () => {
+          wrapper.removeEventListener('transitionend', settle);
           wrapper.style.transition = '';
           // The form is at rest and holds there for the rest of the visit.
           // The site check waits for this before it reads the transform.
           host.dataset.atRest = 'true';
-        }, RETURN_MS);
+        };
+        wrapper.addEventListener('transitionend', settle);
+        window.setTimeout(settle, RETURN_MS * 2);
       }
       return;
     }
