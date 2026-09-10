@@ -21,6 +21,8 @@
  * 7. `InfiniteMenu` got the props `inertia`, `onInit`, and `onActiveItemChange`.
  *    The mount effect pauses the sketch on cleanup.
  * 8. `InfiniteGridMenu` and `MenuItem` are exported.
+ * 9. `resize()` paints one frame when the sketch is paused. A new canvas size
+ *    clears the bitmap, and a paused sketch has no frame loop to repaint it.
  * Everything else is unchanged.
  */
 import { type CSSProperties, type FC, useRef, useState, useEffect, type MutableRefObject } from 'react';
@@ -829,6 +831,9 @@ export class InfiniteGridMenu {
       this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
     }
     this.updateProjectionMatrix();
+    if (needsResize && this.paused) {
+      this.render();
+    }
   }
 
   public run(time = 0): void {
