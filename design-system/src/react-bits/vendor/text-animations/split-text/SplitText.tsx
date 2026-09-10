@@ -13,6 +13,8 @@
  * 3. `reduced` skips the split and shows the final paragraph.
  * 4. The host carries data-testid="split-text-copy".
  * 5. `React.FC` became a plain function.
+ * 6. A visually hidden span holds the copy. The split host is aria-hidden
+ *    so SplitText cannot put aria-label on a `p`.
  */
 import React, { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
@@ -156,6 +158,8 @@ const SplitText = ({
         }
       });
       el._rbsplitInstance = splitInstance;
+      el.removeAttribute('aria-label');
+      el.setAttribute('aria-hidden', 'true');
       return () => {
         ScrollTrigger.getAll().forEach(st => {
           if (st.trigger === el) st.kill();
@@ -204,12 +208,17 @@ const SplitText = ({
     const Tag = tag || 'p';
 
     return (
-      <Tag ref={ref} style={style} className={classes} data-testid="split-text-copy">
+      <Tag ref={ref} style={style} className={classes} data-testid="split-text-copy" aria-hidden="true">
         {text}
       </Tag>
     );
   };
-  return renderTag();
+  return (
+    <div className="split-text-root">
+      <span className="split-text__sr">{text}</span>
+      {renderTag()}
+    </div>
+  );
 };
 
 export default SplitText;

@@ -15,6 +15,7 @@
  * 5. Pointer listeners bind to the container, including pointermove so play helpers reach it.
  * 6. The host carries data-testid="text-cursor-host".
  * 7. `React.FC` became a plain function.
+ * 8. Trail items are aria-hidden. They are decorative copies.
  */
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -161,17 +162,16 @@ const TextCursor = ({
           {trail.map(item => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, scale: 1, rotate: item.angle }}
+              initial={{ scale: 0.85, rotate: item.angle }}
               animate={{
-                opacity: 1,
                 scale: 1,
                 x: randomFloat ? [0, item.randomX || 0, 0] : 0,
                 y: randomFloat ? [0, item.randomY || 0, 0] : 0,
                 rotate: randomFloat ? [item.angle, item.angle + (item.randomRotate || 0), item.angle] : item.angle
               }}
-              exit={{ opacity: 0, scale: 0 }}
+              exit={{ scale: 0 }}
               transition={{
-                opacity: { duration: exitDuration, ease: 'easeOut' },
+                scale: { duration: exitDuration, ease: 'easeOut' },
                 ...(randomFloat && {
                   x: { duration: 2, ease: 'easeInOut', repeat: Infinity, repeatType: 'mirror' },
                   y: { duration: 2, ease: 'easeInOut', repeat: Infinity, repeatType: 'mirror' },
@@ -180,6 +180,7 @@ const TextCursor = ({
               }}
               className="text-cursor-item"
               style={{ left: item.x, top: item.y }}
+              aria-hidden="true"
             >
               {text}
             </motion.div>

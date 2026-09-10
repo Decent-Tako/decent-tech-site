@@ -14,6 +14,8 @@
  * 4. The host carries data-testid="shuffle-copy".
  * 5. `React.FC` became a plain function.
  * 6. Unused gsap callback indexes became `_i`.
+ * 7. A visually hidden span holds the copy. The split host is aria-hidden
+ *    so SplitText cannot put aria-label on a `p`.
  */
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { gsap } from 'gsap';
@@ -158,6 +160,7 @@ const Shuffle = ({
           smartWrap: true,
           reduceWhiteSpace: false
         });
+        el.removeAttribute('aria-label');
 
         const chars = (splitRef.current.chars || []) as HTMLElement[];
         wrappersRef.current = [];
@@ -508,12 +511,18 @@ const Shuffle = ({
   const commonStyle: React.CSSProperties = useMemo(() => ({ textAlign, ...style }), [textAlign, style]);
   const classes = useMemo(() => `shuffle-parent ${ready ? 'is-ready' : ''} ${className}`, [ready, className]);
   const Tag = tag || 'p';
-  return React.createElement(Tag, {
-    ref: ref as React.Ref<HTMLElement>,
-    className: classes,
-    style: commonStyle,
-    'data-testid': 'shuffle-copy'
-  }, text);
+  return (
+    <div className="shuffle-root">
+      <span className="shuffle-sr">{text}</span>
+      {React.createElement(Tag, {
+        ref: ref as React.Ref<HTMLElement>,
+        className: classes,
+        style: commonStyle,
+        'data-testid': 'shuffle-copy',
+        'aria-hidden': 'true'
+      }, text)}
+    </div>
+  );
 };
 
 export default Shuffle;

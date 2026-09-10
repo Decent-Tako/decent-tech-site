@@ -143,9 +143,7 @@ export const ReducedMotion: Story = {
     await playBrand(canvas);
     const stage = canvas.getByTestId('text-pressure-stage');
     await expect(stage).toHaveAttribute('data-reduced', 'true');
-    await expect(canvas.getByTestId('text-pressure-copy')).toHaveTextContent(
-      FEATURES[0].title.toUpperCase(),
-    );
+    await expect(canvas.getByTestId('text-pressure-title')).toHaveTextContent(FEATURES[0].title);
     await expect(stage).toHaveAttribute('data-pressure', '400');
     await playPause(canvas, stage);
   },

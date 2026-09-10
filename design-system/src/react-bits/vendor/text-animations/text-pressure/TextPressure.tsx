@@ -270,6 +270,7 @@ const TextPressure = ({
       <p
         ref={titleRef}
         className={`text-pressure-title ${dynamicClassName}`}
+        data-testid="text-pressure-title"
         style={{
           fontFamily: `'${fontFamily}', Arial, sans-serif`,
           textTransform: 'uppercase',

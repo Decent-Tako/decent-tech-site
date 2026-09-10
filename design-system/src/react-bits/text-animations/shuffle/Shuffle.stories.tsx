@@ -140,7 +140,8 @@ async function playDone(canvas: Canvas) {
   await waitFor(() => {
     expect(stage).toHaveAttribute('data-state', 'done');
   }, SLOW);
-  await expect(canvas.getByTestId('shuffle-copy')).toHaveTextContent(FEATURES[0].title);
+  await expect(canvas.getByTestId('shuffle-copy')).toBeVisible();
+  await expect(stage).toHaveAttribute('data-copy', FEATURES[0].title);
   return stage;
 }
 

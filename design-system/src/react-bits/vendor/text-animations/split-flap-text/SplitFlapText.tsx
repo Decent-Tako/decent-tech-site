@@ -15,6 +15,7 @@
  * 5. The host carries data-testid="split-flap-text-copy".
  * 6. Type-only imports for CSSProperties and HTMLAttributes.
  * 7. The cycle timer ref stores a number, matching window.setTimeout.
+ * 8. The host uses role="img" so aria-label is permitted.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, HTMLAttributes } from 'react';
@@ -364,6 +365,7 @@ const SplitFlapText = ({
       className={`split-flap-text ${className}`.trim()}
       style={componentStyle}
       data-testid="split-flap-text-copy"
+      role="img"
       aria-label={settledText || undefined}
       {...props}
     >

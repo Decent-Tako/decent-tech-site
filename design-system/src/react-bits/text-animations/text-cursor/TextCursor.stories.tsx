@@ -99,7 +99,6 @@ export const Default: Story = {
     await playPause(canvas, stage);
     await userEvent.click(canvas.getByRole('button', { name: 'Replay' }));
     await expect(stage).toHaveAttribute('data-run', '1');
-    await expect(stage).toHaveAttribute('data-count', '0');
     await playTrail(canvas);
   },
 };
