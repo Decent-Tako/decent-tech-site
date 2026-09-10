@@ -623,6 +623,22 @@ function formTransform(page) {
   });
 }
 
+// The resting place has two spellings. A wrapper with no transform computes
+// as "none", and a wrapper that carries the identity computes as
+// "matrix(1, 0, 0, 1, 0, 0)". They are the same place, so the check reads
+// both as "none" and compares the normalised strings.
+function restingPlace(transform) {
+  if (transform === 'none') return 'none';
+  const numbers = transform.match(/^matrix\(([^)]+)\)$/);
+  if (!numbers) return transform;
+  const parts = numbers[1].split(',').map((part) => Number(part.trim()));
+  const identity = [1, 0, 0, 1, 0, 0];
+  const isIdentity =
+    parts.length === identity.length &&
+    parts.every((part, index) => Math.abs(part - identity[index]) < 0.01);
+  return isIdentity ? 'none' : transform;
+}
+
 // Wait until the transform is other than `before`. Returns true on a change.
 function waitForTransformChange(page, before, timeout = 1000) {
   return page
@@ -698,10 +714,10 @@ async function checkContactForm(page, label, viewport) {
     .catch(() => fail(`${label}: the form did not return to its resting place within 2 s`));
   // One more frame, so the read is of the frame the compositor now shows.
   await page.waitForTimeout(100);
-  const frozen = await formTransform(page);
+  const frozen = restingPlace(await formTransform(page));
   await page.mouse.move(8, 8);
   await page.waitForTimeout(600);
-  const after = await formTransform(page);
+  const after = restingPlace(await formTransform(page));
   if (after !== frozen) {
     fail(`${label}: the form moved after the reader had typed: "${frozen}" then "${after}"`);
   } else {
