@@ -32,10 +32,43 @@ npm ci
 npm run storybook          # http://127.0.0.1:6012, no browser opened
 npm run storybook:test     # rubric check, then every story in Chromium
 npm run storybook:build    # storybook-static/
+npm run build:site         # the site bundle, dist-site/assets/site.js and site.css
+npm run dev:site           # the site on http://127.0.0.1:8090/, rebuilds on change
+npm run preview:site       # the exact container tree on http://127.0.0.1:8090/
 npm run lint
 npm run type
 npm run rubric
 ```
+
+## Site previews
+
+The site under `../site/` links the bundle this package builds. Three ways to
+look at it, none of which needs the container:
+
+- `npm run dev:site` serves `../site/` plus `dist-site/` on port 8090 the way
+  nginx does (index files, MIME types, the headers from `../nginx.conf`) and
+  runs `vite build --watch`. A change under `src/site/` or `src/react-bits/`
+  rebuilds the bundle in a few seconds; reload the page to see it.
+- `npm run preview:site` builds the bundle once, assembles the container tree
+  into `dist-site-preview/` with `scripts/build-site-preview.mjs`, and serves
+  it on the same port. The two checks a reviewer runs are printed on start:
+
+  ```bash
+  curl -sI http://127.0.0.1:8090/assets/site.js | head -1   # HTTP/1.1 200 OK
+  curl -s http://127.0.0.1:8090/about/ | grep '<title>'     # About · Decent Technology Group
+  ```
+
+- The Pages workflow publishes `main` at
+  <https://decent-tako.github.io/decent-tech-site/site-preview/> next to
+  Storybook. It builds the bundle with `SITE_BASE_PATH=/decent-tech-site/site-preview/`
+  and runs `node scripts/build-site-preview.mjs --base /decent-tech-site/site-preview/ --out storybook-static/site-preview`,
+  which rewrites the site-absolute `href`, `src`, `content`, and sitemap
+  `<loc>` values to that base. With `--base /` the script rewrites nothing and
+  the output is byte-identical to the container tree.
+
+Port 8090 leaves 6012 for Storybook and 8080 for the container. The bundle
+reads its base as `import.meta.env.BASE_URL`; `src/site/pages.ts` exports
+`withBase()` for links and image paths.
 
 ## Finding a component
 

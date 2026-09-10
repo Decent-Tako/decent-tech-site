@@ -1,10 +1,11 @@
-name: Publish Storybook to GitHub Pages
+name: Publish Storybook and the site preview to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
       - 'design-system/**'
+      - 'site/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -44,6 +45,16 @@ jobs:
           # The public project site is served under /decent-tech-site/.
           STORYBOOK_BASE_PATH: /decent-tech-site/
         run: npm run storybook:build
+
+      - name: Build the site bundle for the preview
+        env:
+          # The site preview of main is served under
+          # /decent-tech-site/site-preview/, next to Storybook.
+          SITE_BASE_PATH: /decent-tech-site/site-preview/
+        run: npm run build:site
+
+      - name: Assemble the site preview into the Pages artifact
+        run: node scripts/build-site-preview.mjs --base /decent-tech-site/site-preview/ --out storybook-static/site-preview
 
       - name: Upload the Pages artifact
         uses: actions/upload-pages-artifact@v3
