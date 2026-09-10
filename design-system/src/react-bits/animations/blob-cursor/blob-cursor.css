@@ -1,0 +1,24 @@
+.blob-cursor-stage {
+  min-height: 24rem;
+}
+
+.blob-cursor-stage .blob-container {
+  min-height: 24rem;
+}
+
+.rb-frame .blob-cursor-copy {
+  position: relative;
+  z-index: 2;
+  margin: 1rem;
+  max-width: 24rem;
+  padding: 0.75rem 1rem;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  pointer-events: none;
+}
+
+.rb-frame .blob-cursor-copy p {
+  margin: 0 0 0.35rem;
+}
