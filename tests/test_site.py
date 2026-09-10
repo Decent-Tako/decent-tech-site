@@ -561,6 +561,7 @@ class SiteTests(unittest.TestCase):
             self.assertIn(f"markClick('{what}')", menu, f"the stage never reports {what!r}")
         self.assertIn("'data-last-click'", menu)
         self.assertIn("'data-hit-points'", menu)
+        self.assertIn("'data-centred-vertex'", menu)
         # The cursor follows the same hit test, once a frame.
         self.assertIn("requestAnimationFrame(test)", menu)
         self.assertIn("overDisc", menu)

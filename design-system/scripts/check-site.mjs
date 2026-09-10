@@ -367,22 +367,25 @@ async function checkTurnClick(page, viewportName, box) {
 // A press on the centred disc opens its page and reads `open`. This is the
 // last check, because it leaves the home page.
 async function checkOpenClick(page, viewportName, box) {
-  // The turn above is still gliding, so wait for it to settle before asking
-  // which disc is the centred one.
-  await page.waitForTimeout(1000);
-  const discs = await hitPoints(page);
-  const centre = { x: box.width / 2, y: box.height / 2 };
-  let target = null;
-  let nearest = Infinity;
-  for (const disc of discs) {
-    const away = Math.hypot(disc.x - centre.x, disc.y - centre.y);
-    if (away < nearest) {
-      nearest = away;
-      target = disc;
-    }
-  }
+  // The turn above is still gliding. Wait for it to settle, then read the
+  // discs and the centred vertex together, so the two agree.
+  //
+  // The centred vertex is the one nearest the snap direction, which is not
+  // always the disc nearest the middle of the stage. Picking by screen
+  // distance clicked the wrong disc and read "turn"; the stage names the
+  // right one, so the check asks it.
+  await page.waitForTimeout(2000);
+  const [discs, centredRaw] = await Promise.all([
+    hitPoints(page),
+    page.locator('#menu-stage').getAttribute('data-centred-vertex'),
+  ]);
+  const centred = Number(centredRaw);
+  const target = discs.find((disc) => disc.vertex === centred) ?? null;
   if (!target) {
-    fail(`${viewportName}: no centred disc to click`);
+    fail(
+      `${viewportName}: the centred vertex ${centredRaw} is not among the ` +
+        `${discs.length} discs the stage shows`,
+    );
     return;
   }
   const expandSeen = page

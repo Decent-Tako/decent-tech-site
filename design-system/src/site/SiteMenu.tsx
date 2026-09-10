@@ -401,6 +401,10 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
       const stage = rootRef.current?.parentElement;
       if (!menu || !stage) return;
       stage.setAttribute('data-hit-points', JSON.stringify(menu.getHitPoints()));
+      // Which of those discs a press would open. It is the vertex nearest the
+      // snap direction, which is not always the disc nearest the middle of
+      // the stage, so a check cannot work it out from the points alone.
+      stage.setAttribute('data-centred-vertex', String(menu.getCentredVertex()));
     };
     publish();
     const timer = window.setInterval(publish, HIT_POINTS_MS);
