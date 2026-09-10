@@ -2,6 +2,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 import filecmp
 import json
+import math
 import re
 import shutil
 import struct
@@ -494,6 +495,47 @@ class SiteTests(unittest.TestCase):
         # The throttle and the step counter stay.
         self.assertIn("STEP_THROTTLE_MS", menu)
         self.assertIn("'data-steps'", menu)
+
+    def test_one_trackpad_gesture_is_one_step(self):
+        # Ben said on 2026-09-10 that the wheel motion was too intense. Events
+        # inside the throttle window are one step, and the small events at the
+        # tail of a trackpad gesture are ignored, so one gesture is one disc.
+        menu = (DESIGN_SYSTEM / "src" / "site" / "SiteMenu.tsx").read_text()
+        throttle = re.search(r"const STEP_THROTTLE_MS = ([0-9]+);", menu)
+        self.assertIsNotNone(throttle, "SiteMenu.tsx must set STEP_THROTTLE_MS")
+        self.assertEqual(int(throttle.group(1)), 250)
+        floor = re.search(r"const WHEEL_DELTA_FLOOR = ([0-9]+);", menu)
+        self.assertIsNotNone(floor, "SiteMenu.tsx must set WHEEL_DELTA_FLOOR")
+        self.assertEqual(int(floor.group(1)), 4)
+        self.assertIn("if (Math.abs(event.deltaY) < WHEEL_DELTA_FLOOR) return;", menu)
+        # The page must still not scroll or bounce, whatever the event does.
+        self.assertRegex(menu, r"const onWheel[^}]*event\.preventDefault\(\);")
+        # The step counter stays, so the Chromium check can still tell a wheel
+        # that never arrived from a sphere that did not move.
+        self.assertIn("'data-steps'", menu)
+
+    def test_the_turn_glides_instead_of_snapping(self):
+        # Ben asked for a gentler arrival. While a turn target is held, the
+        # snap covers a constant fraction of the angle that is left, which is
+        # an ease-out that cannot overshoot.
+        vendored = (
+            DESIGN_SYSTEM / "src" / "motion-examples" / "vendor" / "react-bits" / "infinite-menu" / "InfiniteMenu.tsx"
+        ).read_text()
+        self.assertIn("public gentleSnap = false;", vendored)
+        glide = re.search(r"const GLIDE_INTENSITY = ([0-9.]+);", vendored)
+        self.assertIsNotNone(glide, "InfiniteMenu.tsx must set GLIDE_INTENSITY")
+        fraction = float(glide.group(1))
+        # A constant fraction per frame reaches 99 per cent in this many
+        # frames. At 60 Hz the issue asks for about 600 ms.
+        frames = math.log(0.01) / math.log(1 - fraction)
+        self.assertGreaterEqual(frames * 1000 / 60, 500)
+        self.assertLessEqual(frames * 1000 / 60, 700)
+        # The glide runs for the whole turn, not only until the wanted vertex
+        # becomes the nearest one.
+        self.assertIn("this.control.gentleSnap = true;", vendored)
+        self.assertIn("TURN_ARRIVED_SQR", vendored)
+        # A drag and a reset drop the glide with the turn.
+        self.assertEqual(vendored.count("this.control.gentleSnap = false;"), 3)
 
     def test_the_vendored_menu_carries_local_changes_14_and_15(self):
         vendored = (

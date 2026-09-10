@@ -44,11 +44,23 @@
  *    `turnTargetVertex`. `turnToItem()` picks, among the vertices that carry
  *    that item, the one nearest the current front, and keeps its index.
  *    While an index is held, `onControlUpdate()` builds the snap target from
- *    that vertex instead of the nearest one, so the existing snap eases the
- *    sphere there and it turns instead of jumping. The index clears once
- *    that vertex is the nearest, and a drag, a `step()`, or a `reset()`
- *    drops it. The page calls `turnToItem()` when the pointer or the
- *    keyboard moves along its own link list.
+ *    that vertex instead of the nearest one, so the snap eases the sphere
+ *    there and it turns instead of jumping. A drag, a `step()`, or a
+ *    `reset()` drops the index. The page calls `turnToItem()` when the
+ *    pointer or the keyboard moves along its own link list.
+ *
+ *    `ArcballControl` got the flag `gentleSnap`, which `onControlUpdate()`
+ *    holds true for the whole turn. The upstream snap scales the angle it
+ *    covers by a distance factor, so it starts slow and finishes fast, which
+ *    reads as a hard arrival. With `gentleSnap` the snap instead covers a
+ *    constant 0.12 of the angle that is left on every frame: an ease-out
+ *    that is 99 per cent done after about 600 ms at 60 Hz and can never pass
+ *    the target, because a frame only ever covers part of what remains.
+ *
+ *    The turn ends, and the glide with it, once the wanted vertex is the
+ *    nearest one *and* the sphere has arrived within `TURN_ARRIVED_SQR`.
+ *    Ending it as soon as the vertex became nearest would give the last and
+ *    closest part of the turn back to the upstream snap.
  * 15. `InfiniteGridMenu` got `setScale(scale)`, because the page computes the
  *    scale from the viewport and applies it again on every resize. Upstream
  *    takes `scale` in the constructor only.
@@ -551,6 +563,10 @@ class ArcballControl {
 
   public snapDirection = vec3.fromValues(0, 0, -1);
   public snapTargetDirection: vec3 | null = null;
+  // Local change 14. True while `turnToItem()` holds a target. The snap below
+  // then eases with a constant fraction of the angle that is left, instead of
+  // the upstream factor that starts slow and finishes fast.
+  public gentleSnap = false;
 
   private pointerPos = vec2.create();
   private previousPointerPos = vec2.create();
@@ -634,12 +650,22 @@ class ArcballControl {
       }
 
       if (this.snapTargetDirection) {
-        const SNAPPING_INTENSITY = 0.2;
         const a = this.snapTargetDirection;
         const b = this.snapDirection;
-        const sqrDist = vec3.squaredDistance(a, b);
-        const distanceFactor = Math.max(0.1, 1 - sqrDist * 10);
-        angleFactor *= SNAPPING_INTENSITY * distanceFactor;
+        if (this.gentleSnap) {
+          // Local change 14. A constant fraction of the angle that is left,
+          // so the turn is an ease-out: quickest at the start, slowest at the
+          // end, and never past the target, because each frame covers part of
+          // what remains and never more. At 0.12 a frame the turn is 99 per
+          // cent done after 37 frames, about 600 ms at 60 Hz.
+          const GLIDE_INTENSITY = 0.12;
+          angleFactor *= GLIDE_INTENSITY;
+        } else {
+          const SNAPPING_INTENSITY = 0.2;
+          const sqrDist = vec3.squaredDistance(a, b);
+          const distanceFactor = Math.max(0.1, 1 - sqrDist * 10);
+          angleFactor *= SNAPPING_INTENSITY * distanceFactor;
+        }
         this.quatFromVectors(a, b, snapRotation, angleFactor);
       }
     }
@@ -852,6 +878,7 @@ export class InfiniteGridMenu {
   public reset(): void {
     this.control.reset();
     this.turnTargetVertex = null;
+    this.control.gentleSnap = false;
     this.faceVertex(0);
     this.camera.position[2] = 3 * this.scaleFactor;
     this.smoothRotationVelocity = 0;
@@ -951,6 +978,11 @@ export class InfiniteGridMenu {
   // Local change 14. The vertex `turnToItem()` is easing on to, or null when
   // the sphere is free to settle on whichever vertex is nearest the front.
   private turnTargetVertex: number | null = null;
+
+  // Local change 14. The turn is over once the squared distance between the
+  // snap target and the front is below this. Two unit directions this far
+  // apart are about two per cent of a vertex step, which reads as arrived.
+  private readonly TURN_ARRIVED_SQR = 1e-4;
 
   // Local change 15. Set the scale after construction. The camera distance
   // and the frame height both follow it, so a new value takes effect on the
@@ -1277,20 +1309,30 @@ export class InfiniteGridMenu {
     if (!this.control.isPointerDown) {
       const nearestVertexIndex = this.findNearestVertexIndex();
       // Local change 14. While `turnToItem()` is easing the sphere on to a
-      // vertex, the snap follows that vertex, not the nearest one. The turn
-      // ends once the wanted vertex is the nearest, so the sphere settles
-      // there and the wheel and the drag take over again.
-      if (this.turnTargetVertex !== null && this.turnTargetVertex === nearestVertexIndex) {
-        this.turnTargetVertex = null;
-      }
+      // vertex, the snap follows that vertex, not the nearest one.
       const snapVertexIndex = this.turnTargetVertex ?? nearestVertexIndex;
       const itemIndex = snapVertexIndex % Math.max(1, this.items.length);
       this.onActiveItemChange(itemIndex, snapVertexIndex);
       const snapDirection = vec3.normalize(vec3.create(), this.getVertexWorldPosition(snapVertexIndex));
       this.control.snapTargetDirection = snapDirection;
+      // Local change 14. The glide runs for the whole turn, so it is on while
+      // a target is held and it ends only once the sphere has arrived, not
+      // when the wanted vertex first becomes the nearest one. Ending it at
+      // that moment would hand the last and closest part of the turn back to
+      // the sharp upstream snap, which is the motion the glide replaces.
+      if (this.turnTargetVertex !== null) {
+        this.control.gentleSnap = true;
+        const left = vec3.squaredDistance(snapDirection, this.control.snapDirection);
+        if (this.turnTargetVertex === nearestVertexIndex && left < this.TURN_ARRIVED_SQR) {
+          this.turnTargetVertex = null;
+          this.control.gentleSnap = false;
+        }
+      }
     } else {
-      // A drag is the reader's own turn; it drops a pending `turnToItem()`.
+      // A drag is the reader's own turn; it drops a pending `turnToItem()`
+      // and the glide with it, so the release snaps as upstream does.
       this.turnTargetVertex = null;
+      this.control.gentleSnap = false;
       cameraTargetZ += this.control.rotationVelocity * 80 + 2.5;
       damping = 7 / timeScale;
     }

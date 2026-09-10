@@ -73,13 +73,18 @@ list entry opens that entry's page the same way. Under reduced motion the
 page opens at once with no circle.
 
 A pointer over a list entry, or keyboard focus on it, turns the sphere to
-that dot through `turnToItem` (local change 14): the existing snap eases the
-sphere there, so it never jumps. Leaving the entry does nothing; the sphere
-stays. The wheel turns the sphere one page per step, and the arrow keys do
-the same while the wordmark has focus. A step walks the five pages in the
-order of the table above and wraps at the ends, so a forward step from About
-reaches Portfolio and a step back from About reaches Get in touch. The home
-page itself does not scroll.
+that dot through `turnToItem` (local change 14). Leaving the entry does
+nothing; the sphere stays. The wheel turns the sphere one page per step, and
+the arrow keys do the same while the wordmark has focus. A step walks the
+five pages in the order of the table above and wraps at the ends, so a
+forward step from About reaches Portfolio and a step back from About reaches
+Get in touch. The home page itself does not scroll.
+
+Every turn glides. The snap covers a constant part of the angle that is left
+on each frame, so the sphere leaves quickest, arrives slowest, and is about
+99 per cent of the way there after 600 ms. It can never pass the dot. One
+trackpad gesture is one disc: wheel events inside 250 ms count as one step,
+and events below 4 units are the tail of a gesture and are ignored.
 
 The list is the keyboard path and the no-WebGL path. It holds a real link to
 every page, so it works with no bundle and with no WebGL.
