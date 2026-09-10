@@ -29,6 +29,18 @@
   touch-action: none;
 }
 
+/* The cursor says whether a press would do anything. Over a disc it is
+   `pointer`, because a press opens or turns; over empty stage it is `grab`,
+   because empty stage is where a drag turns the sphere. The stage sets
+   data-over-disc from the same hit test the click uses. */
+.menu-sphere {
+  cursor: grab;
+}
+
+.menu-sphere[data-over-disc="true"] {
+  cursor: pointer;
+}
+
 /* The page transition. A circle in the colour of the disc grows from the
    disc, from the wordmark, or from a list entry, until it covers the stage;
    then the page opens.

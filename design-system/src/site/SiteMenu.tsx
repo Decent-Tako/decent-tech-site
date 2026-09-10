@@ -65,7 +65,19 @@ const STEP_THROTTLE_MS = 250;
 // gesture to one disc.
 const WHEEL_DELTA_FLOOR = 4;
 
+// How often the stage republishes the discs it shows, in milliseconds. The
+// Chromium check reads them to click a named disc.
+const HIT_POINTS_MS = 1000;
+
+// How long the site waits for the page to leave after the circle covers the
+// stage. If the tab comes back and no page followed, the circle was left over
+// from a navigation that never happened, and the stage clears it.
+const NAVIGATION_GRACE_MS = 2000;
+
 type Expand = { page: SitePage; x: number; y: number };
+
+/** What the last press on the stage became. The stage carries it. */
+type LastClick = 'open' | 'turn' | 'miss' | 'drag';
 
 function useReducedMotion(): boolean {
   const [reduce, setReduce] = useState(
@@ -118,6 +130,10 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
   // True from the first activation until the page leaves. A second click
   // during the expand does nothing.
   const openingRef = useRef(false);
+  // The timer that opens the page once the circle has covered the stage.
+  // Cancelling it is how the stage recovers from a navigation that never
+  // happened.
+  const openTimerRef = useRef(0);
   // Negative infinity, not zero: the first step must never fall inside the
   // throttle window, however soon after load it comes.
   const lastStepRef = useRef(Number.NEGATIVE_INFINITY);
@@ -178,15 +194,100 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
       return;
     }
     setExpand({ page, x, y });
-    window.setTimeout(() => location.assign(page.path), EXPAND_MS);
+    openTimerRef.current = window.setTimeout(
+      () => location.assign(page.path),
+      EXPAND_MS,
+    );
+  }, []);
+
+  // Put the stage back to rest. The circle goes, the guard lifts, and the
+  // timer that would open a page is cancelled.
+  const cancelOpen = useCallback(() => {
+    window.clearTimeout(openTimerRef.current);
+    openTimerRef.current = 0;
+    openingRef.current = false;
+    setExpand(null);
+  }, []);
+
+  // The stuck screen. The browser keeps this page in the back-forward cache
+  // with its DOM as it was, so the back button restores it with the circle
+  // still covering the stage and `openingRef` still true. Every later press
+  // is then ignored and the screen looks dead.
+  //
+  // A restore from that cache is a `pageshow` with `persisted` set, so the
+  // stage clears itself there. It also clears on `pagehide`, so a page that
+  // is put into the cache goes in already at rest, whatever the browser does
+  // with `pageshow`.
+  useEffect(() => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) cancelOpen();
+    };
+    const onPageHide = () => cancelOpen();
+    window.addEventListener('pageshow', onPageShow);
+    window.addEventListener('pagehide', onPageHide);
+    return () => {
+      window.removeEventListener('pageshow', onPageShow);
+      window.removeEventListener('pagehide', onPageHide);
+    };
+  }, [cancelOpen]);
+
+  // The same screen, reached another way. A tab that goes to the background
+  // during the expand can have its timer held back, so the page never opens
+  // and the circle stays. When the tab comes back, the stage waits out the
+  // grace and clears if no page followed.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (!openingRef.current) return;
+      window.setTimeout(() => {
+        if (openingRef.current) cancelOpen();
+      }, NAVIGATION_GRACE_MS);
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [cancelOpen]);
+
+  // What the last press on the stage became. The stage carries it, so the
+  // Chromium check and a person in devtools can see why a click did nothing.
+  const markClick = useCallback((what: LastClick) => {
+    rootRef.current?.parentElement?.setAttribute('data-last-click', what);
   }, []);
 
   // The canvas fills the stage, so a canvas pixel is already a stage pixel.
+  //
+  // Only a direct press on the centred disc opens its page. A press on any
+  // other disc turns the sphere until that disc is the centre. A press on
+  // empty stage does nothing at all: the sphere is a menu, not a backdrop
+  // that swallows clicks.
   const handleItemClick = useCallback(
-    (item: MenuItem, _vertexIndex: number, point: { x: number; y: number }) => {
-      open(pageForItem(item), point.x, point.y);
+    (
+      item: MenuItem | null,
+      vertexIndex: number,
+      point: { x: number; y: number },
+      hit: boolean,
+    ) => {
+      // The drag rule threw the press away; the vendored menu already turned
+      // the sphere with it.
+      if (item === null) {
+        markClick('drag');
+        return;
+      }
+      if (!hit) {
+        markClick('miss');
+        return;
+      }
+      const menu = menuRef.current;
+      // The centred disc is the one the wordmark names, so a hit on it is the
+      // reader asking for that page.
+      if (menu && vertexIndex === menu.getCentredVertex()) {
+        markClick('open');
+        open(pageForItem(item), point.x, point.y);
+        return;
+      }
+      markClick('turn');
+      menu?.turnToVertex(vertexIndex);
     },
-    [open],
+    [open, markClick],
   );
 
   // A circle that starts at an element outside the stage still needs stage
@@ -255,6 +356,56 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
       for (const host of hosts) host.removeEventListener('wheel', onWheel);
     };
   }, [step]);
+
+  // The cursor says whether a press would do anything: `pointer` over a disc,
+  // `grab` over empty stage, because empty stage is where a drag turns the
+  // sphere. The hit test runs at most once a frame, so a fast pointer costs
+  // one test per paint and not one per event.
+  useEffect(() => {
+    const sphere = rootRef.current;
+    if (!sphere) return;
+    let frame = 0;
+    let pending: { x: number; y: number } | null = null;
+    const test = () => {
+      frame = 0;
+      const menu = menuRef.current;
+      const at = pending;
+      pending = null;
+      if (!menu || !at) return;
+      const local = menu.toCanvasPoint(at.x, at.y);
+      sphere.dataset.overDisc =
+        menu.hitTestVertex(local.x, local.y) >= 0 ? 'true' : 'false';
+    };
+    const onMove = (event: PointerEvent) => {
+      pending = { x: event.clientX, y: event.clientY };
+      if (frame === 0) frame = requestAnimationFrame(test);
+    };
+    const onLeave = () => {
+      sphere.dataset.overDisc = 'false';
+    };
+    sphere.addEventListener('pointermove', onMove);
+    sphere.addEventListener('pointerleave', onLeave);
+    return () => {
+      if (frame !== 0) cancelAnimationFrame(frame);
+      sphere.removeEventListener('pointermove', onMove);
+      sphere.removeEventListener('pointerleave', onLeave);
+    };
+  }, []);
+
+  // The stage publishes the discs it shows, so the Chromium check can click a
+  // named one instead of guessing at a coordinate. Once a second is enough:
+  // the check reads the list, then clicks.
+  useEffect(() => {
+    const publish = () => {
+      const menu = menuRef.current;
+      const stage = rootRef.current?.parentElement;
+      if (!menu || !stage) return;
+      stage.setAttribute('data-hit-points', JSON.stringify(menu.getHitPoints()));
+    };
+    publish();
+    const timer = window.setInterval(publish, HIT_POINTS_MS);
+    return () => window.clearInterval(timer);
+  }, []);
 
   // Turn the sphere to a page without opening it. The vendored snap eases the
   // sphere there, so it never jumps.

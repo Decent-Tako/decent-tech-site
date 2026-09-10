@@ -1443,6 +1443,14 @@ export class InfiniteGridMenu {
     });
   }
 
+  // Local change 16. The vertex at the centre of the view: the one the
+  // wordmark names, and the only one a click opens. While a turn is running
+  // it is the vertex the turn is heading for, so a second click on the disc
+  // the sphere is already gliding towards opens it instead of turning again.
+  public getCentredVertex(): number {
+    return this.turnTargetVertex ?? this.findNearestVertexIndex();
+  }
+
   // Local change 16. A client point in the canvas pixel space the projection
   // helpers below work in.
   public toCanvasPoint(clientX: number, clientY: number): { x: number; y: number } {
