@@ -211,8 +211,10 @@ class SiteTests(unittest.TestCase):
         self.assertIn("default-src 'self'", self.nginx)
         self.assertIn("style-src 'self'", self.nginx)
         self.assertIn("img-src 'self'", self.nginx)
-        self.assertIn("script-src 'none'", self.nginx)
+        self.assertIn("script-src 'self'", self.nginx)
         self.assertNotIn("unsafe-inline", self.nginx)
+        self.assertNotIn("unsafe-eval", self.nginx)
+        self.assertNotIn("data:", self.nginx)
 
     def test_nginx_leaves_transport_security_to_the_ingress(self):
         """TLS terminates at the Traefik ingress, not in this container.

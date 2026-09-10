@@ -29,7 +29,9 @@ This repository holds two things.
 
 ## To lift a component into the site
 
-The site is static HTML with no JavaScript allowed by its Content Security
-Policy (`script-src 'none'` in `nginx.conf`). A Storybook component cannot run
-there as is. Use the library as the reference for markup, tokens, and motion
-values, or change the site's policy in a separate, reviewed change.
+The site is static HTML. Its Content Security Policy (`nginx.conf`) allows
+scripts and styles from the site's own origin only (`script-src 'self'`,
+`style-src 'self'`). Inline scripts, inline styles, `eval`, `data:` URLs, and
+third-party origins stay blocked. To run a Storybook component on the site,
+bundle it into a file under the served root and reference that file from the
+page. Do not widen the policy for a component; change the component.
