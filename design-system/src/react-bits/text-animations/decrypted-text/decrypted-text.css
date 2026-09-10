@@ -1,0 +1,12 @@
+.rb-frame .decrypted-text {
+  display: inline-block;
+  margin: 1.5rem;
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.rb-frame .decrypted-text__hidden {
+  color: var(--quiet);
+}
