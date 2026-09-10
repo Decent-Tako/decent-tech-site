@@ -6,11 +6,13 @@ import ShinyText from '../../react-bits/vendor/text-animations/shiny-text/ShinyT
 import type { SceneProps } from '../scenes';
 import { number, useReducedMotion } from '../sceneSupport';
 
-export default function ShinyTextScene({ text, dataset, onReady }: SceneProps) {
+export default function ShinyTextScene({ text, dataset, onReady, onDone }: SceneProps) {
   const reduce = useReducedMotion();
+  // The shine loops from the first frame; the text itself never moves.
   useEffect(() => {
     onReady();
-  }, [onReady]);
+    onDone();
+  }, [onReady, onDone]);
   return (
     <ShinyText
       text={text}

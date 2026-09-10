@@ -138,13 +138,23 @@ async function checkPage(browser, viewport, pagePath) {
     const name = await page.locator('[data-effect]').nth(index).getAttribute('data-effect');
     const state = await settle(page, `[data-effect="${name}"]`, `${label} [data-effect="${name}"]`);
     console.log(`check-site: ${label}: effect "${name}" branch "${state}"`);
+    // Every effect sets data-done once its entry animation has finished.
+    // Split Text raises its letters one by one, so the word measure below
+    // must not run before then.
+    try {
+      await page.waitForSelector(`[data-effect="${name}"][data-done="true"]`, {
+        state: 'attached',
+        timeout: STAGE_TIMEOUT_MS,
+      });
+      console.log(`check-site: ${label}: effect "${name}" reports done`);
+    } catch {
+      fail(`${label}: effect "${name}" did not report data-done within ${STAGE_TIMEOUT_MS} ms`);
+    }
   }
 
   // A text effect splits its text into letter spans. The letters of one word
   // must stay on one line: every letter shares its wrapper's line top, and
-  // wrapping happens only at the spaces between wrappers. Split Text raises
-  // its letters one by one on entry, so the measure waits for the tween to
-  // settle before it counts a word as broken.
+  // wrapping happens only at the spaces between wrappers.
   const countSplitWords = () => {
     const groups = new Map();
     document.querySelectorAll('[data-effect] .char, [data-effect] .split-char').forEach((letter) => {
@@ -159,11 +169,7 @@ async function checkPage(browser, viewport, pagePath) {
     }
     return { words: groups.size, broken };
   };
-  let settled = await page.evaluate(countSplitWords);
-  for (let attempt = 0; attempt < 40 && settled.words > 0 && settled.broken > 0; attempt += 1) {
-    await page.waitForTimeout(250);
-    settled = await page.evaluate(countSplitWords);
-  }
+  const settled = await page.evaluate(countSplitWords);
   if (settled.words > 0) {
     if (settled.broken > 0) {
       fail(`${label}: ${settled.broken} of ${settled.words} split words break across lines`);

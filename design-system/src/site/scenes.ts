@@ -14,6 +14,8 @@ export type SceneProps = {
   text: string;
   /** Called once, after the first frame has drawn. */
   onReady: () => void;
+  /** Called once the entry animation has finished. Sets data-done on the host. */
+  onDone: () => void;
 };
 
 export type SceneModule = { default: ComponentType<SceneProps> };

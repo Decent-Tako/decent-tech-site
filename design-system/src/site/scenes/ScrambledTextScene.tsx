@@ -6,11 +6,13 @@ import ScrambledText from '../../react-bits/vendor/text-animations/scrambled-tex
 import type { SceneProps } from '../scenes';
 import { number, useReducedMotion } from '../sceneSupport';
 
-export default function ScrambledTextScene({ text, dataset, onReady }: SceneProps) {
+export default function ScrambledTextScene({ text, dataset, onReady, onDone }: SceneProps) {
   const reduce = useReducedMotion();
+  // No entry animation: the letters only move under the pointer.
   useEffect(() => {
     onReady();
-  }, [onReady]);
+    onDone();
+  }, [onReady, onDone]);
   return (
     <ScrambledText
       inline

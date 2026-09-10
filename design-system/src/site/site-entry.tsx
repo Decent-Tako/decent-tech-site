@@ -69,11 +69,14 @@ async function mountScene(host: HTMLElement) {
     host.dataset.webgl = 'ready';
     hideCanvases(host);
   };
+  const onDone = () => {
+    host.dataset.done = 'true';
+  };
   try {
     const module = await entry.load();
     createRoot(host).render(
       <StrictMode>
-        {createElement(module.default, { host, dataset: host.dataset, text, onReady })}
+        {createElement(module.default, { host, dataset: host.dataset, text, onReady, onDone })}
       </StrictMode>,
     );
   } catch (error) {
