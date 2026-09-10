@@ -95,12 +95,12 @@ async function playBrand(canvas: Canvas) {
   await expect(canvas.getByRole('heading', { name: 'Fold Text' })).toBeVisible();
 }
 
-async function playDone(canvas: Canvas) {
+async function playDone(canvas: Canvas, copy = FEATURES[0].title) {
   const stage = canvas.getByTestId('fold-text-stage');
   await waitFor(() => {
     expect(stage).toHaveAttribute('data-state', 'done');
   }, SLOW);
-  await expect(canvas.getByTestId('fold-text-root')).toHaveTextContent(FEATURES[0].title);
+  await expect(canvas.getByTestId('fold-text-root')).toHaveTextContent(copy);
   return stage;
 }
 
@@ -133,7 +133,7 @@ export const WordsFromLeft: Story = {
   },
   play: async ({ canvas }) => {
     await playBrand(canvas);
-    const stage = await playDone(canvas);
+    const stage = await playDone(canvas, FEATURES[0].kicker);
     await playPause(canvas, stage);
   },
 };
