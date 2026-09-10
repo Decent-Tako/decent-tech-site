@@ -14,7 +14,7 @@ The copy sits on a plate in front; the scene runs full-bleed behind it.
 | Portfolio `/portfolio/` | Galaxy (`galaxy`) | | vermilion `#e34234` |
 | Blog `/blog/` | Threads (`threads`) | Scrambled Text on the h1 (`scrambled-text`) | terracotta `#d97757` on charcoal `#2c2c2c` |
 | About Ben `/ben/` | Iridescence (`iridescence`) | | steel blue `#5b8fa3` |
-| Get in touch `/contact/` | Plasma (`plasma`) | Shiny Text on the email link (`shiny-text`) | gold `#ffcb73` on navy |
+| Get in touch `/contact/` | Plasma (`plasma`) | Shiny Text on the email link (`shiny-text`) and the magnet on the contact form (`magnetic-form`) | gold `#ffcb73` on navy |
 
 Cursor effects off by Ben's request 2026-09-10. `splash-cursor` and
 `ribbons` stay in the registry and in Storybook, but no page mounts them, and
@@ -88,6 +88,41 @@ and events below 4 units are the tail of a gesture and are ignored.
 
 The list is the keyboard path and the no-WebGL path. It holds a real link to
 every page, so it works with no bundle and with no WebGL.
+
+## The contact form
+
+Get in touch holds one form: name, email, message, and a Send button. It is
+its own plate, navy type and fields on a cream card, and it works with no
+script at all.
+
+There is no backend yet. The form posts to `mailto:hello@decent.tech` with
+`enctype="text/plain"`, so Send opens the reader's mail program with the
+three fields in the body. `nginx.conf` already allows `form-action 'self'
+mailto:`. A real endpoint comes later; only the `action` changes then.
+
+The `magnetic-form` scene makes the form magnetic. Its host is an empty
+element next to the form that names the wrapper with `data-target`, because a
+React root replaces the children of the element it mounts into. The scene
+renders nothing and moves the wrapper with a transform only, so the layout,
+the field order, the tab order, and the focus never change.
+
+While the pointer is on the page and away from the form, the wrapper closes
+about 8 per cent of the distance to the pointer on each frame. It chases; it
+never jumps. The travel is capped at 40 per cent of the viewport and at the
+viewport edges, so the form never leaves the screen.
+
+The form holds still, at once and completely, when any one of these is true:
+
+- the pointer is inside the form plus a 24 pixel margin;
+- any field or the button has focus;
+- the reader has typed in any field this visit;
+- the pointer is a touch or a pen;
+- the viewport is narrower than 720 pixels;
+- `prefers-reduced-motion: reduce` is on.
+
+The first Tab into the page also freezes it, so a keyboard reader never sees
+it move. Once the reader has typed, the form stays still for the rest of the
+visit and eases back to its resting place in 300 ms.
 
 ## Behaviour
 
