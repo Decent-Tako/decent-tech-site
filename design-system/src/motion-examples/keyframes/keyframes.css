@@ -1,0 +1,352 @@
+.kf {
+  display: grid;
+  gap: 1rem;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.kf__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.kf__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.kf__intro,
+.kf__fixed {
+  margin: 0;
+  max-width: 52rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--charcoal);
+}
+
+.kf__intro a,
+.kf__fixed a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+.kf__action {
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.kf__action:hover,
+.kf__action:focus-visible {
+  background: var(--accent-blue);
+  color: var(--paper);
+  border-color: var(--accent-blue);
+}
+
+.kf__action:active {
+  background: var(--accent-yellow);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.kf__stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  min-height: 16rem;
+  padding: 2.5rem 1.5rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.kf__stage--variants {
+  min-height: 400px;
+  padding: 0;
+  align-items: stretch;
+  justify-content: flex-start;
+  background: var(--ink);
+}
+
+.kf__stage--state {
+  min-height: 28rem;
+  padding: 2rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.kf__caption {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.kf__box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--kf-size, 100px);
+  height: var(--kf-size, 100px);
+  border: 0;
+  padding: 0.5rem;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.15;
+  text-align: center;
+  cursor: default;
+}
+
+.kf__box--yellow {
+  background: var(--accent-yellow);
+  color: var(--ink);
+}
+
+.kf__box--blue {
+  background: var(--accent-blue);
+  color: var(--paper);
+}
+
+.kf__box--hover {
+  cursor: pointer;
+}
+
+.kf__box--hover:hover,
+.kf__box--hover:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 4px;
+}
+
+.kf__box--hover:active {
+  outline-color: var(--ink);
+}
+
+.kf-variants {
+  position: relative;
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  flex: 1;
+  width: 500px;
+  max-width: 100%;
+  height: 400px;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+.kf-variants__nav {
+  width: 300px;
+}
+
+.kf-variants__background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 300px;
+  background: var(--paper);
+}
+
+.kf-variants__toggle {
+  position: absolute;
+  top: 18px;
+  left: 15px;
+  width: 50px;
+  height: 50px;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.kf-variants__toggle:hover,
+.kf-variants__toggle:focus-visible {
+  background: var(--accent-blue);
+  color: var(--paper);
+}
+
+.kf-variants__toggle:hover path,
+.kf-variants__toggle:focus-visible path {
+  stroke: var(--paper);
+}
+
+.kf-variants__toggle:active {
+  background: var(--accent-yellow);
+  color: var(--ink);
+}
+
+.kf-variants__toggle:active path {
+  stroke: var(--ink);
+}
+
+.kf-variants[data-open='false'] .kf-variants__list {
+  pointer-events: none;
+}
+
+.kf-variants__list {
+  position: absolute;
+  top: 80px;
+  width: 230px;
+  margin: 0;
+  padding: 25px;
+  list-style: none;
+}
+
+.kf-variants__item-wrap {
+  margin: 0 0 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.kf-variants__item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  margin: 0 0 20px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kf-variants__item:hover,
+.kf-variants__item:focus-visible {
+  color: var(--accent-blue);
+}
+
+.kf-variants__item:active {
+  color: var(--ink);
+}
+
+.kf-variants__photo {
+  flex: 40px 0;
+  width: 40px;
+  height: 40px;
+  margin-right: 20px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  object-fit: cover;
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.kf-variants__copy {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.kf-variants__kicker {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.kf-variants__name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.kf-state {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 52rem;
+}
+
+.kf-state__stage {
+  position: relative;
+  flex: 1 1 22rem;
+  min-height: 22rem;
+}
+
+.kf-state__card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  overflow: hidden;
+  border: 5px dotted var(--accent-blue);
+  border-radius: 20px;
+  background: var(--paper);
+  pointer-events: none;
+}
+
+.kf-state__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.kf-state__inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 14rem;
+}
+
+.kf-state__label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.kf-state__label code {
+  width: 4.5rem;
+  font-family: inherit;
+  font-weight: 700;
+}
+
+.kf-state__label input[type='range'] {
+  flex: 1;
+  accent-color: var(--accent-blue);
+}
+
+.kf-state__label input[type='number'] {
+  width: 4.5rem;
+  border: 0;
+  border-bottom: 1px dotted var(--accent-blue);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+}
+
+.kf-state__label input[type='number']:focus {
+  outline: none;
+  border-bottom: 2px solid var(--accent-blue);
+}

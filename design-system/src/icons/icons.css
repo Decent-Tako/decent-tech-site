@@ -1,0 +1,81 @@
+.icons-root {
+  isolation: isolate;
+  max-width: 56rem;
+  font-family: system-ui, sans-serif;
+  color: #111111;
+}
+
+.icons-note {
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.icons-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.icons-table th,
+.icons-table td {
+  border: 1px solid var(--line);
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.icons-table th[scope='row'] {
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.icons-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.icons-name,
+.icons-gap {
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+.icons-gap {
+  color: var(--charcoal);
+}
+
+.icons-themed {
+  color: var(--accent-blue);
+}
+
+.icons-controls {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(8rem, 1fr));
+  gap: 1rem;
+}
+
+.icons-control-card {
+  border: 1px solid var(--line);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 8rem;
+}
+
+.icons-control-card h3 {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.icons-unsupported {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--charcoal);
+  text-align: center;
+}

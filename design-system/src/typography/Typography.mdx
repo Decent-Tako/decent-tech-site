@@ -1,0 +1,44 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+import { ContrastReport } from './ContrastReport';
+
+<Meta title="Typography/Overview" />
+
+# Academy long-form typography
+
+Package **@tailwindcss/typography** **0.5.20**. Licence MIT. Source: https://github.com/tailwindlabs/tailwindcss-typography . Docs: https://github.com/tailwindlabs/tailwindcss-typography#readme .
+
+The plugin supplies `prose` classes for HTML we do not control, such as article bodies and Markdown output. Tailwind **4.3.3** is already installed. The Tailwind 4 register path is `@plugin "@tailwindcss/typography"` in CSS. Do not add a `tailwind.config.js` plugins array for this.
+
+The Academy modifier is `prose-academy`. It maps plugin variables onto issue 231 tokens. Body and headings use Brand Sans. They must not render as Arial. Arial is removed from every Academy stack. The fallback is Brand Sans, our own OFL face.
+
+## Theme
+
+| Role | Token | Hex |
+| --- | --- | --- |
+| Body and headings | `--ink` on `--paper` | `#212121` on `#FFFFFF` |
+| Lead and captions | `--charcoal` on `--paper` | `#4A4A4A` on `#FFFFFF` |
+| Links at rest | `--accent-blue` | `#0035B1` |
+| Link hover and `:focus-visible` | `--paper` on `--accent-blue` | `#FFFFFF` on `#0035B1` |
+| Link press `:active` | `--ink` on `--accent-yellow` | `#212121` on `#DEF54F` |
+| Code blocks | `--paper` on `--ink` | `#FFFFFF` on `#212121` |
+| Rules and table borders | `--line` | `#D9D9D9` |
+
+`#A6A6A6` is for hairlines and disabled marks only. It fails AA for body text.
+
+## Measure
+
+Long-form text needs roughly 60 to 75 characters per line. Default is **65ch**, the plugin default. The reading stories expose a control: Narrow 50ch, Default 65ch, Wide 80ch.
+
+## Stories
+
+| Story | What it shows |
+| --- | --- |
+| Contrast | WCAG 2.2 AA pairs for every prose colour |
+| Element range | h1–h4, paragraph, lists, blockquote, code, table, figure, rule |
+| Article | 800 words or more on Week 0, the goal, and the ten-day challenge |
+| Reference | 800 words or more with tables, nested lists, and code |
+
+Pages/Article uses the same `prose prose-academy` pair on the motion reading surface.
+
+<ContrastReport />

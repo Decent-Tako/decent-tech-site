@@ -1,0 +1,125 @@
+.academy-globe {
+  display: grid;
+  gap: 1rem;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.academy-globe__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.academy-globe__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.academy-globe__intro,
+.academy-globe__fixed {
+  margin: 0;
+  max-width: 52rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--charcoal);
+}
+
+.academy-globe__intro a,
+.academy-globe__fixed a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+.academy-globe__pause {
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.academy-globe__pause:hover,
+.academy-globe__pause:focus-visible {
+  background: var(--accent-blue);
+  color: var(--paper);
+  border-color: var(--accent-blue);
+}
+
+.academy-globe__pause:active {
+  background: var(--accent-yellow);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.academy-globe__layout {
+  display: grid;
+  grid-template-columns: 600px minmax(12rem, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.academy-globe__stage {
+  width: 600px;
+  height: 600px;
+  border: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.academy-globe__canvas {
+  display: block;
+  width: 600px;
+  height: 600px;
+  cursor: default;
+}
+
+.academy-globe__cities {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.academy-globe__cities-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--charcoal);
+}
+
+.academy-globe__city {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.academy-globe__city-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.academy-globe__city-coord {
+  font-size: 0.75rem;
+  color: var(--charcoal);
+}
+
+@media (max-width: 52rem) {
+  .academy-globe__layout {
+    grid-template-columns: 1fr;
+  }
+}

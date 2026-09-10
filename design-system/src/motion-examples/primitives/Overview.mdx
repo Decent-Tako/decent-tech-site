@@ -1,0 +1,122 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Motion examples/Motion Primitives/Overview" />
+
+# Motion Primitives
+
+Seven Motion Primitives components, rebuilt in Academy branding against the component rubric.
+Eight Motion Primitives components, rebuilt in Academy branding against the component rubric.
+Motion Primitives components, rebuilt in Academy branding against the component rubric.
+Nine Motion Primitives components, rebuilt in Academy branding against the component rubric.
+
+Source: https://motion-primitives.com
+
+Repository: https://github.com/ibelick/motion-primitives
+
+Licence: MIT. Last source push **2026-03-19**.
+
+The files come from the shadcn registry `https://motion-primitives.com/c/{name}.json`. They live under `src/motion-examples/vendor/motion-primitives/`. This catalogue does not promote them to production.
+
+Default runtime: `motion` **13.2.0**.
+
+## Components
+
+| Story | Mechanism | Extra runtime |
+| --- | --- | --- |
+| Sliding number | Each digit is a 0-9 reel. `useSpring` advances a `motionValue`. `useTransform` offsets Y by the measured glyph height. | `react-use-measure` 2.1.7 |
+| Morphing dialog | Shared `layoutId` between the card trigger and a portaled dialog. `AnimatePresence` fades the backdrop. | none |
+| Image comparison | A motion value at 50 percent. `useSpring` moves the handle. `useTransform` sets left and right `clipPath`. | none |
+| Text shimmer | `useMemo` sets `--spread`. A `motion` element animates `backgroundPosition` with `background-clip: text`. | none |
+| Text shimmer wave | Each character is a `motion.span`. Keyframes run translate, scale, rotateY, and colour. | none |
+| Spinning text | Letters sit on a CSS ring. The container `variants.visible.rotate` is 360 or -360, `repeat: Infinity`. | none |
+| Animated number | `useSpring` holds the value. `useTransform` maps it through `Math.round(current).toLocaleString()`. | none |
+| Text effect | `AnimatePresence` mounts `motion[as]`. `staggerChildren` is `defaultStaggerTimes[per] / speedReveal`. Item duration is `0.3 / speedSegment`. | none |
+| Text loop | `setInterval(interval * 1000)` advances `currentIndex`. `AnimatePresence` swaps a `motion.div` keyed by index. | none |
+| Text morph | `useId` plus per-character `layoutId`. `AnimatePresence popLayout` morphs shared letters. | none |
+| Text roll | Two stacked `motion.span` faces per letter. Outgoing `rotateX` 0 to 90. Incoming 90 to 0. | none |
+| Text scramble | `setInterval` every `speed * 1000` ms. Characters before `progress * length` settle. The rest pick from `characterSet`. | none |
+| Accordion | `AccordionContent` mounts a `motion.div` while `value` equals `expandedValue`. `AnimatePresence` runs height and opacity. | none |
+| Disclosure | `DisclosureContent` mounts a `motion.div` while `open` is true. The trigger clones the child and adds `onClick`. | none |
+| Dialog | `showModal()` on a `motion.dialog`. `AnimatePresence` runs variants. `onAnimationComplete('exit')` calls native `close()`. | lucide-react `X`; vendored `usePreventScroll` |
+| Morphing popover | Shared `layoutId` `popover-trigger-{id}` between trigger and content. Click outside and Escape close it. | none |
+| Transition panel | `AnimatePresence mode="popLayout"` swaps a `motion.div` keyed by `activeIndex`. | `react-use-measure` 2.1.7 on the card |
+| Animated background | Shared `layoutId={`background-${useId()}`}`. `AnimatePresence` mounts one overlay. Click or hover sets `activeId`. | none |
+| Animated group | Container variants with `staggerChildren: 0.1`. Each child is `motion.create(asChild)`. | none |
+| Border trail | CSS `offsetPath: rect(0 auto auto 0 round size)` plus `offsetDistance` 0% to 100% with `repeat: Infinity`. | none |
+| Glow effect | `animate={animations[mode]}` on an absolute `motion.div`. `rotate` loops a conic gradient. | none |
+| Spotlight | Parent `mousemove` writes `useSpring` `mouseX`/`mouseY`. `useTransform` offsets `left` and `top` by `size/2`. | none |
+| In view | `useInView(ref, viewOptions)` swaps hidden and visible variants. `once` sets a local `isViewed` flag after the first complete. | none |
+| Scroll progress | `useScroll({ container })` writes `scrollYProgress`. `useSpring` maps it to `scaleX`. | none |
+| Progressive blur | Stacked `motion.div` layers. Each uses a `linear-gradient` mask and `backdrop-filter: blur(index * blurIntensity)`. | none |
+| Infinite slider | Children render twice. `useMeasure` reads the track. `animate()` drives a motion value from 0 to `-contentSize / 2` with linear ease. | `react-use-measure` 2.1.7 |
+| Carousel | Context holds `index`. `IntersectionObserver` counts visible items. `translateX` is `-index * (100 / visibleItemsCount)%`. | `lucide-react` 1.43.0 |
+| Cursor | `document` `mousemove` writes `clientX`/`clientY` into `useMotionValue`. `useSpring` follows. `AnimatePresence` mounts the chip. | none |
+| Magnetic | Distance from centre times `intensity` times falloff. `useSpring` writes `x`/`y`. | none |
+| Tilt | Pointer percent to `rotateX`/`rotateY` through `useSpring` and `useMotionTemplate`. | none |
+| Dock | Dock `mouseX` to item width `[40, magnification, 40]`, then `useSpring`. | none |
+| Toolbar dynamic | `motion.div` animates `width` between closed and open. `useClickOutside` closes. | none |
+| Toolbar expandable | `useMeasure` height plus `AnimatePresence`. Selected panel opacity follows `active`. | `react-use-measure` 2.1.7 |
+
+## Props the docs and the source disagree on
+
+Sliding number docs type `value` as `string`. The installed source types `value` as `number`. The stories use the source.
+
+Spinning text docs type `children` as `ReactElement`. The installed source types `children` as `string`. The stories use the source.
+
+Text shimmer wave docs type `as` as `string`. The installed source types `as` as `React.ElementType`. The stories use the source.
+
+Animated number upstream examples pass `springOptions.duration` of 2000, 1000, and 10000. Motion 13.2.0 treats spring `duration` as seconds. The stories use 2, 1, and 3.
+
+## Prior Academy use
+
+Provenance recorded Motion Primitives as evaluated, with no surviving copy. Issue 271 installed the first three files. These four files are the text-shimmer batch from issue 299.
+Animated background docs omit `transition` and `enableHover`. The source has both.
+
+Animated group docs list five presets and `blur-sm`. The source has ten presets and `blur`.
+
+Border trail docs omit `style`. The source has it.
+
+## Prior Academy use
+
+Provenance recorded Motion Primitives as evaluated, with no surviving copy. Sliding number, Morphing dialog, and Image comparison were the first install. This batch adds Animated background, Animated group, Border trail, Glow effect, and Spotlight.
+Tilt docs say `reverse`. The source prop is `isRevese`. Toolbar dynamic and toolbar expandable have no Component API. The stories expose the source constants.
+
+## Prior Academy use
+
+Provenance recorded Motion Primitives as evaluated, with no surviving copy. Sliding number, Morphing dialog, and Image comparison were the first install. Cursor, magnetic, tilt, dock, and the two toolbars follow the same vendor path.
+
+## Proof
+
+1. Open `motion-examples-motion-primitives-sliding-number--fundraising-total`. Change **value** from 3000 to 4500. The thousands reel slides. Press **Replay**. The count runs again.
+2. Open `motion-examples-motion-primitives-morphing-dialog--week-card`. Press the Week 0 card. The card morphs into the detail dialog. Press **Close**, then **Replay**, then open it again.
+3. Open `motion-examples-motion-primitives-image-comparison--drag`. Drag the yellow handle. Press **Replay**. The handle returns to centre. Open **Hover** and move the pointer without dragging.
+4. Open `motion-examples-motion-primitives-text-shimmer--opening-week-0`. Change **duration** from 2 to 0.6. The sweep speeds up. Press **Pause**, then **Resume**.
+5. Open `motion-examples-motion-primitives-text-shimmer-wave--setting-the-goal`. Change **zDistance** from 10 to 28. The letters travel further. Press **Pause**.
+6. Open `motion-examples-motion-primitives-spinning-text--uncomfortable-ring`. Change **reverse**. The ring turns the other way. Press **Pause**.
+7. Open `motion-examples-motion-primitives-animated-number--fundraising-total`. Change **value** from 3000 to 4500. The figure springs. Press **Replay**. The count runs from 0 again.
+4. Open `motion-examples-motion-primitives-text-effect--goal-lede`. Change **preset** from fade to scale. Press **Replay**. Each word scales in.
+5. Open `motion-examples-motion-primitives-text-loop--academy-stages`. Change **interval** from 2 to 1. The stages swap faster. Press **Pause**. The word holds.
+6. Open `motion-examples-motion-primitives-text-morph--publish-toggle`. Press **Publish**. Letters morph to Live. Press **Replay**.
+7. Open `motion-examples-motion-primitives-text-roll--wordmark`. Change **duration** from 0.5 to 0.8. Press **Replay**. The faces roll slower.
+8. Open `motion-examples-motion-primitives-text-scramble--tracker`. Change **duration** from 0.8 to 1.4. Press **Replay**. The glyphs settle later.
+4. Open `motion-examples-motion-primitives-accordion--weeks`. Change **duration**. Press **Start**. The panel height opens. Press **Replay**.
+5. Open `motion-examples-motion-primitives-disclosure--week-actions`. Press **Show the five Week 0 actions**. Press **Replay**.
+6. Open `motion-examples-motion-primitives-dialog--publish-page`. Press **Publish your page**. Change **scale**. Press **Close dialog**, then **Replay**.
+7. Open `motion-examples-motion-primitives-morphing-popover--goal`. Press **Set goal**. Change **bounce**. Press Escape, then **Replay**.
+8. Open `motion-examples-motion-primitives-transition-panel--weeks`. Press **Learn**. Change **offset**. Press **Replay**.
+4. Open `motion-examples-motion-primitives-animated-background--academy-tabs`. Press **Learn**. The yellow overlay moves. Press **Replay**. Start is active again.
+5. Open `motion-examples-motion-primitives-animated-group--week-cards`. Change **preset** from blur-slide to bounce. Press **Replay**. The cards drop in.
+6. Open `motion-examples-motion-primitives-border-trail--publish-card`. Change **duration** from 5 to 2. The yellow chip travels faster. Press **Pause**.
+7. Open `motion-examples-motion-primitives-glow-effect--goal-rotate`. Change **mode** to pulse. Press **Pause**.
+8. Open `motion-examples-motion-primitives-spotlight--week-zero`. Move the pointer. The disc follows. Change **size** from 200 to 320. Press **Pause**, then **Replay**. Open **Learn color** for the larger disc.
+4. Open `motion-examples-motion-primitives-in-view--week-lede`. Scroll the stage. The Week 0 card rises and un-blurs. Change **hiddenY**. Press **Replay**. Scroll again.
+5. Open `motion-examples-motion-primitives-scroll-progress--week-article`. Scroll the article. The blue bar grows. Change **stiffness**. Press **Replay**. The bar returns to empty.
+6. Open `motion-examples-motion-primitives-progressive-blur--photo-plate`. Change **blurIntensity**. Press **Replay**. Open **Hover caption** and hover the photograph. Open **Slider edges** and press **Pause**.
+7. Open `motion-examples-motion-primitives-infinite-slider--academy-weeks`. Change **speed**. Press **Pause**. The row holds. Press **Resume**.
+8. Open `motion-examples-motion-primitives-carousel--week-cards`. Press **Next slide**. The Start card moves to Learn. Press **Replay**. The Start card returns.
+4. Open `motion-examples-motion-primitives-cursor--goal`. Move the pointer on the photo. The **$3,000** chip follows. Change **springDuration**. Press **Pause**, then **Replay**.
+5. Open `motion-examples-motion-primitives-magnetic--rsvp`. Hover **RSVP to Learn + Do**. The button follows. Change **intensity**. Press **Replay**.
+6. Open `motion-examples-motion-primitives-tilt--week-zero-card`. Move the pointer on the card. Change **rotationFactor**. Press **Replay**.
+7. Open `motion-examples-motion-primitives-dock--academy`. Hover **Start**. The icon grows. Change **magnification**. Press **Replay**.
+8. Open `motion-examples-motion-primitives-toolbar-dynamic--tracker`. Press **Search the tracker**. The bar widens. Change **openWidth**. Press **Replay**.
+9. Open `motion-examples-motion-primitives-toolbar-expandable--academy`. Press **Buddy**. The panel grows. Change **duration**. Press **Replay**.

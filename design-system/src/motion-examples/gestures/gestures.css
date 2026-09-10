@@ -1,0 +1,292 @@
+.gesture-example {
+  display: grid;
+  gap: 0.75rem;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.gesture-example__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.gesture-example__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.gesture-example__intro,
+.gesture-example__fixed {
+  margin: 0;
+  max-width: 52rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--charcoal);
+}
+
+.gesture-example__intro a,
+.gesture-example__fixed a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+.gesture-example__replay {
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.gesture-example__replay:hover,
+.gesture-example__replay:focus-visible {
+  background: var(--accent-blue);
+  color: var(--paper);
+  border-color: var(--accent-blue);
+}
+
+.gesture-example__replay:active {
+  background: var(--accent-yellow);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.gesture-example__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 22rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.gesture-example__stage--lock {
+  min-height: 24rem;
+}
+
+.gesture-example__stage--swipe {
+  min-height: 12rem;
+  background: var(--paper);
+}
+
+.gesture-example__stage img[data-photo] {
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.gesture-card {
+  display: grid;
+  gap: 0.35rem;
+  width: 13.75rem;
+  min-height: 9.25rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+  font: inherit;
+  cursor: grab;
+  touch-action: none;
+}
+
+.gesture-card:active {
+  cursor: grabbing;
+}
+
+.gesture-card:hover,
+.gesture-card:focus-visible {
+  border-color: var(--accent-blue);
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+.gesture-card__photo {
+  width: 100%;
+  height: 4.5rem;
+  object-fit: cover;
+}
+
+.gesture-card__kicker {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gesture-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.gesture-constraints {
+  width: 22.5rem;
+  height: 22.5rem;
+  border: 1px dashed var(--charcoal);
+  background: var(--paper);
+  border-radius: 0.6rem;
+}
+
+.gesture-lock__line {
+  position: absolute;
+  width: 18.75rem;
+  height: 0;
+  border-top: 1px dashed var(--ink);
+  pointer-events: none;
+}
+
+.gesture-lock__caption {
+  position: absolute;
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gesture-lock__caption--x {
+  top: calc(50% + 1.1rem);
+}
+
+.gesture-lock__caption--y {
+  left: calc(50% + 1.1rem);
+}
+
+.gesture-lock__box {
+  width: 4.5rem;
+  height: 4.5rem;
+  padding: 0.35rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  cursor: grab;
+  touch-action: none;
+}
+
+.gesture-lock__box:active {
+  cursor: grabbing;
+}
+
+.gesture-lock__box:hover,
+.gesture-lock__box:focus-visible {
+  border-color: var(--accent-blue);
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+.gesture-press {
+  width: 10rem;
+  height: 10rem;
+  padding: 1rem;
+  border: 0;
+  background: var(--ink);
+  color: var(--paper);
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.125rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.gesture-press:focus-visible {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: 3px;
+}
+
+.gesture-swipe {
+  width: min(80dvw, 24rem);
+}
+
+.gesture-swipe__row {
+  position: relative;
+  height: var(--swipe-height, 80px);
+  overflow: hidden;
+  border: 1px solid var(--ink);
+  border-radius: 0.75rem;
+  background: var(--ink);
+  touch-action: none;
+  z-index: 0;
+}
+
+.gesture-swipe__item {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.gesture-swipe__copy {
+  margin: 0;
+  max-width: 18rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.gesture-swipe__actions {
+  position: absolute;
+  display: flex;
+  height: 100%;
+  width: 100%;
+  user-select: none;
+}
+
+.gesture-swipe__action {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.gesture-swipe__action-slot {
+  height: 100%;
+  width: 25%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gesture-swipe__action-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-width: 4.5rem;
+  min-height: 3.5rem;
+  padding: 0.35rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.gesture-swipe__action-button:focus-visible {
+  outline: 2px solid var(--paper);
+  outline-offset: 2px;
+}

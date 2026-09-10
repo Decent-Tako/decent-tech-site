@@ -1,0 +1,319 @@
+.academy-app-store-shell {
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-synthesis: none;
+}
+
+.academy-app-store-chrome {
+  position: sticky;
+  top: 0;
+  z-index: 1000002;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.academy-app-store-chrome p {
+  margin: 0;
+  max-width: 52rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--charcoal);
+}
+
+.academy-app-store-chrome a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+.academy-app-store-replay {
+  flex: none;
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.academy-app-store-replay:hover,
+.academy-app-store-replay:focus-visible {
+  background: var(--accent-blue);
+  color: var(--paper);
+  border-color: var(--accent-blue);
+}
+
+.academy-app-store-replay:active {
+  background: var(--accent-yellow);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+#academy-app-store {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 990px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1.5rem 4rem;
+}
+
+#academy-app-store,
+#academy-app-store * {
+  box-sizing: border-box;
+}
+
+#academy-app-store header {
+  position: relative;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+#academy-app-store .store-kicker {
+  margin: 0;
+  color: var(--charcoal);
+  font-size: 0.875rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+#academy-app-store .store-title {
+  margin: 0.2rem 0 0;
+  font-size: 2.125rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  color: var(--ink);
+}
+
+#academy-app-store ul,
+#academy-app-store li {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#academy-app-store p.big {
+  margin: 0 0 0.75rem;
+  color: var(--ink);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+#academy-app-store .card-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 20px;
+}
+
+#academy-app-store .card {
+  position: relative;
+  padding: 0;
+  height: 420px;
+  flex: 0 0 40%;
+}
+
+#academy-app-store .card:nth-child(4n + 1),
+#academy-app-store .card:nth-child(4n + 4) {
+  flex: 0 1 calc(60% - 20px);
+}
+
+#academy-app-store .card-content-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+#academy-app-store .card-content-container.open {
+  top: 0;
+  left: 0;
+  right: 0;
+  position: fixed;
+  z-index: 1000001;
+  overflow: hidden;
+  padding: 40px 0;
+  justify-content: center;
+}
+
+#academy-app-store .dark .h3,
+#academy-app-store .dark span {
+  color: var(--paper);
+}
+
+#academy-app-store .card-content {
+  pointer-events: auto;
+  position: relative;
+  border-radius: 20px;
+  background: var(--paper);
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+}
+
+#academy-app-store .open .card-content {
+  width: unset;
+  height: unset;
+  max-width: 700px;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+#academy-app-store .card-open-link {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+#academy-app-store .card-open-link:hover,
+#academy-app-store .card-open-link:focus-visible {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: -3px;
+}
+
+#academy-app-store .card-open-link:active {
+  outline-color: var(--accent-yellow);
+}
+
+#academy-app-store .card-image-container {
+  overflow: hidden;
+  height: 420px;
+  display: flex;
+  justify-content: stretch;
+  flex-direction: column;
+  position: relative;
+}
+
+#academy-app-store .card-image {
+  width: 100%;
+  position: absolute;
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+#academy-app-store .open .card-image-container,
+#academy-app-store .open .title-container {
+  z-index: 1;
+}
+
+#academy-app-store .title-container {
+  position: absolute;
+  z-index: 2;
+  top: 15px;
+  left: 15px;
+  max-width: 300px;
+  padding: 8px 10px;
+  background: var(--ink);
+  border-radius: 8px;
+}
+
+#academy-app-store .open .title-container {
+  top: 30px;
+  left: 30px;
+}
+
+#academy-app-store .title-container h2 {
+  color: var(--paper);
+  margin: 8px 0;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+#academy-app-store .title-container .h6 {
+  color: var(--paper);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+#academy-app-store .overlay {
+  inset: 0;
+  z-index: 1000000;
+  position: fixed;
+  border: 0;
+  padding: 0;
+  background: rgb(33 33 33 / 80%);
+  cursor: pointer;
+  will-change: opacity;
+}
+
+#academy-app-store .overlay:hover,
+#academy-app-store .overlay:focus-visible {
+  background: rgb(0 53 177 / 72%);
+}
+
+#academy-app-store .content-container {
+  padding: 35px;
+  max-width: 700px;
+  width: 90vw;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+#academy-app-store .open p.big {
+  color: var(--ink);
+}
+
+@media only screen and (max-width: 990px) {
+  #academy-app-store {
+    padding: 1rem;
+  }
+
+  #academy-app-store .card-list {
+    gap: 10px;
+  }
+
+  #academy-app-store .card {
+    flex: 0 1 calc(50% - 5px);
+    height: 280px;
+  }
+
+  #academy-app-store li .card-image {
+    top: unset !important;
+    bottom: -10px !important;
+    left: 0 !important;
+    right: 0 !important;
+    min-width: 250px;
+    min-height: 300px;
+  }
+
+  #academy-app-store .card-image-container {
+    height: 280px;
+  }
+
+  #academy-app-store .card:nth-child(4n + 1),
+  #academy-app-store .card:nth-child(4n + 4) {
+    flex: 0 1 calc(50% - 5px);
+    max-width: 100%;
+  }
+
+  #academy-app-store .card-content-container.open {
+    padding: 0;
+  }
+}

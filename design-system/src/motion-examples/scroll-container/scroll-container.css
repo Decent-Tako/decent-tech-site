@@ -1,0 +1,135 @@
+.academy-scroll-container {
+  display: grid;
+  gap: 1rem;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  font-synthesis: none;
+}
+
+.academy-scroll-container__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.academy-scroll-container__intro,
+.academy-scroll-container__fixed {
+  margin: 0;
+  max-width: 52rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--charcoal);
+}
+
+.academy-scroll-container__intro a,
+.academy-scroll-container__fixed a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+.academy-scroll-container__replay {
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.academy-scroll-container__replay:hover,
+.academy-scroll-container__replay:focus-visible {
+  background: var(--accent-blue);
+  color: var(--paper);
+  border-color: var(--accent-blue);
+}
+
+.academy-scroll-container__replay:active {
+  background: var(--accent-yellow);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.academy-scroll-container__stage {
+  position: relative;
+  width: min(100%, 400px);
+  margin: 0 auto;
+  padding-top: 4.5rem;
+}
+
+.academy-scroll-container__progress {
+  position: absolute;
+  top: 0;
+  left: -15px;
+  transform: rotate(-90deg);
+}
+
+.academy-scroll-container__progress .bg {
+  stroke: var(--line);
+}
+
+.academy-scroll-container__progress circle {
+  stroke-dashoffset: 0;
+  stroke-width: 10%;
+  fill: none;
+}
+
+.academy-scroll-container__progress .indicator {
+  stroke: var(--accent-blue);
+}
+
+.academy-scroll-container__list {
+  position: relative;
+  display: flex;
+  list-style: none;
+  height: 220px;
+  overflow-x: auto;
+  padding: 20px 0;
+  margin: 0;
+  gap: 20px;
+}
+
+.academy-scroll-container__list:focus-visible {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+.academy-scroll-container__card {
+  flex: 0 0 200px;
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.academy-scroll-container__card img[data-photo] {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+.academy-scroll-container__label {
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-shadow: 0 1px 8px var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .academy-scroll-container:not(.academy-scroll-container--force) * {
+    scroll-behavior: auto !important;
+  }
+}

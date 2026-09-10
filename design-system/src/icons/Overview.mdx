@@ -1,0 +1,61 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Icon resources/Overview" />
+
+# Upstream icon resources
+
+This section compares real icons from maintained React packages. Each cell imports the package icon. This gallery does not redraw paths and does not promote a candidate to production.
+
+Checked on 2026-09-09 against npm, GitHub repository metadata, official docs, and the 2026-09-08 reset prior-art sheet.
+
+## Packages
+
+| Package | Version | Licence | Size | Stroke or weight | Mirror | Accessible name | Prior Academy use | Official docs |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| `lucide-react` | 1.43.0 | ISC | `size` default 24 | `strokeWidth` default 2. `nonScalingStroke` | CSS `scaleX(-1)` | `aria-label` | Used: motion-library `app/page.tsx` | https://lucide.dev/guide/react |
+| `@phosphor-icons/react` | 2.1.10 | MIT | `size` | `weight` thin, light, regular, bold, fill, duotone | `mirrored` | `alt` | Evaluated, not installed | https://github.com/phosphor-icons/react |
+| `@tabler/icons-react` | 3.46.0 | MIT | `size` default 24 | `stroke` default 2 | CSS `scaleX(-1)` | `title` | Evaluated, not installed | https://tabler.io/icons |
+| `@heroicons/react` | 2.2.0 | MIT | `width` and `height` | No stroke prop. Outline or solid import | CSS `scaleX(-1)` | `aria-label` | Evaluated, not installed | https://heroicons.com |
+
+React peers: Lucide `^16.5.1` through `^19`. Phosphor `>=16.8`. Tabler `>=16`. Heroicons `>=16` including React 19.
+
+Sources: https://github.com/lucide-icons/lucide https://github.com/phosphor-icons/react https://github.com/tabler/tabler-icons https://github.com/tailwindlabs/heroicons
+
+Last GitHub push on 2026-09-09: Lucide 2026-09-09, Tabler 2026-09-08, Iconoir 2026-08-12, Heroicons 2026-05-12, Phosphor 2026-01-06. None is archived.
+
+## Academy concepts
+
+| Concept | Lucide | Phosphor | Tabler | Heroicons |
+| --- | --- | --- | --- | --- |
+| Start / rocket | `Rocket` | `RocketIcon` | `IconRocket` | `RocketLaunchIcon` |
+| Tools / wrench | `Wrench` | `WrenchIcon` | `IconTool` | `WrenchIcon` |
+| Learn / book | `BookOpen` | `BookOpenIcon` | `IconBook` | `BookOpenIcon` |
+| Lounge / chat | `MessageCircle` | `ChatsCircleIcon` | `IconMessageCircle` | `ChatBubbleLeftRightIcon` |
+| Events / calendar | `Calendar` | `CalendarIcon` | `IconCalendarEvent` | `CalendarIcon` |
+| Captains / people | `Users` | `UsersIcon` | `IconUsers` | `UserGroupIcon` |
+| Map | `Map` | `MapTrifoldIcon` | `IconMap` | `MapIcon` |
+| Buddy | `Handshake` | `HandshakeIcon` | `IconFriends` | `UserPlusIcon` |
+| Teams | `UsersRound` | `UsersThreeIcon` | `IconUsersGroup` | `UsersIcon` |
+| Running | No icon | `PersonSimpleRunIcon` | `IconRun` | No icon |
+| Sport | `Dumbbell` | `BarbellIcon` | `IconBallFootball` | No icon |
+| Challenge | `Flag` | `FlagIcon` | `IconTrophy` | `FlagIcon` |
+
+Lucide has `Footprints` and `PersonStanding`. Those names are not running, so Running stays a gap. Heroicons 24 outline has no running icon and no sport icon.
+
+The Themed comparison sets package `color` to Academy hover `#0035B1`. It does not edit SVG geometry.
+
+## Omitted candidates
+
+| Candidate | Reason |
+| --- | --- |
+| `@iconify/react` | Maintained aggregator. It hides native stroke, weight, and `mirrored` APIs. |
+| `react-icons` | Aggregator. Same problem as Iconify. |
+| `iconoir-react` 7.12.1 | Maintained MIT stroke set. Tabler already supplies that extra outline family. |
+| `@radix-ui/react-icons` 1.3.2 | Small set. Last push 2026-04-02. No rocket, running, or sport icons. |
+| `phosphor-react` legacy | Replaced by `@phosphor-icons/react`. |
+| Lucide Lab | Experimental extras. This gallery uses the stable `lucide-react` set. |
+| Generated hand-drawn icons | Issue 219 keeps that work outside this catalogue. |
+
+No maintained Storybook addon compares these four packages on Academy concepts. The local adapter is the table, the controls, and the notes.
+
+Open Comparison and Controls on http://127.0.0.1:6012 .

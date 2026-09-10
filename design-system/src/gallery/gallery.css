@@ -1,0 +1,178 @@
+.gallery-root {
+  isolation: isolate;
+  max-width: 36rem;
+  font-family: system-ui, sans-serif;
+  color: #111111;
+}
+
+.gallery-note {
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.gallery-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.gallery-themed {
+  --gallery-ink: #111111;
+  --gallery-paper: var(--paper);
+  --gallery-focus: var(--accent-blue);
+  --gallery-press: var(--accent-yellow);
+}
+
+.gallery-themed .gallery-button,
+.gallery-themed .gallery-input,
+.gallery-themed .gallery-trigger {
+  box-sizing: border-box;
+  font: inherit;
+  color: var(--gallery-ink);
+  background: var(--gallery-paper);
+  border: 1px solid var(--gallery-ink);
+}
+
+.gallery-themed .gallery-button,
+.gallery-themed .gallery-trigger {
+  min-height: 2rem;
+  padding: 0 0.75rem;
+}
+
+.gallery-themed .gallery-button:hover:not([data-disabled]),
+.gallery-themed .gallery-trigger:hover:not([data-disabled]) {
+  outline: 2px solid var(--gallery-focus);
+  outline-offset: 2px;
+}
+
+.gallery-themed .gallery-button:active:not([data-disabled]),
+.gallery-themed .gallery-trigger:active:not([data-disabled]) {
+  background: var(--gallery-press);
+}
+
+.gallery-themed .gallery-button:focus-visible,
+.gallery-themed .gallery-trigger:focus-visible,
+.gallery-themed .gallery-input:focus-visible {
+  outline: 2px solid var(--gallery-focus);
+  outline-offset: 2px;
+}
+
+.gallery-themed .gallery-input {
+  min-height: 2rem;
+  padding: 0 0.5rem;
+  width: 16rem;
+}
+
+.gallery-themed .gallery-checkbox[data-checked] {
+  background: var(--gallery-press);
+}
+
+.gallery-themed.gallery-dialog,
+.gallery-themed .gallery-dialog,
+.gallery-themed .gallery-panel {
+  background: var(--gallery-paper);
+  color: var(--gallery-ink);
+  border: 1px solid var(--gallery-ink);
+  padding: 1rem;
+}
+
+.gallery-themed.gallery-backdrop,
+.gallery-themed .gallery-backdrop {
+  background: rgb(0 0 0 / 35%);
+}
+
+.gallery-themed .rdp-root {
+  --rdp-accent-color: var(--accent-blue);
+  --rdp-accent-background-color: var(--accent-yellow);
+}
+
+.gallery-checkbox {
+  box-sizing: border-box;
+  width: 1rem;
+  height: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid currentColor;
+  padding: 0;
+}
+
+.gallery-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.gallery-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.gallery-backdrop {
+  position: fixed;
+  inset: 0;
+  min-height: 100dvh;
+  background: rgb(0 0 0 / 20%);
+}
+
+.gallery-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(24rem, calc(100vw - 2rem));
+  padding: 1rem;
+  background: var(--paper);
+  color: #111111;
+  border: 1px solid #111111;
+}
+
+.gallery-panel-group {
+  height: 10rem;
+  width: 20rem;
+  border: 1px solid #111111;
+}
+
+.gallery-split {
+  overflow: auto;
+  padding: 0.5rem;
+}
+
+.gallery-separator {
+  width: 0.5rem;
+  background: var(--line);
+}
+
+.gallery-embla {
+  overflow: hidden;
+  width: 16rem;
+  border: 1px solid #111111;
+}
+
+.gallery-embla-container {
+  display: flex;
+}
+
+.gallery-embla-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.gallery-command {
+  width: 18rem;
+  border: 1px solid #111111;
+  padding: 0.5rem;
+}
+
+.gallery-command [cmdk-input] {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.gallery-command [cmdk-item][data-selected='true'] {
+  background: var(--accent-yellow);
+}

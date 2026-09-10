@@ -1,0 +1,32 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="UI primitives/Overview" />
+
+# Upstream UI primitives
+
+This is the **headless** tier. It imports maintained React packages for behavior and accessibility. Those packages ship almost no CSS, so the Default stories look like bare browser controls. That is the upstream default, not a missing theme.
+
+The **Themed** stories apply Academy hover `#0035B1` and press `#DEF54F` through `className` and CSS variables. That CSS is local agent styling. It is not an upstream design language.
+
+Compare finished design languages in **Styled systems**. This section does not recreate package mechanics and does not promote a candidate to production.
+
+| Category | Package | Version | Licence | Accessibility | Prior Academy use | Official docs |
+| --- | --- | --- | --- | --- | --- | --- |
+| Button | `@base-ui/react/button` | 1.8.0 | MIT | Native button semantics | Used: `components/ui/button.tsx` | https://base-ui.com/react/components/button |
+| Field | `@base-ui/react/field` | 1.8.0 | MIT | Label and error association | Base UI used | https://base-ui.com/react/components/field |
+| Selection | `@base-ui/react/checkbox` | 1.8.0 | MIT | Accessible name via label | Base UI used | https://base-ui.com/react/components/checkbox |
+| Disclosure | `@base-ui/react/collapsible` | 1.8.0 | MIT | Button controls panel | Evaluated React Aria disclosure | https://base-ui.com/react/components/collapsible |
+| Dialog | `@base-ui/react/dialog` | 1.8.0 | MIT | Modal dialog, title, close | Base UI used | https://base-ui.com/react/components/dialog |
+| Command | `cmdk` | 1.1.1 | MIT | Labelled command list | Installed only, no prior import | https://github.com/pacocoursey/cmdk |
+| Date | `react-day-picker` | 10.0.1 | MIT | Grid of days | Installed 9.8.1, gallery uses current 10.0.1 | https://daypicker.dev |
+| Panels | `react-resizable-panels` | 4.12.4 | MIT | Keyboard-resizable group | Installed only | https://react-resizable-panels.vercel.app |
+| Carousel | `embla-carousel-react` | 8.6.0 | MIT | Viewport plus slides | Installed only | https://www.embla-carousel.com |
+
+## Omitted candidates
+
+| Candidate | Reason |
+| --- | --- |
+| shadcn copy-paste | Official Base UI docs treat shadcn as a pre-styled Base UI layer. Importing Base UI avoids copied wrappers. |
+| `input-otp` | Base UI 1.8.0 includes OTP Field. Extra package would duplicate that primitive. |
+| Radix Accordion / Progress | Issue 194 recorded them as maintained but not required once Base UI is present. |
+| React Aria | Evaluated alternative. Base UI already supplies the selected primitives. |

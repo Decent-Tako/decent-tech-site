@@ -1,0 +1,29 @@
+import { Meta, ColorPalette, ColorItem } from '@storybook/addon-docs/blocks';
+
+import { ColorTokens } from './ColorTokens';
+
+<Meta title="Brand/Colors" />
+
+# Colors
+
+<ColorPalette>
+  <ColorItem
+    title="Neutrals"
+    subtitle="Rest state. Use #A6A6A6 only for hairlines and disabled marks."
+    colors={{
+      Ink: '#212121',
+      Paper: '#FFFFFF',
+      Soft: '#F2F2F2',
+      Line: '#D9D9D9',
+      Quiet: '#A6A6A6',
+      Charcoal: '#4A4A4A',
+    }}
+  />
+  <ColorItem
+    title="Accents"
+    subtitle="Blue is hover and focus. Yellow is press and confirmed success."
+    colors={{ Blue: '#0035B1', Yellow: '#DEF54F' }}
+  />
+</ColorPalette>
+
+<ColorTokens />

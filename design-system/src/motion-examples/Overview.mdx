@@ -1,0 +1,103 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Motion examples/Overview" />
+
+# Motion examples
+
+Every component in this section is built to the rubric in issue 268. It has typed controls that change the animation live, a Replay or Pause control, a `play` test, the Academy brand, and an attribution block that names the animation mechanism. The build fails on a story that does not.
+
+The default runtime is `motion` **13.2.0**. Licence MIT. Docs: https://motion.dev/docs/react . Extra packages are listed on **Runtime additions** with the reason Motion cannot do the work.
+
+Issue 231 supplies colors, Brand Sans, and the live-text wordmark. Photographs stay in full color.
+
+## Sources
+
+Two sources only, chosen by Ben on 2026-09-09.
+
+| Source | Usable set | Note |
+| --- | --- | --- |
+| motion.dev examples https://motion.dev/examples | 81 free React examples of 204 | The other 123 are Motion+ paid and publish no source. |
+| Motion Primitives https://motion-primitives.com | 33 components | Last push 2026-03-19. Each component is checked against React 19 before it is built. |
+
+## Built so far
+
+1. **Apple Intelligence**. A rebuild of the motion.dev ripple. The mechanism is `animate()` on a `cloneNode(true)` layer. Change a control. Press Replay.
+2. **App Store**. A rebuild of the motion.dev iOS App Store example. The mechanism is `layoutId` shared layout plus `AnimatePresence`. Change overlay duration or layout type. Press Replay.
+3. **Globe**. A rebuild of the cobe WebGL globe. `onRender` advances `phi` each frame, so it rotates. Change rotation speed or marker size. Press Pause.
+4. **Motion Primitives**. Sliding number, Morphing dialog, Image comparison, Text shimmer, Text shimmer wave, Spinning text, Animated number, Text effect, Text loop, Text morph, Text roll, Text scramble, Accordion, Disclosure, Dialog, Morphing popover, Transition panel, Animated background, Animated group, Border trail, Glow effect, Spotlight, In view, Scroll progress, Progressive blur, Infinite slider, Carousel, Cursor, Magnetic, Tilt, Dock, Toolbar dynamic, and Toolbar expandable. Use the controls. Press Replay or Pause.
+5. **Loading**. Seven motion.dev loading indicators. Circle spinner, jumping dots, pulse, and ripple take Pause and Speed. Fill text, progress bar, and line reveal take Replay.
+6. **Drag**. A Week 0 card. Mechanism: `drag` starts a `PanSession`. Change axis or momentum. Press Replay.
+7. **Drag constraints**. A Challenge week card inside a board. Mechanism: `dragConstraints` as a ref or a pixel box. Change elastic. Press Replay.
+8. **Drag lock direction**. The 100-person tracker. Mechanism: `dragDirectionLock` plus a rubber-band to origin. Press Replay.
+9. **Gestures**. RSVP to Learn + Do. Mechanism: `whileHover` and `whileTap`. Hover or press. Press Replay.
+10. **Swipe actions**. A Buddy check-in row. Mechanism: pointer tracking with `useMotionValue` and `useSpring`. Swipe, then press Replay.
+11. **Scroll container**. A rebuild of the motion.dev element scroll example. `useScroll({ container })` drives a progress ring and an overflow mask. Change the mask insets. Press Replay.
+12. **Scroll hide header**. A rebuild of the motion.dev hide-header example. `useMotionValueEvent` on `scrollY` hides the Academy masthead. Change the threshold. Press Replay.
+13. **Scroll horizontal**. A rebuild of the motion.dev horizontal gallery. `useTransform` of `scrollYProgress` to `x` on a sticky row of Academy weeks. Change card width. Press Replay.
+14. **Scroll image reveal**. A rebuild of the motion.dev clip-path reveal. Each photograph opens from the centre as it crosses the stage. Change `clipEnd`. Press Replay.
+15. **Scroll-linked**. `useScroll()` writes `scrollYProgress` into `scaleX`. Change offset or speed. Press Pause.
+16. **Scroll-linked with spring**. Same bar, with `useSpring` lag. Change stiffness. Press Pause.
+17. **Scroll-triggered**. `whileInView` springs Academy week cards. Change bounce. Press Replay.
+18. **Scroll-track element in viewport**. Each week’s `target` drives a `pathLength` ring. Change offset. Press Pause.
+19. **Scroll velocity**. A rebuild of the motion.dev 3D planes carousel. The mechanism is `useVelocity` on a sprung wheel offset. Change wave amount. Press Replay.
+20. **Scroll zoom hero**. A rebuild of the motion.dev zoom hero. The mechanism is `useScroll` plus `useTransform` on scale, blur, and opacity. Change scale. Press Replay.
+21. **Parallax**. A rebuild of the motion.dev parallax gallery. The mechanism is per-section `useScroll` mapped to image `y`. Change image speed. Press Replay.
+22. **Follow pointer with spring**. `useSpring` follows the pointer through `frame.read`. Change stiffness. Press Pause.
+23. **Conic gradient pointer**. `useMotionValue` plus `useTransform` move a conic gradient. Move the pointer. Press Pause.
+24. **Magnetic filings**. Each filing `atan2` toward the pointer. Change size. Press Pause.
+25. **Tilt card**. `useSpring` `rotateX`/`rotateY` from pointer percent. Change maxTilt. Press Replay.
+26. **Cursor floating target**. Spring-follow target plus infinite rotate. Change rotate duration. Press Pause.
+27. **Layout animation**. Publish the page. Mechanism: `layout` FLIP on `justifyContent`. Change spring duration. Press Replay.
+28. **Layout anchor**. Week 0 goal chip. Mechanism: `layoutAnchor` pins a 0–1 point. Change `anchorX`. Press Replay.
+29. **Shared layout animation**. Start / Learn / Challenge tabs. Mechanism: `layoutId` underline. Change presence mode. Press Replay.
+30. **Reorder grid**. Sixteen Week 0 actions. Mechanism: `Reorder.Group` plus `checkReorder`. Drag a cell. Press Replay.
+31. **Reorder items**. Start, Learn, Tools, Challenge week. Mechanism: `layout` on shuffled tiles. Press Pause.
+32. **Presence**. Five motion.dev enter, exit, and presence examples. Enter and Transition remount with Replay. Exit uses Hide and Show. Modes uses Switch. usePresenceData uses Next and Previous.
+33. **Keyframes**. `scale`, `rotate`, and `borderRadius` keyframe arrays with `times` and `repeat: Infinity`. Change scale or duration. Press Pause.
+34. **Keyframe wildcards**. Hover scale starts at `null` so the sequence is interruptible. Hover the $3,000 goal. Press Replay.
+35. **Variants**. Open/closed clip-path drawer with staggered Academy stages. Press Open, then Replay.
+36. **Animate state**. A challenge photo springs to `x`, `y`, and `rotate`. Change a slider. Press Replay.
+37. **Rotate**. One tween to 360°. Press Replay. The tutorial linear ease is a second story.
+38. **Use animation frame**. A 3D cube of Academy weeks. `useAnimationFrame` writes `rotateX`/`rotateY` and `translateY` every frame. Change speed. Press Pause.
+39. **Use time**. `useTime` maps elapsed milliseconds to rotation. Tiny boxes spin at 2×. Change `cycleMs`. Press Pause.
+40. **Use transform**. Drag right to confirm Publish your page. `useTransform` maps `x` to tick `pathLength`. Change `dragElastic`. Press Replay.
+41. **CSS spring**. `spring(0.5, 0.8)` from `motion` writes a CSS `transition`. Toggle Week 0 to Page live. Change bounce. Press Replay.
+42. **Bounce easing**. Challenge week switch. On uses a spring. Off uses easeOutBounce. Change stiffness. Press Replay.
+43. **Path drawing**. A rebuild of the motion.dev SVG draw. `pathLength` springs from 0 to 1. Rows are Week 0, Learn, and Challenge week. Change duration. Press Replay.
+44. **Path morphing**. A rebuild of the motion.dev Flubber morph. Academy shapes cycle Challenge week through the $3,000 goal. Change duration. Press Pause.
+45. **Motion path**. A rebuild of the motion.dev offset-path spiral. A participant photograph travels the six-week path. Change duration. Press Pause.
+46. **Color interpolation**. Browser WAAPI versus Motion linear RGB. Hover blue `#0035B1` to press yellow `#DEF54F`. Change the colours. Press Pause.
+47. **Color picker**. A rebuild of the motion.dev spring colour picker. Pick a week banner colour. Change `pushMagnitude`. Press Pause or Replay.
+48. **Split text**. A rebuild of the motion.dev word stagger. `animate` plus `stagger` on `span.split-word` nodes. Change stagger. Press Replay.
+49. **Scroll word reveal**. A rebuild of the motion.dev scroll word reveal. `useScroll` plus `useTransform` per word. Change `spread`. Press Replay.
+50. **Rolling text button**. A rebuild of the motion.dev rolling label. Two copies and variants. Hover. Press Replay.
+51. **Characters remaining**. A rebuild of the motion.dev counter spring. Type in the page title. Press Replay.
+52. **HTML content**. A rebuild of the motion.dev MotionValue HTML count. Counts to $3,000. Press Replay.
+53. **Forms**. Clerk sign-in, Clerk conditional field, Clerk user button, hold to confirm, and tab select. Change a control. Press Replay.
+54. **Card stack**. Academy week photographs. Mechanism: `drag="x"` plus `wrap` plus `mix`/`progress`. Change `maxRotate`. Press Replay.
+55. **Clerk card stack**. Join the Academy, then enter the Lounge code. Mechanism: `AnimatePresence` `popLayout` plus variants. Change overlay y. Press Replay.
+56. **Notifications stack**. Week 0, Buddy, Challenge week. Mechanism: parent variants propagate. Change count. Press Replay.
+57. **Multi-state badge**. Publish page. Mechanism: `AnimatePresence` plus `layout` plus `animate()`. Change shake. Press Replay.
+58. **Accordion**. Academy FAQ. Mechanism: `height: auto` plus `maskImage` plus `layoutId` focus ring. Change duration. Press Replay.
+59. **iOS App Folder**. A rebuild of the motion.dev folder. Mechanism: `layoutId` plus `AnimatePresence popLayout`. Press Replay to open.
+60. **iOS slider**. Control Centre pull, squish, and stretch. Mechanism: `useTransform` of pan progress. Press Replay.
+61. **Carousel iOS exposure slider**. Night outreach brightness. Mechanism: local `plusCarousel` ticker maps offset to `brightness()`. Drag the notches. Press Replay.
+62. **Image reveal slider**. Week 0 colour over greyscale. Mechanism: `drag="x"` plus `clipPath`. Press Replay.
+63. **Aspect ratio**. Week 0 page crop. Mechanism: `layout` plus `delay()` debounce. Press Replay.
+64. **Todo list**. `Reorder.Group` on Week 0 actions. Toggle a row. Press Replay.
+65. **Infinite loading**. `stagger()` on Academy notes. The spinner is continuous, so Pause and Speed. Replay resets the list.
+66. **Command palette**. `AnimatePresence` dialog for Academy commands. Open it. Filter. Press Replay.
+67. **Add to basket**. `arc()` flies the photograph into the published page. Change strength. Press Replay.
+68. **Bobble hover**. Pointer-segment collision injects spring velocity into Academy week tiles. Press Pause.
+69. **Material Design ripple**. Press ink on RSVP to Learn + Do. Press Replay.
+
+## Reduced motion
+
+`MotionConfig reducedMotion="user"` is the default. CSS animations stop under `prefers-reduced-motion`. Each Reduced motion story sets `always` and shows the final state at once.
+
+## Omitted
+
+| Candidate | Reason |
+| --- | --- |
+| Motion+ examples | Paid source with no published code. 123 of the 204 motion.dev React examples. |
+| Magic UI | Removed on Ben's instruction. The bulk import had no controls, no tests, and a static globe. |

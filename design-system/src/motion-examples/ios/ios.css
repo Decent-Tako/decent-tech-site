@@ -1,0 +1,600 @@
+.ios-example {
+  display: grid;
+  gap: 0.75rem;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
+
+.ios-example__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ios-example__title {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.ios-example__intro,
+.ios-example__fixed {
+  margin: 0;
+  max-width: 52rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--charcoal);
+}
+
+.ios-example__intro a,
+.ios-example__fixed a {
+  color: var(--accent-blue);
+  text-decoration: underline;
+}
+
+.ios-example__action {
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ios-example__action:hover,
+.ios-example__action:focus-visible {
+  background: var(--accent-blue);
+  color: var(--paper);
+  border-color: var(--accent-blue);
+}
+
+.ios-example__action:active {
+  background: var(--accent-yellow);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.ios-example__stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 22rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--soft);
+}
+
+.ios-example__caption {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.ios-example__stage--folder {
+  min-height: 32rem;
+  background: var(--soft);
+}
+
+.ios-folder {
+  width: 100%;
+  min-height: 32rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ios-folder *,
+.ios-folder *::before,
+.ios-folder *::after {
+  box-sizing: border-box;
+}
+
+.ios-folder__closed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ios-folder__closed:hover .ios-folder__mini,
+.ios-folder__closed:focus-visible .ios-folder__mini {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 4px;
+}
+
+.ios-folder__closed:active .ios-folder__preview {
+  background: var(--accent-yellow);
+}
+
+.ios-folder__preview {
+  position: relative;
+  border-radius: 26px;
+  padding: 12px;
+  background: var(--paper);
+  box-shadow: 0 18px 40px rgba(33, 33, 33, 0.18);
+  border: 1px solid var(--line);
+}
+
+.ios-folder__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 55px);
+  grid-template-rows: repeat(2, 55px);
+  gap: 10px;
+}
+
+.ios-folder__mini {
+  display: grid;
+  grid-template-columns: repeat(2, 25px);
+  grid-template-rows: repeat(2, 25px);
+  gap: 5px;
+  border-radius: 8px;
+}
+
+.ios-folder__mini-cell {
+  position: relative;
+  aspect-ratio: 1;
+}
+
+.ios-folder__mini-label {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.ios-folder__name {
+  font-size: 0.95rem;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.ios-folder__tile {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.ios-folder__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ios-folder__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: var(--paper);
+  cursor: pointer;
+}
+
+.ios-folder__backdrop:hover,
+.ios-folder__backdrop:focus-visible {
+  outline: 3px solid var(--accent-blue);
+  outline-offset: -3px;
+}
+
+.ios-folder__backdrop:active {
+  background: var(--accent-yellow);
+}
+
+.ios-folder__open {
+  position: relative;
+  z-index: 1;
+  border-radius: 1.65rem;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.ios-folder__open-title {
+  text-align: center;
+  width: 100%;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.ios-folder__open-grid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  column-gap: 24px;
+  row-gap: 20px;
+  justify-items: center;
+}
+
+.ios-folder__open-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ios-folder__open-tile {
+  width: 4.25rem;
+  height: 4.25rem;
+}
+
+.ios-folder__open-label {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.ios-example__stage--slider {
+  min-height: 20rem;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.ios-slider {
+  width: 400px;
+  height: 300px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ios-slider__track {
+  width: 100px;
+  height: 225px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  touch-action: none;
+  outline: none;
+}
+
+.ios-slider__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--accent-yellow);
+  transform-origin: 50% 100%;
+  pointer-events: none;
+}
+
+.ios-slider__icon {
+  position: relative;
+  z-index: 1;
+  bottom: 20px;
+  pointer-events: none;
+}
+
+.ios-example__stage--slider .ios-example__caption {
+  position: absolute;
+  bottom: 1rem;
+  color: var(--paper);
+}
+
+.ios-example__stage--exposure {
+  min-height: 28rem;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 1.25rem;
+}
+
+.ios-exposure {
+  max-width: 500px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.ios-exposure__image {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-height: 300px;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.ios-exposure__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.ios-exposure__progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 75px;
+  height: 75px;
+  position: relative;
+}
+
+.ios-exposure__progress svg {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.ios-exposure__border {
+  fill: rgba(255, 255, 255, 0.08);
+  stroke: var(--color, #fff);
+  stroke-width: 3;
+  opacity: 0.3;
+}
+
+.ios-exposure__indicator {
+  fill: none;
+  stroke-width: 3;
+}
+
+.ios-exposure__indicator--positive {
+  stroke: var(--accent-yellow);
+}
+
+.ios-exposure__indicator--negative {
+  stroke: #fff;
+}
+
+.ios-exposure__value {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ios-exposure__slider {
+  position: relative;
+  height: 40px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 20%,
+    #000 80%,
+    transparent 100%
+  );
+}
+
+.ios-exposure__carousel {
+  height: 100%;
+  width: 100%;
+  min-width: 0;
+  padding: 0 calc(50% - 6.5px);
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.ios-plus-carousel__track {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  width: max-content;
+  touch-action: none;
+  cursor: grab;
+}
+
+.ios-plus-carousel__track:active {
+  cursor: grabbing;
+}
+
+.ios-plus-carousel__item {
+  flex: none;
+}
+
+.ios-exposure__notch-wrap {
+  padding: 0 5px;
+}
+
+.ios-exposure__notch {
+  width: 3px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 1px;
+}
+
+.ios-example__stage--exposure .ios-example__caption {
+  color: var(--paper);
+}
+
+.ios-example__stage--reveal {
+  min-height: 24rem;
+  padding: 1.5rem;
+  background: var(--paper);
+}
+
+.ios-reveal {
+  position: relative;
+  width: min(100%, 36rem);
+}
+
+.ios-reveal__image {
+  position: relative;
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  height: 300px;
+}
+
+.ios-reveal__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ios-reveal__overlay {
+  top: 0;
+  left: 0;
+  filter: grayscale(100%);
+}
+
+.ios-reveal__slider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--paper);
+  cursor: grab;
+  left: 50%;
+  filter: drop-shadow(2px 0 3px rgba(33, 33, 33, 0.4));
+  outline: none;
+}
+
+.ios-reveal__handle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  background: var(--paper);
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  cursor: grab;
+  touch-action: none;
+}
+
+.ios-reveal__slider:hover .ios-reveal__handle,
+.ios-reveal__slider:focus-visible .ios-reveal__handle {
+  background: var(--accent-blue);
+  color: var(--paper);
+  border-color: var(--accent-blue);
+}
+
+.ios-reveal__slider:active .ios-reveal__handle {
+  background: var(--accent-yellow);
+  color: var(--ink);
+  border-color: var(--ink);
+  cursor: grabbing;
+}
+
+.ios-example__stage--aspect {
+  min-height: 28rem;
+  padding: 1.5rem;
+  background: var(--paper);
+}
+
+.ios-aspect {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.ios-aspect__box-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 300px;
+  height: 300px;
+}
+
+.ios-aspect__box {
+  position: relative;
+  overflow: hidden;
+  background: var(--accent-yellow);
+}
+
+.ios-aspect__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ios-aspect__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--soft);
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+}
+
+.ios-aspect__label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.ios-aspect__label span {
+  width: 7rem;
+  font-weight: 700;
+}
+
+.ios-aspect__label input[type='range'] {
+  accent-color: var(--accent-blue);
+}
+
+.ios-aspect__label input[type='number'] {
+  width: 4.5rem;
+  border: 0;
+  border-bottom: 1px dotted var(--ink);
+  color: var(--ink);
+  background: transparent;
+  font: inherit;
+}
+
+.ios-aspect__label input[type='number']:focus {
+  outline: none;
+  border-bottom: 2px solid var(--accent-blue);
+}
+
+@media (max-width: 500px) {
+  .ios-reveal__image {
+    height: 200px;
+  }
+
+  .ios-slider {
+    width: 100%;
+  }
+}

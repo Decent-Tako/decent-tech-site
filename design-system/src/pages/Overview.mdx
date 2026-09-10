@@ -1,0 +1,38 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Pages/Overview" />
+
+# Academy motion pages
+
+This section rebuilds official Motion examples as Academy page compositions. Each story is a page, not a mechanic demo.
+
+The runtime is `motion` **13.2.0** only. Licence MIT. Docs: https://motion.dev/docs/react . Source: https://github.com/motiondivision/motion . React `^18 || ^19`.
+
+Issue 231 supplies colors, Brand Sans, Brand Script, and the live-text wordmark. These pages consume those tokens. They do not invent new colors or faces. The Article body uses `@tailwindcss/typography` 0.5.20 with `prose prose-academy`. Long-form proof lives under Typography.
+
+Photographs stay in full color. `filter` is `none`. `mix-blend-mode` is `normal`. The files live in `design-system/public/photos/`. `community-run.jpg` records copyright Hanna Lassen in EXIF.
+
+Reduced motion shows the final state at once. `MotionConfig reducedMotion="user"` is the default. The Reduced motion stories set `always`.
+
+## Pages
+
+| Page | Motion APIs | Official example | Academy content |
+| --- | --- | --- | --- |
+| Hero | `useScroll`, `useTransform`, stagger variants | https://motion.dev/examples/react-scroll-zoom-hero | Wordmark hero, $3,000 goal, 19–28 Oct 2026 |
+| Article | `useScroll` progress, `whileInView` | https://motion.dev/examples/react-scroll-linked | Week 0 Set Up reading surface |
+| Feature scroll | sticky pin, `useTransform` x | https://motion.dev/examples/react-scroll-horizontal | Start, Learn, Tools, Challenge, Street |
+| Navigation | `layoutId`, `LayoutGroup`, `AnimatePresence` | https://motion.dev/examples/react-shared-layout-animation | Start, Learn, Tools, Events, Lounge |
+
+## Shared layout
+
+Every page uses the same masthead: live-text wordmark, `layoutId` underline, Start control. Hover uses `#0035B1`. Press uses `#DEF54F`.
+
+## Omitted
+
+| Candidate | Reason |
+| --- | --- |
+| Motion UI section templates (`npx shadcn@latest add @motion/hero-editorial-stagger`) | Motion+ paid source. This gallery uses public `motion` 13.2.0 APIs and documented examples. |
+| Split-text / scramble / typewriter | Issue 194 and wordmark research reject delayed reading and intermediate wording. |
+| A second motion runtime for the same effect | Issue 194 keeps `motion` 13.2.0 as the default. Extra runtimes live in Motion examples / Runtime additions when Motion cannot produce the effect. |
+
+Open the four pages on http://127.0.0.1:6012 . Use the Reduced motion stories to check the final state.

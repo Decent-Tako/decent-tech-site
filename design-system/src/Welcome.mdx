@@ -1,0 +1,26 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Welcome" />
+
+# Welcome
+
+The catalogue has a locked brand section, long-form typography, two UI tiers, Academy motion pages, an icon-resource gallery, and a Motion examples gallery.
+The catalogue has a locked brand section, long-form typography, two UI tiers, Academy motion pages, and a charts comparison.
+The catalogue has a locked brand section, long-form typography, two UI tiers, page compositions, and 115 motion components.
+
+**Brand** holds the Academy colors, fonts, and live-text wordmark.
+
+**Typography** uses `@tailwindcss/typography` 0.5.20 for `prose` reading surfaces. The Academy theme is `prose-academy`. It consumes issue 231 tokens. Body and headings use Brand Sans.
+
+**Pages** rebuilds official Motion examples as Academy compositions: hero, article, feature scroll, and navigation. The runtime is `motion` 13.2.0. The Article page body uses `prose prose-academy`.
+
+**Motion examples** imports Magic UI registry components in bulk. Each example uses Academy colors, Brand Sans, and full-color photographs. Keepers live in this browser after a rebuild. Extra runtimes sit on **Runtime additions**.
+
+**UI primitives** is the headless tier. Those packages ship behavior and accessibility with almost no CSS.
+
+**Styled systems** is the styled tier. It shows shadcn/ui, Radix Themes, and Mantine in each system's own default appearance.
+
+**Icon resources** compares Lucide, Phosphor, Tabler, and Heroicons on Academy concepts. Each cell is a package import.
+**Charts and data** compares Recharts 3.10.1 and visx 4.0.0 on one fictional Academy cohort snapshot. It does not include a map.
+
+The Provenance / Upstream sources docs page records recovered package evidence. This catalogue does not promote a candidate to production.
