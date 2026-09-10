@@ -1,0 +1,7 @@
+.ascii-text__stage {
+  min-height: 24rem;
+}
+
+.rb-frame .ascii-text-container pre {
+  font-family: 'Brand Sans', Arial, sans-serif;
+}
