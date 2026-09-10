@@ -25,6 +25,29 @@ PAGES = (
 )
 
 
+# The React Bits scene behind each page and the extra effect on it, as
+# site/README.md and design-system/src/site/scenes.ts list them.
+SCENES = {
+    "about": ("liquid-ether", "split-text"),
+    "portfolio": ("galaxy", None),
+    "blog": ("threads", "scrambled-text"),
+    "ben": ("iridescence", "ribbons"),
+    "contact": ("plasma", "shiny-text"),
+}
+SCENE_NAMES = (
+    "liquid-ether",
+    "galaxy",
+    "threads",
+    "iridescence",
+    "plasma",
+    "splash-cursor",
+    "ribbons",
+    "split-text",
+    "scrambled-text",
+    "shiny-text",
+)
+
+
 def relative_luminance(hex_color):
     hex_color = hex_color.lstrip("#")
     channels = [int(hex_color[i : i + 2], 16) / 255 for i in (0, 2, 4)]
@@ -57,6 +80,8 @@ class SiteParser(HTMLParser):
         self.meta_name_values = {}
         self.meta_properties = {}
         self.scripts = []
+        self.scenes = []
+        self.effects = []
         self.h1_count = 0
         self.menu_list_links = []
         self.current_page_links = []
@@ -71,6 +96,10 @@ class SiteParser(HTMLParser):
             self.html_lang = attributes.get("lang")
         if tag == "h1":
             self.h1_count += 1
+        if "data-scene" in attributes:
+            self.scenes.append(attributes["data-scene"])
+        if "data-effect" in attributes:
+            self.effects.append(attributes["data-effect"])
         if tag == "a":
             self.links.append(attributes.get("href", ""))
             if self._in_menu_list:
@@ -294,6 +323,67 @@ class SiteTests(unittest.TestCase):
         parser = parse(SITE / "contact" / "index.html")
         self.assertIn("mailto:hello@decent.tech", parser.links)
         self.assertIn("hello@decent.tech", " ".join(parser.text))
+
+    def test_each_page_mounts_one_named_scene(self):
+        for slug, _, path, _ in PAGES:
+            parser = parse(SITE / slug / "index.html")
+            scene, effect = SCENES[slug]
+            self.assertEqual(parser.scenes, [scene], f"{path} must hold exactly one data-scene")
+            self.assertIn(scene, SCENE_NAMES, f"{path} scene {scene} is not in the registry")
+            self.assertEqual(parser.effects, [effect] if effect else [], f"{path} data-effect")
+            if effect:
+                self.assertIn(effect, SCENE_NAMES, f"{path} effect {effect} is not in the registry")
+            html = (SITE / slug / "index.html").read_text()
+            self.assertIn('class="scene" data-scene=', html, f"{path} scene element lacks class scene")
+            self.assertIn('href="/assets/site.css"', html, f"{path} must load the bundle stylesheet")
+            self.assertIn('src="/assets/site.js"', html, f"{path} must load the bundle")
+            self.assertIn(' plate"', html, f"{path} copy must sit on a plate")
+
+    def test_home_page_keeps_the_menu_and_adds_only_the_cursor_scene(self):
+        self.assertIn('id="menu-stage"', self.html)
+        self.assertEqual(self.parser.scenes, ["splash-cursor"])
+        self.assertEqual(self.parser.effects, [])
+
+    def test_scene_registry_names_every_scene_the_pages_use(self):
+        registry = (DESIGN_SYSTEM / "src" / "site" / "scenes.ts").read_text()
+        for name in SCENE_NAMES:
+            self.assertRegex(registry, rf"['\"]?{name}['\"]?:\s*\{{ load:", f"scenes.ts lacks {name}")
+        for slug, (scene, effect) in SCENES.items():
+            self.assertIn(scene, SCENE_NAMES, slug)
+            if effect:
+                self.assertIn(effect, SCENE_NAMES, slug)
+
+    def test_scene_readme_names_every_scene(self):
+        readme = SITE / "README.md"
+        self.assertTrue(readme.is_file(), "site/README.md is missing")
+        text = readme.read_text()
+        for name in SCENE_NAMES:
+            self.assertIn(f"`{name}`", text, f"site/README.md does not name {name}")
+        for _, _, path, _ in PAGES:
+            self.assertIn(f"`{path}`", text, f"site/README.md does not list {path}")
+
+    def test_scene_and_plate_styles_use_brand_tokens(self):
+        for selector in (".scene {", ".scene--cursor {", ".plate {"):
+            self.assertIn(selector, self.css)
+        root = re.search(r":root\s*\{([^}]+)\}", self.css)
+        tokens = css_variables(root.group(1))
+        expected = {
+            "brand-cream": "#f2f1e8",
+            "brand-navy": "#182534",
+            "brand-vermilion": "#e34234",
+            "brand-gold": "#ffcb73",
+            "brand-terracotta": "#d97757",
+            "brand-charcoal": "#2c2c2c",
+            "brand-steel": "#5b8fa3",
+        }
+        for name, value in expected.items():
+            self.assertEqual(tokens.get(name), value, f"--{name}")
+        for slug, _, _, _ in PAGES:
+            self.assertIn(f".page--{slug} {{", self.css, f"no page tokens for {slug}")
+        # Plate text keeps AA against its plate: cream on navy or charcoal, charcoal on cream.
+        self.assertGreaterEqual(contrast_ratio("#f2f1e8", "#182534"), 4.5)
+        self.assertGreaterEqual(contrast_ratio("#f2f1e8", "#2c2c2c"), 4.5)
+        self.assertGreaterEqual(contrast_ratio("#2c2c2c", "#f2f1e8"), 4.5)
 
     def test_favicon_and_open_graph_image_exist(self):
         favicon = SITE / "favicon.svg"

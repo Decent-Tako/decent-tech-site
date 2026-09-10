@@ -1,0 +1,36 @@
+/*
+ * Site styles for the mounted scenes. The boxes (.scene, .plate, page
+ * tokens) live in site/styles.css; this file sizes what the vendored
+ * components render inside a scene host. Bundled into dist-site/assets/site.css.
+ */
+
+.scene > div,
+.scene > canvas,
+.scene__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.scene canvas {
+  display: block;
+}
+
+/* Text effects sit inline in their heading or link. The upstream
+   Scrambled Text stylesheet sets a margin, a face, and white; the heading
+   owns those. */
+[data-effect] .text-block {
+  margin: 0;
+  max-width: none;
+  color: inherit;
+  font: inherit;
+}
+
+[data-effect] .split-parent {
+  overflow: visible;
+}
+
+[data-effect] .shiny-text {
+  animation: none;
+}
