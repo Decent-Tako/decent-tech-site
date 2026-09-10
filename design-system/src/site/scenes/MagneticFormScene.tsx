@@ -116,7 +116,7 @@ function runMagnet(host: HTMLElement, wrapper: HTMLElement, follow: number): () 
     frame = 0;
     if (holds()) {
       // A hold keeps the offset the form has now. Nothing moves.
-      if (typed && !returning && (shown.x !== 0 || shown.y !== 0)) {
+      if (typed && !returning) {
         // The reader has typed. Ease back to the resting place, once.
         returning = true;
         wrapper.style.transition = `transform ${RETURN_MS}ms ease`;
@@ -125,6 +125,9 @@ function runMagnet(host: HTMLElement, wrapper: HTMLElement, follow: number): () 
         write();
         window.setTimeout(() => {
           wrapper.style.transition = '';
+          // The form is at rest and holds there for the rest of the visit.
+          // The site check waits for this before it reads the transform.
+          host.dataset.atRest = 'true';
         }, RETURN_MS);
       }
       return;

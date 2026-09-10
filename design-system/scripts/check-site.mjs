@@ -525,8 +525,15 @@ async function checkContactForm(page, label, viewport) {
   const name = page.locator('#contact-name');
   await name.focus();
   await page.keyboard.type('Ben');
-  // The freeze eases back to the resting place in 300 ms; wait it out.
-  await page.waitForTimeout(600);
+  // The freeze eases back to the resting place in 300 ms. The scene sets
+  // data-at-rest when that ease has finished, so the read below is not of a
+  // frame in the middle of it.
+  await page
+    .waitForSelector('[data-effect="magnetic-form"][data-at-rest="true"]', {
+      state: 'attached',
+      timeout: 2000,
+    })
+    .catch(() => fail(`${label}: the form did not return to its resting place within 2 s`));
   const frozen = await formTransform(page);
   await page.mouse.move(8, 8);
   await page.waitForTimeout(600);
