@@ -396,8 +396,9 @@ footer {
   padding: 0.9rem clamp(1rem, 3vw, 2rem);
   transform: translateY(-50%);
   /* A navy scrim on the list's own box, so the entries stay legible when
-     discs pass behind them. */
-  background: rgba(24, 37, 52, 0.72);
+     discs pass behind them. The cream text keeps AA on this scrim over any
+     disc colour. */
+  background: rgba(24, 37, 52, 0.88);
   border-radius: 0.6rem 0 0 0.6rem;
 }
 
