@@ -1,0 +1,15 @@
+.meta-balls-stage {
+  min-height: 24rem;
+}
+
+.meta-balls-stage .metaballs-container {
+  width: 100%;
+  height: 22rem;
+}
+
+.rb-frame .meta-balls-copy {
+  margin: 0 1rem 1rem;
+  color: var(--paper);
+  font-family: 'Brand Sans', Arial, sans-serif;
+  text-align: center;
+}

@@ -1,0 +1,26 @@
+/*
+ * Vendored from React Bits.
+ * Source: https://github.com/DavidHDev/react-bits/blob/625f25025fed1c28e2de7d3ac5f12ee83542844d/src/ts-default/Animations/PixelTrail/PixelTrail.css
+ * Page: https://reactbits.dev/animations/pixel-trail
+ * Commit: 625f25025fed1c28e2de7d3ac5f12ee83542844d
+ * Date: 2026-09-10
+ * Licence: MIT + Commons Clause (see ../../LICENSE.md). The Commons Clause forbids
+ * selling, sublicensing, or redistributing the components themselves.
+ *
+ * Local changes:
+ * 1. Host fills the stage so the three.js canvas can size itself.
+ */
+.goo-filter-container {
+  position: absolute;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.pixel-trail-host,
+.pixel-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+}
