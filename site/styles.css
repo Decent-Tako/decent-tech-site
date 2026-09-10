@@ -322,36 +322,81 @@ footer {
   color: var(--plate-ink);
 }
 
-/* Home page: the sphere on a fixed dark plate, then the link list. */
+/* Home page: immersive. The sphere stage fills the viewport edge to edge on
+   the navy plate. The wordmark sits over it top left, the five-link row
+   over it at the bottom. No header band, no page padding, no footer. The
+   stage tokens are the same in both colour schemes. */
+.home {
+  background: var(--stage);
+  color: var(--stage-ink);
+}
+
+.home main {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  margin: 0;
+}
+
+.home a:focus-visible {
+  outline-color: var(--stage-ink);
+}
+
+.home .site-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  width: auto;
+  margin: 0;
+  padding: clamp(1rem, 2.5vw, 1.6rem) clamp(1rem, 3vw, 2rem);
+  border-bottom: 0;
+  pointer-events: none;
+}
+
+.home .wordmark {
+  pointer-events: auto;
+  color: var(--stage-ink);
+}
+
+.home .wordmark-company {
+  color: var(--stage-ink);
+}
+
 .menu {
-  padding-block: 0 clamp(2.5rem, 6vw, 4.5rem);
+  padding: 0;
 }
 
 .menu-stage {
   position: relative;
-  min-height: calc(100svh - var(--header-height));
+  min-height: 100svh;
   background: var(--stage);
   color: var(--stage-ink);
   overflow: hidden;
-}
-
-.menu-stage[data-webgl="unavailable"] {
-  min-height: 0;
-  height: 0;
+  /* The active-page pill from the bundle sits above the link row. */
+  --menu-overlay-bottom: 5rem;
 }
 
 .menu-list {
-  margin-top: 1.5rem;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 0.6rem clamp(1rem, 3vw, 2rem) calc(0.8rem + env(safe-area-inset-bottom));
 }
 
 .menu-list ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 1.25rem;
+  justify-content: center;
+  gap: 0.2rem 1.4rem;
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 650;
 }
 
@@ -359,7 +404,8 @@ footer {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  min-height: 2.75rem;
+  min-height: 2.5rem;
+  color: var(--stage-ink);
   text-decoration: none;
 }
 
@@ -371,7 +417,7 @@ footer {
   flex: none;
   width: 0.85rem;
   height: 0.85rem;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(242, 241, 232, 0.28);
   border-radius: 50%;
 }
 
@@ -564,6 +610,11 @@ footer p {
 
   .site-header nav {
     margin-left: -0.55rem;
+  }
+
+  /* The link row wraps onto two lines; the pill moves up above it. */
+  .menu-stage {
+    --menu-overlay-bottom: 8rem;
   }
 
   .hero {

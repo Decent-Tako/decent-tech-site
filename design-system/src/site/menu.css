@@ -31,7 +31,7 @@
 .menu-overlay {
   position: absolute;
   left: 50%;
-  bottom: clamp(1.25rem, 5vh, 3rem);
+  bottom: var(--menu-overlay-bottom, clamp(1.25rem, 5vh, 3rem));
   z-index: 2;
   display: inline-flex;
   align-items: center;

@@ -11,6 +11,11 @@ import { SITE_PAGES, withBase, type SitePage } from './pages';
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
+// How much of the sphere the resting view shows. At 1 one disc fills the
+// stage; at 2.4 about a dozen discs are in the frame at 1280 by 800, with
+// the five colours repeating across the sphere. Tuned from the CI shots.
+const MENU_SCALE = 2.4;
+
 function useReducedMotion(): boolean {
   const [reduce, setReduce] = useState(
     () => window.matchMedia(REDUCED_MOTION_QUERY).matches,
@@ -62,6 +67,7 @@ export function SiteMenu({ backgroundColor, onReady }: SiteMenuProps) {
     <div className="menu-sphere" ref={rootRef}>
       <InfiniteMenu
         items={items}
+        scale={MENU_SCALE}
         backgroundColor={backgroundColor}
         inertia={!reduce}
         onInit={onReady}

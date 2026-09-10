@@ -23,6 +23,10 @@
  * 8. `InfiniteGridMenu` and `MenuItem` are exported.
  * 9. `resize()` paints one frame when the sketch is paused. A new canvas size
  *    clears the bitmap, and a paused sketch has no frame loop to repaint it.
+ * 10. `updateProjectionMatrix()` multiplies the frame height by `scaleFactor`.
+ *    Upstream derives the field of view from the camera distance, so `scale`
+ *    moved the camera back without showing more of the sphere. Now a larger
+ *    `scale` shows more discs at rest.
  * Everything else is unchanged.
  */
 import { type CSSProperties, type FC, useRef, useState, useEffect, type MutableRefObject } from 'react';
@@ -1071,7 +1075,7 @@ export class InfiniteGridMenu {
     if (!this.gl) return;
     const canvasEl = this.gl.canvas as HTMLCanvasElement;
     this.camera.aspect = canvasEl.clientWidth / canvasEl.clientHeight;
-    const height = this.SPHERE_RADIUS * 0.35;
+    const height = this.SPHERE_RADIUS * 0.35 * this.scaleFactor;
     const distance = this.camera.position[2];
     if (this.camera.aspect > 1) {
       this.camera.fov = 2 * Math.atan(height / distance);
