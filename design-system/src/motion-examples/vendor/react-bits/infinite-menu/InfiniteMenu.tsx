@@ -92,7 +92,17 @@
  *    `turnToVertex(vertexIndex)` turns the sphere to one named vertex.
  *    `turnToItem()` is now that call with the vertex chosen for it. A click
  *    needs the exact disc under the pointer, and several discs carry the same
- *    item, so naming the item alone is not enough.
+ *    item, so naming the item alone is not enough. `getCentredVertex()`
+ *    reports the vertex at the centre of the view, which is the target of a
+ *    running turn when there is one, so a second click on the disc the sphere
+ *    is already gliding towards opens it instead of turning again.
+ *
+ *    The canvas now captures the pointer on `pointerdown` and releases it on
+ *    `pointerup`, and clears a press on `pointerleave`. Upstream the
+ *    `pointerup` of a press that wandered off the canvas went to whatever the
+ *    pointer was over, so `pointerDownAt` was left set and the next press
+ *    paired with the old one: an elapsed time of seconds that the drag rule
+ *    threw away. That is the third cause of a press that did nothing.
  * Everything else is unchanged.
  */
 import { type CSSProperties, type FC, useRef, useState, useEffect, type MutableRefObject } from 'react';
@@ -620,6 +630,14 @@ class ArcballControl {
       this.isPointerDown = false;
     });
     canvas.addEventListener('pointerleave', () => {
+      this.isPointerDown = false;
+    });
+    // Local change 16. The canvas captures the pointer while a press is
+    // running, so `pointerleave` no longer fires during a drag that wanders
+    // off the canvas. `pointercancel` is then the only end that arrives when
+    // the system takes the pointer away, and a drag that missed it stayed
+    // down for ever, turning the sphere with every later move.
+    canvas.addEventListener('pointercancel', () => {
       this.isPointerDown = false;
     });
     canvas.addEventListener('pointermove', (e: PointerEvent) => {
@@ -1416,13 +1434,28 @@ export class InfiniteGridMenu {
   private initClickListeners(): void {
     this.canvas.addEventListener('pointerdown', (e: PointerEvent) => {
       this.pointerDownAt = { x: e.clientX, y: e.clientY, time: performance.now() };
+      // Local change 16. The canvas keeps the pointer until it is released,
+      // so a press that wanders off the canvas still ends with a `pointerup`
+      // here. Without this the `pointerup` went to whatever the pointer was
+      // over, `pointerDownAt` was left set, and the next press paired with
+      // the old one: a huge elapsed time that the drag rule threw away. That
+      // is why a press sometimes did nothing at all.
+      this.canvas.setPointerCapture?.(e.pointerId);
     });
     this.canvas.addEventListener('pointercancel', () => {
+      this.pointerDownAt = null;
+    });
+    // Local change 16. A press that ends outside the canvas is not a click on
+    // a disc, and it must not be left behind for the next press to pair with.
+    this.canvas.addEventListener('pointerleave', () => {
       this.pointerDownAt = null;
     });
     this.canvas.addEventListener('pointerup', (e: PointerEvent) => {
       const down = this.pointerDownAt;
       this.pointerDownAt = null;
+      if (this.canvas.hasPointerCapture?.(e.pointerId)) {
+        this.canvas.releasePointerCapture(e.pointerId);
+      }
       if (!down || !this.onItemClick) return;
       // Local change 16. The move limit is in canvas pixels, so a device with
       // a scale factor above 1 gets the same tolerance in the pixels the hit

@@ -594,6 +594,27 @@ class SiteTests(unittest.TestCase):
         self.assertIn("window.devicePixelRatio", vendored)
         self.assertIn("this.CLICK_MOVE_LIMIT * dpr", vendored)
 
+    def test_a_press_that_leaves_the_canvas_is_not_left_behind(self):
+        # The third cause of a press that did nothing. Upstream the pointerup
+        # of a press that wandered off the canvas went elsewhere, so the down
+        # was left set and the next press paired with it: an elapsed time of
+        # seconds that the drag rule threw away. The canvas now captures the
+        # pointer, and a press that ends outside is cleared.
+        vendored = (
+            DESIGN_SYSTEM / "src" / "motion-examples" / "vendor" / "react-bits" / "infinite-menu" / "InfiniteMenu.tsx"
+        ).read_text()
+        self.assertIn("this.canvas.setPointerCapture?.(e.pointerId);", vendored)
+        self.assertIn("this.canvas.releasePointerCapture(e.pointerId);", vendored)
+        # With capture, pointerleave no longer ends a drag, so the arcball
+        # needs pointercancel or a drag stays down for ever. The four places
+        # that end a press are pointerup, pointerleave, pointercancel, and
+        # reset().
+        self.assertEqual(vendored.count("this.isPointerDown = false;"), 4)
+        self.assertRegex(
+            vendored,
+            r"canvas\.addEventListener\('pointercancel', \(\) => \{\s*this\.isPointerDown = false;",
+        )
+
     def test_the_vendored_menu_carries_local_change_16(self):
         vendored = (
             DESIGN_SYSTEM / "src" / "motion-examples" / "vendor" / "react-bits" / "infinite-menu" / "InfiniteMenu.tsx"
